@@ -1,0 +1,480 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Rubik' ,  sans-serif ;
+    text-decoration: none;
+    list-style: none;
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
+}
+:root{
+    --bg-color: rgb(20, 20, 20);
+    --main-color: #45a049;
+    --2nd-main-color: #ffffffcc;
+    --text-color: #fff;    
+    --big-font: 2.5rem;
+    --h2-font: 1.8rem;
+    --p-font: 1rem;
+}
+body{
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+header{
+    position: fixed;
+    width: 100%;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-color);
+    padding: 24px 14%;
+    transition: .3s;
+}
+.class{
+    color: var(--text-color);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+span{
+    color: #29e833;
+}
+.nuvlist{
+    display: flex;
+    color: #c6c9d8;
+}
+.nuvlist a{
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 10px 20px;
+    font-weight: 600;
+}
+.nuvlist a:hover{
+    background: var(--main-color);
+    transition: .4s;
+}
+#menu-icon{
+    font-size: 28px;
+    z-index: 10001;
+    cursor: pointer;
+
+}
+section{
+    padding: 120px 14%;
+}
+.home{
+    position: relative;
+    margin: auto;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 1px;
+    align-items: center;
+}
+.home-img img{
+    max-width: 100%;
+    width: 600px;
+    height: auto;
+}
+.home-text h5{
+    color: var(--text-color);
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 0 5px;
+}
+.home-text h1{
+    max-width: fit-content;
+    font-size: var(--big-font);
+    color: var(--text-color);
+    font-weight: 800;
+}
+.home-text h6{
+    color: var(--text-color);
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 25px;
+}
+.home-text p{
+    max-width: 470px;
+    font-size: var(--p-font);
+    font-weight: 300;
+    line-height: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--2nd-main-color);
+}
+.about{
+    padding-top: 100px;
+    padding-bottom: 100px;
+    display: grid;
+    grid-template-columns: repeat(2 , 2fr);
+    grid-gap: 4rem;
+    align-items: center;
+}
+.about img{
+    max-width: 100%;
+    width: 580px;
+    height: auto;
+    border-radius: 15%;
+}
+.about-text h3{
+    color: var(--text-color);
+    font-size: 30px;
+    font-weight: 300;
+    letter-spacing: 6px;
+    margin: 0 0 30px;
+}
+.about-text h2{
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+    font-size: var(--h2-font);
+}
+.about-text p{
+    max-width: 570px;
+    font-size: var(--p-font);
+    font-weight: 300;
+    line-height: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: var(--2nd-main-color);
+}
+.artwork{
+    padding-top: 100px;
+    padding-bottom: 20px;
+}
+.artwork-text h3{
+    color: var(--text-color);
+    font-size: 30px;
+    font-weight: 300;
+    letter-spacing: 6px;
+    margin: 0 0 10px;
+}
+.artwork-text h2{
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+    font-size: var(--h2-font);
+}
+.artwork-container{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, auto));
+    grid-gap: 2rem;
+    align-items: center;
+    margin-top: 4rem;
+}
+.box{
+    height: 300px;
+    width: 300px auto;
+    min-height: max-content;
+    border-radius: 5%;
+    transition: all 1s;
+    overflow: hidden;
+    box-shadow: var(--main-color) 0px 3px 5px;
+    position: relative;
+    cursor: pointer;
+}
+.box-one{
+    background: linear-gradient(rgba(0, 0, 0, 0.3),rgba(0, 0, 0, 0.3)), url(./upload/Kyedae_Vexel.png) center center no-repeat;
+    background-size: 360px;
+}
+.box-one:hover{
+    background: linear-gradient(rgba(0, 0, 0, 0.7),rgba(0, 0, 0, 0.7)), url(./upload/Kyedae_Vexel.png) center center no-repeat;
+    background-size: 450px;
+}
+.box-two{
+    background: linear-gradient(rgba(0, 0, 0, 0.3),rgba(0, 0, 0, 0.3)), url(./upload/Vexel\ Art_CamilePortrait-8K.png) center center no-repeat;
+    background-size: 360px;
+}
+.box-two:hover{
+    background: linear-gradient(rgba(0, 0, 0, 0.7),rgba(0, 0, 0, 0.7)), url(./upload/Vexel\ Art_CamilePortrait-8K.png) center center no-repeat;
+    background-size: 450px;
+}
+.box-three{
+    background: linear-gradient(rgba(0, 0, 0, 0.3),rgba(0, 0, 0, 0.3)), url(./upload/Jhelsey_Vexel.png) center center no-repeat;
+    background-size: 360px;
+}
+.box-three:hover{
+    background: linear-gradient(rgba(0, 0, 0, 0.7),rgba(0, 0, 0, 0.7)), url(./upload/Jhelsey_Vexel.png) center center no-repeat;
+    background-size: 450px;
+}
+.box-four{
+    background: linear-gradient(rgba(0, 0, 0, 0.3),rgba(0, 0, 0, 0.3)), url(./upload/zumm.png) center center no-repeat;
+    background-size: 360px;
+}
+.box-four:hover{
+    background: linear-gradient(rgba(0, 0, 0, 0.7),rgba(0, 0, 0, 0.7)), url(./upload/zumm.png) center center no-repeat;
+    background-size: 450px;
+}
+.box-five{
+    background: linear-gradient(rgba(0, 0, 0, 0.3),rgba(0, 0, 0, 0.3)), url(./upload/Jihyo_Vexel.png) center center no-repeat;
+    background-size: 360px;
+}
+.box-five:hover{
+    background: linear-gradient(rgba(0, 0, 0, 0.7),rgba(0, 0, 0, 0.7)), url(./upload/Jihyo_Vexel.png) center center no-repeat;
+    background-size: 450px;
+}
+.box-six{
+    background: linear-gradient(rgba(0, 0, 0, 0.3),rgba(0, 0, 0, 0.3)), url(./upload/아이여final_20210322035253.png) center center no-repeat;
+    background-size: 360px;
+}
+.box-six:hover{
+    background: linear-gradient(rgba(0, 0, 0, 0.7),rgba(0, 0, 0, 0.7)), url(./upload/아이여final_20210322035253.png) center center no-repeat;
+    background-size: 450px;
+}
+.inner{
+    position: absolute;
+    bottom: 45px;
+    left: 35px;
+}
+.inner h3{
+    color: var(--text-color);
+    font-size: 1.8rem;
+    line-height: 0.6;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+.inner h6{
+    color: var(--p-font);
+    font-size: o.3rem;
+    line-height: 1.7;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+.inner button{
+    background: var(--main-color);
+    border: 2px solid var(--main-color);
+    color: white;
+    padding: 7px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.inner button:hover{
+    background: transparent;
+    border: 2px solid #c6c9d8;
+    transition: 0.4s;
+}
+@media (max-width: 1500px){
+    header{
+        padding: 15px 42px;
+    }
+    :root{
+        --big-font: 3rem;
+        --h2-font: 2rem;
+    }
+}
+@media (max-width: 1340px){
+    section{
+        padding: 50px 5%;
+    }
+}
+@media (max-width: 1060px){
+    #menu-icon{
+        display: block;
+    }
+    header{
+        padding: 18px 3%;
+    } 
+    .nuvlist{
+        position: absolute;
+        top: -500px;
+        right: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        background: var(--bg-color);
+        transition: 0.4s ease;
+    }
+    .nuvlist a{
+        display: block;
+        padding: 1rem;
+        border-left: 2px solid var(--main-color);
+        margin: 1rem;
+        display: block;
+    }
+    .nuvlist.active{
+        top: 100%;
+    }
+}
+@media(max-width: 950px){
+    .home{
+        grid-template-columns: 1fr;
+        grid-gap: 2rem;
+        text-align: center;
+        margin-top: 80px;
+        height: 100vh;
+    }
+    .home img{
+        max-width: 100%;
+        width: 490px;
+        height: auto;  
+    }
+    .about{
+        grid-template-columns: 1fr;
+        grid-gap: 2rem;
+        text-align: center;
+        margin-top: 80px;
+        height: 100vh;
+        margin-bottom: 100px;
+    }
+    .about-img{
+        order: 2;  
+    }
+    .about-img img{
+        width: 350px;
+    }
+    .about h3{
+        max-width: 100%;
+    }
+    .about h2{
+        max-width: 100%;
+    }
+    .about p{
+        max-width: 100%;
+    }
+}
+@media(max-width: 1700px){
+    .box-one{
+        background-size: 445px;
+    }
+    .box-one:hover{
+        background-size: 535px;
+    }
+    .box-two{
+        background-size: 445px;
+    }
+    .box-two:hover{
+        background-size: 535px;
+    }
+    .box-three{
+        background-size: 445px;
+    }
+    .box-three:hover{
+        background-size: 535px;
+    }
+    .box-four{
+        background-size: 445px;
+    }
+    .box-four:hover{
+        background-size: 535px;
+    }
+    .box-five{
+        background-size: 445px;
+    }
+    .box-five:hover{
+        background-size: 535px;
+    }
+    .box-six{
+        background-size: 445px;
+    }
+    .box-six:hover{
+        background-size: 535px;
+    }
+}
+@media(max-width: 1120px){
+    .box-one{
+        background-size: 675px;
+    }
+    .box-one:hover{
+        background-size: 760px;
+    }
+    .box-two{
+        background-size: 675px;
+    }
+    .box-two:hover{
+        background-size: 760px;
+    }
+    .box-three{
+        background-size: 675px;
+    }
+    .box-three:hover{
+        background-size: 760px;
+    }
+    .box-four{
+        background-size: 675px;
+    }
+    .box-four:hover{
+        background-size: 760px;
+    }
+    .box-five{
+        background-size: 675px;
+    }
+    .box-five:hover{
+        background-size: 760px;
+    }
+    .box-six{
+        background-size: 675px;
+    }
+    .box-six:hover{
+        background-size: 760px;
+    }
+}
+.contact-text h2{
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+    letter-spacing: 6px;
+    font-size: var(--h2-font);
+}
+.contact-form{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4.2rem;
+}
+.contact-form form{
+    position: relative;
+    width: 550px;
+}
+form input,
+form button,
+form textarea{
+    width: 100%;
+    padding: 20px;
+    border: none;
+    outline: none;
+    background: #0b0b13;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+form input::placeholder,
+form textarea::placeholder{
+    color: var(--2nd-main-color);
+}
+textarea{
+    resize: none;
+    height: 200px;
+}
+form .send-btn{
+    background: var(--main-color);
+    color: var(--text-color);
+    box-shadow: 4px 4px var(--text-color);
+    padding: 0 25px;
+    line-height: 42px;
+    display: inline-block;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    transition: ease all .35s;
+    cursor: pointer;
+}
+form .send-btn:hover{
+    background: var(--text-color);
+    color: var(--main-color);
+    box-shadow: 4px 4px var(--main-color);
+}
+.msg{
+    margin: 0 auto;
+    margin-top: -80px;
+    padding: 10px;
+    text-align: center;
+    color: var(--2nd-main-color);
+}
+.copyright{
+    margin: 0 auto;
+    margin-top: -100px;
+    text-align: center;
+    padding: 30px;
+    color: var(--2nd-main-color);
+    background: #0b0b13;
+}
