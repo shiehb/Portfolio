@@ -110,7 +110,10 @@ export default function Hero() {
           src="/img/hero.webp"
           alt="Jericho Urbano portrait"
           fill
-          priority
+          preload
+          unoptimized
+          quality={95}
+          sizes="100vw"
           className="object-cover object-bottom"
         />
       </div>
