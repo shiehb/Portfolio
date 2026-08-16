@@ -99,7 +99,7 @@
 
   .marquee-text {
     font-family: var(--font-display);
-    @apply text-[clamp(2rem,8vw,8rem)] font-black uppercase leading-[0.85] flex-shrink-0 inline-block mr-[clamp(1.5rem,4vw,4rem)];
+    @apply text-[clamp(2rem,8vw,8rem)] md:text-[clamp(2.5rem,8.5vw,8.5rem)] font-black uppercase leading-[0.85] flex-shrink-0 inline-block mr-[clamp(1.5rem,4vw,4rem)];
   }
 
   .marquee-text-light {

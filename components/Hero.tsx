@@ -91,7 +91,7 @@ export default function Hero() {
     >
       {/* Marquee text container */}
       <div
-        className="absolute left-0 right-0 top-1/2 -translate-y-1/2 z-0 flex flex-col pointer-events-none"
+        className="absolute left-0 right-0 top-1/3 -translate-y-1/2 md:top-1/2 md:-translate-y-1/2 z-0 flex flex-col pointer-events-none"
         aria-hidden="true"
       >
         {/* Top marquee - scrolls left */}
