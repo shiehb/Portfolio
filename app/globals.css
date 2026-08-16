@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Departure Mono";
+  src: url("/font/departure-mono.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #000000;
+    --font-display: "Departure Mono", "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply m-0 overflow-hidden h-screen;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * {
+    @apply box-border;
+  }
+
+  img {
+    @apply max-w-full block;
+  }
+
+  a {
+    @apply no-underline;
+  }
+}
+
+@layer components {
+  .logo {
+    @apply h-[clamp(36px,8vw,60px)] w-auto max-w-[clamp(150px,20vw,200px)] object-contain block transition-all duration-350;
+  }
+
+  .logo-invert {
+    @apply brightness-0 invert saturate-100;
+  }
+
+  .menu-btn {
+    @apply bg-transparent border-3 border-black rounded px-0 cursor-pointer flex items-center justify-center w-[clamp(42px,8vw,60px)] h-[clamp(42px,8vw,60px)] text-black font-black text-[clamp(1.5rem,3vw,2.5rem)] leading-none transition-all duration-350;
+  }
+
+  .menu-btn-invert {
+    @apply border-white text-white brightness-0 invert saturate-100;
+  }
+
+  .menu-btn:hover {
+    @apply opacity-80 transition-opacity duration-300;
+  }
+
+  .nav-menu-link {
+    font-family: var(--font-display);
+    @apply text-white no-underline text-[clamp(1.5rem,5vw,2.5rem)] font-black uppercase tracking-wider transition-all duration-300 relative inline-block;
+  }
+
+  /* Reserved brackets for hover state */
+  .nav-menu-link::before {
+    content: "> ";
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .nav-menu-link::after {
+    content: " <";
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .nav-menu-link:hover::before,
+  .nav-menu-link:hover::after {
+    opacity: 1;
+  }
+
+  /* Slow blinking animation on hover */
+  .nav-menu-link:hover {
+    @apply text-[#fff];
+    animation: blink 1.2s infinite ease-in-out;
+  }
+
+  .marquee-text {
+    font-family: var(--font-display);
+    @apply text-[clamp(2rem,8vw,8rem)] font-black uppercase leading-[0.85] flex-shrink-0 inline-block mr-[clamp(1.5rem,4vw,4rem)];
+  }
+
+  .marquee-text-light {
+    @apply text-black/14;
+  }
+
+  .marquee-text-dark {
+    @apply text-black;
+  }
+}
