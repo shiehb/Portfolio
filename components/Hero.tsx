@@ -111,8 +111,6 @@ export default function Hero() {
           alt="Jericho Urbano portrait"
           fill
           priority
-          quality={90}
-          sizes="(max-width: 650px) 100vw, (max-width: 1200px) 75vw, 650px"
           className="object-cover object-bottom"
         />
       </div>
