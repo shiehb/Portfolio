@@ -107,7 +107,7 @@ export default function About() {
             className="mx-auto max-w-3xl text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-[0.95] sm:leading-[0.9] text-[#fff] font-display"
             segments={[
               { text: "I am Jericho Urbano,", className: "font-normal" },
-              { text: "a visual artist & webdeveloper.", className: "text-[#c0c0c0]" },
+              { text: "a VISUAL ARTIST & WEB DEVELOPER.", className: "text-[#fd551d]" },
               {
                 text: "Specializing in immersive digital experiences, videography, and narrative aesthetics.",
                 className: "font-normal",

@@ -132,8 +132,8 @@ export default function Projects() {
                 <h1 className="font-normal text-[clamp(1.3rem,3vw,1.8rem)] mb-3 tracking-[0.05em] uppercase text-zinc-900 font-display">
                     PROJECTS
                 </h1>
-                <p className="text-sm text-neutral-600 leading-relaxed font-display">
-                    Explore my web design and media projects
+                <p className="text-sm text-[#fd551d] leading-relaxed font-display">
+                    EXPLORE ALL MY WEB DESIGN AND MEDIA PROJECTS
                 </p>
             </div>
 
