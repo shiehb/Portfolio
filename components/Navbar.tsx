@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const navItems = [
   { label: "Home", href: "#home" },
@@ -14,10 +20,63 @@ const navItems = [
 export default function Navbar() {
   const [navState, setNavState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
   const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   const isMenuOpen = navState === 'opening' || navState === 'open';
   const isOverlayDown = navState === 'opening' || navState === 'open' || navState === 'closing';
   const isTextVisible = navState === 'open';
+
+  // Scrub logo and menu button invert filter (0 to 1) continuously with scroll
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+
+    const ctx = gsap.context(() => {
+      // 1. Hero Section (#home):
+      // As hero zooms down, scrub invert from 0 (black over initial white hero card) to 1 (white over dark #222222)
+      ScrollTrigger.create({
+        trigger: "#home",
+        start: "top top",
+        end: "bottom top",
+        scrub: true,
+        onUpdate: (self) => {
+          const val = Math.min(1, self.progress * 2);
+          header.style.setProperty("--nav-invert", val.toFixed(3));
+        },
+      });
+
+      // 2. Horizontal Scroll Section (#gallery):
+      // As horizontal track scrubs and white-bg-layer opacity goes from 0 to 1,
+      // navbar invert filter scrubs linearly from 1 (white) down to 0 (black) in 1:1 synchronization!
+      ScrollTrigger.create({
+        trigger: "#gallery",
+        start: "top top",
+        end: () => {
+          const gallery = document.querySelector("#gallery");
+          const innerTrack = gallery?.querySelector(".will-change-transform");
+          return innerTrack ? `+=${(innerTrack as HTMLElement).scrollWidth}` : "bottom top";
+        },
+        scrub: true,
+        onUpdate: (self) => {
+          const val = Math.max(0, Math.min(1, 1 - self.progress));
+          header.style.setProperty("--nav-invert", val.toFixed(3));
+        },
+      });
+
+      // 3. Projects Section (#projects):
+      // Keep invert at 0 (solid black) over white projects section
+      ScrollTrigger.create({
+        trigger: "#projects",
+        start: "top top",
+        end: "bottom bottom",
+        onUpdate: () => {
+          header.style.setProperty("--nav-invert", "0");
+        },
+      });
+    });
+
+    return () => ctx.revert();
+  }, []);
 
   const handleToggle = () => {
     if (navState === 'closed') {
@@ -48,6 +107,13 @@ export default function Navbar() {
     return () => clearTimeout(timer);
   }, [navState, pendingHref]);
 
+  useEffect(() => {
+    document.body.style.overflow = isOverlayDown ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOverlayDown]);
+
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setPendingHref(href);
@@ -56,21 +122,30 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full h-[70px] mx-auto my-2 px-6 py-6 flex justify-between items-center z-30 bg-transparent">
+      <header
+        ref={headerRef}
+        className="fixed top-0 left-0 w-full h-[70px] mx-auto my-2 px-6 py-6 flex justify-between items-center z-30 bg-transparent"
+        style={{ "--nav-invert": "0" } as React.CSSProperties}
+      >
         <Image
           src="/img/logo.png"
           alt="Jericho Urbano Logo"
           width={100}
           height={40}
           priority
-          className={`logo transition-all duration-350 w-auto h-auto ${isMenuOpen ? "logo-invert" : ""
-            }`}
+          className="logo w-auto h-auto"
+          style={{
+            filter: isMenuOpen ? "invert(1)" : "invert(var(--nav-invert, 0))",
+          }}
         />
 
         <div className="flex items-center justify-end gap-3 ml-auto">
           <button
             type="button"
-            className={`menu-btn ${isMenuOpen ? "menu-btn-invert" : ""}`}
+            className="menu-btn"
+            style={{
+              filter: isMenuOpen ? "invert(1)" : "invert(var(--nav-invert, 0))",
+            }}
             aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMenuOpen}
             onClick={handleToggle}

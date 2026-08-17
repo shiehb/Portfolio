@@ -8,9 +8,12 @@
 }
 
 @keyframes blink {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.2;
   }
@@ -18,8 +21,8 @@
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #000000;
+    --background: #222222;
+    --foreground: #ffffff;
     --font-display: "Departure Mono", "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
   }
 
@@ -28,7 +31,7 @@
   }
 
   body {
-    @apply m-0 overflow-hidden h-screen;
+    @apply m-0 overflow-x-hidden min-h-screen;
     background-color: var(--background);
     color: var(--foreground);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -48,8 +51,20 @@
 }
 
 @layer components {
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* Hero Section Background */
+  #home {
+    background-color: transparent;
+  }
+
   .logo {
-    @apply h-[clamp(36px,8vw,60px)] w-auto max-w-[clamp(150px,20vw,200px)] object-contain block transition-all duration-350;
+    @apply w-auto object-contain block transition-all duration-350;
+    height: clamp(36px, 8vw, 60px);
+    max-width: clamp(150px, 20vw, 200px);
   }
 
   .logo-invert {
@@ -57,7 +72,10 @@
   }
 
   .menu-btn {
-    @apply bg-transparent border-3 border-black rounded px-0 cursor-pointer flex items-center justify-center w-[clamp(42px,8vw,60px)] h-[clamp(42px,8vw,60px)] text-black font-black text-[clamp(1.5rem,3vw,2.5rem)] leading-none transition-all duration-350;
+    @apply bg-transparent border-3 border-black rounded px-0 cursor-pointer flex items-center justify-center text-black font-black leading-none transition-all duration-350;
+    width: clamp(42px, 8vw, 60px);
+    height: clamp(42px, 8vw, 60px);
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
   }
 
   .menu-btn-invert {
@@ -70,7 +88,8 @@
 
   .nav-menu-link {
     font-family: var(--font-display);
-    @apply text-white no-underline text-[clamp(1.5rem,5vw,2.5rem)] font-black uppercase tracking-wider transition-all duration-300 relative inline-block;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    @apply text-white no-underline font-black uppercase tracking-wider transition-all duration-300 relative inline-block;
   }
 
   /* Reserved brackets for hover state */
@@ -99,7 +118,15 @@
 
   .marquee-text {
     font-family: var(--font-display);
-    @apply text-[clamp(2rem,8vw,8rem)] md:text-[clamp(2.5rem,8.5vw,8.5rem)] font-black uppercase leading-[0.85] flex-shrink-0 inline-block mr-[clamp(1.5rem,4vw,4rem)];
+    font-size: clamp(2rem, 8vw, 8rem);
+    margin-right: clamp(1.5rem, 4vw, 4rem);
+    @apply font-black uppercase leading-[0.85] flex-shrink-0 inline-block;
+  }
+
+  @media (min-width: 768px) {
+    .marquee-text {
+      font-size: clamp(2.5rem, 8.5vw, 8.5rem);
+    }
   }
 
   .marquee-text-light {
