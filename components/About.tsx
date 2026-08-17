@@ -96,9 +96,10 @@ function WordsPullUpMultiStyle({
 export default function About() {
   return (
     <section id="about" className="text-white font-display">
-      <div className="min-h-screen flex justify-center items-center px-4 py-12">
+      {/* Zero vertical padding on mobile (py-0), restores vertical padding on desktop (md:py-12) */}
+      <div className="py-0 md:py-12 md:min-h-screen flex justify-center items-center px-4">
         <div className="text-center">
-          <span className="block mb-6 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] font-display">
+          <span className="block mb-2 md:mb-6 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] font-display">
             ABOUT
           </span>
 
@@ -115,7 +116,7 @@ export default function About() {
           />
 
           <AnimatedParagraph
-            className="mx-auto mt-8 md:mt-10 max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-[#c0c0c0] font-display"
+            className="mx-auto mt-4 md:mt-10 max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-[#c0c0c0] font-display"
             text="Crafting high-impact interactive web applications, cinematic narratives, and brand identities with seamless motion physics, minimalist spatial layouts, and precision color science."
           />
         </div>
