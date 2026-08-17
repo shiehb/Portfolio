@@ -39,7 +39,7 @@ interface HorizontalScrollProps {
     images?: { src: string; alt: string; title?: string; category?: string }[];
 }
 
-export default function HorizontalScroll({
+export default function GallerySection({
     images = defaultGalleryImages,
 }: HorizontalScrollProps) {
     const triggerRef = useRef<HTMLDivElement>(null);
@@ -48,10 +48,7 @@ export default function HorizontalScroll({
     const bgOverlayRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        // Use GSAP matchMedia to only run horizontal pinned scroll on desktop screens (768px+)
-        const mm = gsap.matchMedia();
-
-        mm.add('(min-width: 768px)', () => {
+        const ctx = gsap.context(() => {
             if (!triggerRef.current || !outerTrackRef.current || !innerTrackRef.current || !bgOverlayRef.current) return;
 
             const trigger = triggerRef.current;
@@ -59,93 +56,101 @@ export default function HorizontalScroll({
             const inner = innerTrackRef.current;
             const bgOverlay = bgOverlayRef.current;
 
-            // Entrance Active Motion
-            gsap.fromTo(
-                outer,
-                {
-                    x: () => window.innerWidth * 0.45,
-                    opacity: 0.85,
-                    scale: 0.98,
-                },
-                {
-                    x: 0,
-                    opacity: 1,
-                    scale: 1,
-                    ease: 'none',
+            const mm = gsap.matchMedia();
+
+            // Desktop View (Pinned Horizontal Scroll + Transition to Solid White)
+            mm.add('(min-width: 768px)', () => {
+                // Entrance Motion
+                gsap.fromTo(
+                    outer,
+                    { x: () => window.innerWidth * 0.45, opacity: 0.85, scale: 0.98 },
+                    {
+                        x: 0,
+                        opacity: 1,
+                        scale: 1,
+                        ease: 'none',
+                        scrollTrigger: {
+                            trigger: trigger,
+                            start: 'top bottom',
+                            end: 'top top',
+                            scrub: true,
+                            invalidateOnRefresh: true,
+                        },
+                    }
+                );
+
+                // Pinned Scrub
+                const getScrollAmount = () => -(inner.scrollWidth - window.innerWidth);
+                const tl = gsap.timeline({
                     scrollTrigger: {
                         trigger: trigger,
-                        start: 'top bottom',
-                        end: 'top top',
+                        start: 'top top',
+                        end: () => `+=${inner.scrollWidth}`,
+                        pin: true,
                         scrub: true,
                         invalidateOnRefresh: true,
                     },
-                }
-            );
+                });
 
-            // Pinned Horizontal Scrubbing
-            const getScrollAmount = () => -(inner.scrollWidth - window.innerWidth);
-
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: trigger,
-                    start: 'top top',
-                    end: () => `+=${inner.scrollWidth}`,
-                    pin: true,
-                    scrub: true,
-                    invalidateOnRefresh: true,
-                },
+                tl.fromTo(inner, { x: 0 }, { x: getScrollAmount, ease: 'none' }, 0);
+                tl.fromTo(bgOverlay, { opacity: 0 }, { opacity: 1, ease: 'none' }, 0);
             });
 
-            tl.fromTo(
-                inner,
-                { x: 0 },
-                { x: getScrollAmount, ease: 'none' },
-                0
-            );
+            // Mobile View (Vertical Scroll + Solid White Transition)
+            mm.add('(max-width: 767px)', () => {
+                gsap.fromTo(
+                    bgOverlay,
+                    { opacity: 0 },
+                    {
+                        opacity: 1,
+                        ease: 'none',
+                        scrollTrigger: {
+                            trigger: trigger,
+                            start: 'top 50%',
+                            end: 'bottom bottom',
+                            scrub: true,
+                            invalidateOnRefresh: true,
+                        },
+                    }
+                );
+            });
+        }, triggerRef);
 
-            tl.fromTo(
-                bgOverlay,
-                { opacity: 0 },
-                { opacity: 1, ease: 'none' },
-                0
-            );
-        });
-
-        return () => mm.revert();
+        return () => ctx.revert();
     }, [images]);
 
     return (
         <section
             id="gallery"
             ref={triggerRef}
-            className="relative overflow-hidden bg-transparent text-neutral-100 py-10 md:py-0"
+            className="relative overflow-hidden bg-transparent text-neutral-100 border-none outline-none shadow-none"
         >
-            {/* Background Layer */}
+            {/* Background Overlay Layer */}
             <div
                 id="white-bg-layer"
                 ref={bgOverlayRef}
-                className="fixed inset-0 bg-white pointer-events-none z-0 hidden md:block"
+                className="absolute inset-0 bg-white pointer-events-none z-0 border-none outline-none"
                 style={{ opacity: 0 }}
             />
 
             {/* Container */}
-            <div className="relative z-10 min-h-screen md:h-screen w-full flex items-center overflow-hidden">
+            <div className="relative z-10 min-h-screen md:h-screen w-full flex items-center overflow-hidden py-10 md:py-0 border-none outline-none">
                 <div ref={outerTrackRef} className="w-full will-change-transform">
-                    {/* Inner Track: Stacks vertically on mobile, switches to horizontal row on desktop */}
+                    {/* Inner Track */}
                     <div
                         ref={innerTrackRef}
-                        className="flex flex-col md:flex-row items-center gap-8 md:gap-10 px-4 md:pl-10 md:pr-[10vw] will-change-transform"
+                        className="flex flex-col md:flex-row items-center gap-10 px-5 md:pl-10 md:pr-[10vw] will-change-transform"
                     >
                         {images.map((img, index) => (
                             <div
                                 key={index}
-                                className="relative h-[70vh] md:h-[90vh] w-full md:w-auto shrink-0 overflow-hidden shadow-2xl bg-neutral-950 group flex items-center justify-center"
+                                className="relative h-[60vh] md:h-[90vh] w-full md:w-auto shrink-0 overflow-hidden bg-neutral-950 group flex items-center justify-center border-none outline-none"
                             >
                                 <img
                                     src={img.src}
                                     alt={img.alt}
                                     referrerPolicy="no-referrer"
-                                    className="h-full w-full md:w-auto max-w-none object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                    className="h-full w-full md:w-auto max-w-none object-cover transition-transform duration-700 ease-out group-hover:scale-105 border-none outline-none"
                                     loading={index === 0 ? 'eager' : 'lazy'}
                                     onError={(e) => {
                                         (e.currentTarget as HTMLImageElement).src =
