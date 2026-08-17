@@ -26,7 +26,7 @@ export default function Navbar() {
   const isOverlayDown = navState === 'opening' || navState === 'open' || navState === 'closing';
   const isTextVisible = navState === 'open';
 
-  // Scrub logo and menu button invert filter (0 to 1) continuously with scroll
+  // Scrub logo and menu button invert filter (0 to 1) continuously with scroll on desktop
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
@@ -120,35 +120,44 @@ export default function Navbar() {
     <>
       <header
         ref={headerRef}
-        className="fixed top-0 left-0 w-full h-[70px] mx-auto my-2 px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 bg-transparent"
+        className={`fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 transition-all duration-500 ease-in-out sm:bg-transparent sm:backdrop-blur-none ${isOverlayDown
+            ? "bg-transparent backdrop-blur-none"
+            : "bg-zinc-950/80 backdrop-blur-md"
+          }`}
         style={{ "--nav-invert": "0" } as React.CSSProperties}
       >
+        {/* LOGO */}
         <Image
           src="/img/logo.png"
           alt="Jericho Urbano Logo"
           width={120}
           height={48}
           priority
-          className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300"
-          style={{
-            filter: isMenuOpen ? "invert(1)" : "invert(var(--nav-invert, 0))",
-          }}
+          className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300 [filter:invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
+          style={
+            isMenuOpen
+              ? { filter: "invert(1)" }
+              : undefined
+          }
         />
 
         <div className="flex items-center justify-end gap-3 ml-auto">
+          {/* MENU / CLOSE BUTTON */}
           <button
             type="button"
-            className="menu-btn"
-            style={{
-              filter: isMenuOpen ? "invert(1)" : "invert(var(--nav-invert, 0))",
-            }}
+            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 text-white stroke-white border-2 border-current rounded-md p-2 sm:text-zinc-900 sm:stroke-zinc-900 transition-all duration-300 [filter:brightness(0)_invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
+            style={
+              isMenuOpen
+                ? { filter: "brightness(0) invert(1)" }
+                : undefined
+            }
             aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMenuOpen}
             onClick={handleToggle}
           >
             {isMenuOpen ? (
               <svg
-                className="w-[55%] h-[55%] stroke-current"
+                className="w-full h-full stroke-current"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="2.5"
@@ -161,7 +170,7 @@ export default function Navbar() {
               </svg>
             ) : (
               <svg
-                className="w-[55%] h-[55%] stroke-current"
+                className="w-full h-full stroke-current"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="2.5"
@@ -178,19 +187,20 @@ export default function Navbar() {
         </div>
       </header>
 
+      {/* OVERLAY MENU */}
       <nav
-        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 transform transition-transform duration-500 ease-in-out z-20 flex items-center justify-center ${isOverlayDown ? "translate-y-0" : "-translate-y-full"
+        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 text-white transform transition-transform duration-500 ease-in-out z-20 flex items-center justify-center ${isOverlayDown ? "translate-y-0" : "-translate-y-full"
           }`}
         id="nav-menu"
         aria-label="Main navigation"
       >
-        <ul className="list-none flex flex-col items-center gap-8 text-center m-0 p-0">
+        <ul className="list-none flex flex-col items-center gap-8 text-center m-0 p-0 text-white">
           {navItems.map((item, index) => (
             <li
               key={item.label}
               className={`transform transition-all duration-400 ease-out ${isTextVisible
-                ? "opacity-100 translate-y-0 pointer-events-auto"
-                : "opacity-0 translate-y-6 pointer-events-none"
+                  ? "opacity-100 translate-y-0 pointer-events-auto"
+                  : "opacity-0 translate-y-6 pointer-events-none"
                 }`}
               style={{
                 transitionDelay: isTextVisible ? `${index * 90}ms` : '0ms',
@@ -198,7 +208,7 @@ export default function Navbar() {
             >
               <Link
                 href={item.href}
-                className="nav-menu-link"
+                className="nav-menu-link text-white hover:text-zinc-300 transition-colors"
                 onClick={(e) => handleLinkClick(e, item.href)}
               >
                 {item.label}
