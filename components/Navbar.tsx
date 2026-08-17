@@ -12,7 +12,6 @@ const navItems = [
 ];
 
 export default function Navbar() {
-  // Navigation states: 'closed' | 'opening' | 'open' | 'closing'
   const [navState, setNavState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
   const [pendingHref, setPendingHref] = useState<string | null>(null);
 
@@ -20,7 +19,6 @@ export default function Navbar() {
   const isOverlayDown = navState === 'opening' || navState === 'open' || navState === 'closing';
   const isTextVisible = navState === 'open';
 
-  // Toggle button handler
   const handleToggle = () => {
     if (navState === 'closed') {
       setNavState('opening');
@@ -29,19 +27,15 @@ export default function Navbar() {
     }
   };
 
-  // State machine timing effect for choreographed sequence
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
     if (navState === 'opening') {
-      // Step 1: Wait for background overlay to slide down and fully cover the page (450ms)
       timer = setTimeout(() => {
-        setNavState('open'); // Step 2: Staggered fade reveal text list
+        setNavState('open');
       }, 450);
     } else if (navState === 'closing') {
-      // Step 1: Wait for text list to fade out (250ms)
       timer = setTimeout(() => {
-        // Step 2: Slide background overlay away
         setNavState('closed');
         if (pendingHref) {
           const target = document.querySelector(pendingHref);
@@ -62,16 +56,15 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full h-[70px] mx-auto my-2 px-2 py-6 flex justify-between items-center z-30 bg-transparent">
+      <header className="fixed top-0 left-0 w-full h-[70px] mx-auto my-2 px-6 py-6 flex justify-between items-center z-30 bg-transparent">
         <Image
           src="/img/logo.png"
           alt="Jericho Urbano Logo"
           width={100}
           height={40}
           priority
-          className={`logo transition-all duration-350 w-auto h-auto ${
-            isMenuOpen ? "logo-invert" : ""
-          }`}
+          className={`logo transition-all duration-350 w-auto h-auto ${isMenuOpen ? "logo-invert" : ""
+            }`}
         />
 
         <div className="flex items-center justify-end gap-3 ml-auto">
@@ -115,9 +108,8 @@ export default function Navbar() {
       </header>
 
       <nav
-        className={`fixed inset-0 w-full h-screen h-screen-svh bg-linear-to-br from-zinc-950 to-zinc-800 transform transition-transform duration-500 ease-in-out z-20 flex items-center justify-center ${
-          isOverlayDown ? "translate-y-0" : "-translate-y-full"
-        }`}
+        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 transform transition-transform duration-500 ease-in-out z-20 flex items-center justify-center ${isOverlayDown ? "translate-y-0" : "-translate-y-full"
+          }`}
         id="nav-menu"
         aria-label="Main navigation"
       >
@@ -125,11 +117,10 @@ export default function Navbar() {
           {navItems.map((item, index) => (
             <li
               key={item.label}
-              className={`transform transition-all duration-400 ease-out ${
-                isTextVisible
+              className={`transform transition-all duration-400 ease-out ${isTextVisible
                   ? "opacity-100 translate-y-0 pointer-events-auto"
                   : "opacity-0 translate-y-6 pointer-events-none"
-              }`}
+                }`}
               style={{
                 transitionDelay: isTextVisible ? `${index * 90}ms` : '0ms',
               }}

@@ -102,7 +102,7 @@ export default function Hero() {
       </div>
 
       {/* Hero image container */}
-      <div 
+      <div
         className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-full z-10 flex justify-center items-end overflow-hidden"
         style={{ maxWidth: '650px' }}
       >
