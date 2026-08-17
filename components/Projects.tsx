@@ -30,33 +30,11 @@ const projectImages = [
     "https://assets.codepen.io/16327/osmo.png",
     "https://assets.codepen.io/16327/pantheon.jpg",
     "https://assets.codepen.io/16327/ponpon.jpg",
-    "https://assets.codepen.io/16327/quentin.png",
-    "https://assets.codepen.io/16327/planetono.png",
-    "https://assets.codepen.io/16327/sanrita.jpg",
-    "https://assets.codepen.io/16327/anima.jpg",
-    "https://assets.codepen.io/16327/giulio.jpg",
-    "https://assets.codepen.io/16327/lando.png",
-    "https://assets.codepen.io/16327/glenn.png",
-    "https://assets.codepen.io/16327/fantik.jpg",
-    "https://assets.codepen.io/16327/romei.jpg",
-    "https://assets.codepen.io/16327/ironhill.jpeg",
-    "https://assets.codepen.io/16327/inkwell.jpg",
-    "https://assets.codepen.io/16327/monolith.jpg",
-    "https://assets.codepen.io/16327/phantom.jpg",
-    "https://assets.codepen.io/16327/ribbit.jpg",
-    "https://assets.codepen.io/16327/aurel.jpg",
-    "https://assets.codepen.io/16327/aether.jpg",
-    "https://assets.codepen.io/16327/cashapp.jpg",
-    "https://assets.codepen.io/16327/osmo.png",
-    "https://assets.codepen.io/16327/pantheon.jpg",
-    "https://assets.codepen.io/16327/ponpon.jpg",
-    "https://assets.codepen.io/16327/quentin.png",
 ];
 
 export default function Projects() {
     const sectionRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -90,8 +68,8 @@ export default function Projects() {
                             autoAlpha: 1,
                             y: 0,
                             scale: 1,
-                            stagger: 0.1,
-                            duration: 0.9,
+                            stagger: 0.08,
+                            duration: 0.8,
                             ease: "power3.out",
                             overwrite: "auto",
                         }
@@ -125,10 +103,10 @@ export default function Projects() {
         <section
             id="projects"
             ref={sectionRef}
-            className="relative z-10 py-16 px-4 bg-white min-h-screen text-zinc-900 font-display"
+            className="relative z-10 py-4 px-3 sm:px-6 bg-white min-h-screen text-zinc-900 font-display"
         >
-            {/* Header with Text Reveal Animation */}
-            <div ref={headerRef} className="text-center max-w-[560px] mx-auto my-8">
+            {/* Header */}
+            <div ref={headerRef} className="text-center max-w-[560px] mx-auto my-2">
                 <h1 className="font-normal text-[clamp(1.3rem,3vw,1.8rem)] mb-3 tracking-[0.05em] uppercase text-zinc-900 font-display">
                     PROJECTS
                 </h1>
@@ -137,15 +115,12 @@ export default function Projects() {
                 </p>
             </div>
 
-            {/* Grid Container */}
-            <div
-                ref={containerRef}
-                className="max-w-[800px] mx-auto w-full flex flex-wrap justify-center items-center gap-4"
-            >
+            {/* Responsive Grid: Mobile (2), Tablet (3), Desktop (4) */}
+            <div className="max-w-[1280px] mx-auto w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
                 {projectImages.map((src, index) => (
                     <div
                         key={index}
-                        className="batch-image opacity-0 invisible w-[calc(33.333%-0.75rem)] min-w-[200px] aspect-[16/9] relative overflow-hidden will-change-transform shadow-md group"
+                        className="batch-image opacity-0 invisible w-full aspect-[16/9] relative overflow-hidden will-change-transform shadow-sm group rounded-sm"
                     >
                         <div className="project-img-inner w-full h-full relative overflow-hidden transition-transform duration-500 ease-out group-hover:scale-105">
                             <Image
@@ -153,7 +128,7 @@ export default function Projects() {
                                 alt={`Project artwork ${index + 1}`}
                                 fill
                                 unoptimized
-                                sizes="(max-width: 768px) 100vw, 33vw"
+                                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                 className="object-cover"
                             />
                         </div>
