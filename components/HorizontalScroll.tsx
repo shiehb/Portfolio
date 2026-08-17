@@ -28,12 +28,6 @@ const defaultGalleryImages = [
         category: 'Industrial Design',
     },
     {
-        src: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=1600&auto=format&fit=crop',
-        alt: 'Work sample 4',
-        title: 'Aura Form & Void',
-        category: 'Sculpture',
-    },
-    {
         src: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1600&auto=format&fit=crop',
         alt: 'Work sample 5',
         title: 'Solstice Sanctuary',
@@ -54,7 +48,10 @@ export default function HorizontalScroll({
     const bgOverlayRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const ctx = gsap.context(() => {
+        // Use GSAP matchMedia to only run horizontal pinned scroll on desktop screens (768px+)
+        const mm = gsap.matchMedia();
+
+        mm.add('(min-width: 768px)', () => {
             if (!triggerRef.current || !outerTrackRef.current || !innerTrackRef.current || !bgOverlayRef.current) return;
 
             const trigger = triggerRef.current;
@@ -62,8 +59,7 @@ export default function HorizontalScroll({
             const inner = innerTrackRef.current;
             const bgOverlay = bgOverlayRef.current;
 
-            // 1. Entrance Active Motion:
-            // Glides smoothly from the right into center alignment
+            // Entrance Active Motion
             gsap.fromTo(
                 outer,
                 {
@@ -86,9 +82,7 @@ export default function HorizontalScroll({
                 }
             );
 
-            // 2. Pinned Horizontal Scrubbing & Background Opacity Transition:
-            // Locks and pins when top hits screen top ("top top")
-            // Simultaneously translates track and scrubs overlay opacity from 0 (0%) to 1 (100%)
+            // Pinned Horizontal Scrubbing
             const getScrollAmount = () => -(inner.scrollWidth - window.innerWidth);
 
             const tl = gsap.timeline({
@@ -102,7 +96,6 @@ export default function HorizontalScroll({
                 },
             });
 
-            // Scrub inner track horizontal scroll
             tl.fromTo(
                 inner,
                 { x: 0 },
@@ -110,51 +103,49 @@ export default function HorizontalScroll({
                 0
             );
 
-            // Scrub background overlay opacity linearly from 0 to 1
             tl.fromTo(
                 bgOverlay,
                 { opacity: 0 },
                 { opacity: 1, ease: 'none' },
                 0
             );
-        }, triggerRef);
+        });
 
-        return () => ctx.revert();
+        return () => mm.revert();
     }, [images]);
 
     return (
         <section
             id="gallery"
             ref={triggerRef}
-            className="relative overflow-hidden bg-transparent text-neutral-100"
+            className="relative overflow-hidden bg-transparent text-neutral-100 py-10 md:py-0"
         >
-            {/* Fixed Overlay Layer driven by opacity */}
+            {/* Background Layer */}
             <div
                 id="white-bg-layer"
                 ref={bgOverlayRef}
-                className="fixed inset-0 bg-white pointer-events-none z-0"
+                className="fixed inset-0 bg-white pointer-events-none z-0 hidden md:block"
                 style={{ opacity: 0 }}
             />
 
-            {/* Container for the horizontal images */}
-            <div className="relative z-10 h-screen w-full flex items-center overflow-hidden">
-                {/* Outer track: handles smooth right-to-left entrance transition */}
+            {/* Container */}
+            <div className="relative z-10 min-h-screen md:h-screen w-full flex items-center overflow-hidden">
                 <div ref={outerTrackRef} className="w-full will-change-transform">
-                    {/* Inner track: handles linear pinned horizontal scrub */}
+                    {/* Inner Track: Stacks vertically on mobile, switches to horizontal row on desktop */}
                     <div
                         ref={innerTrackRef}
-                        className="flex items-center gap-10 pl-0 pr-[10vw] will-change-transform"
+                        className="flex flex-col md:flex-row items-center gap-8 md:gap-10 px-4 md:pl-10 md:pr-[10vw] will-change-transform"
                     >
                         {images.map((img, index) => (
                             <div
                                 key={index}
-                                className="relative w-[75vw] sm:w-[60vw] md:w-[50vw] aspect-[16/10] shrink-0 overflow-hidden shadow-2xl bg-neutral-950 group"
+                                className="relative h-[70vh] md:h-[90vh] w-full md:w-auto shrink-0 overflow-hidden shadow-2xl bg-neutral-950 group flex items-center justify-center"
                             >
                                 <img
                                     src={img.src}
                                     alt={img.alt}
                                     referrerPolicy="no-referrer"
-                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                    className="h-full w-full md:w-auto max-w-none object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                                     loading={index === 0 ? 'eager' : 'lazy'}
                                     onError={(e) => {
                                         (e.currentTarget as HTMLImageElement).src =

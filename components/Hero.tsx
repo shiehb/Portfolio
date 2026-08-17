@@ -5,7 +5,6 @@ import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Register GSAP ScrollTrigger plugin safely
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
@@ -97,15 +96,11 @@ export default function Hero() {
     if (!scrollContainerRef.current || !frameRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Capture the current viewport ratio so the frame starts perfectly
-      // edge-to-edge, then animates its aspect ratio down to 3:2.
-      const initialRatio = window.innerWidth / window.innerHeight;
+      const mm = gsap.matchMedia();
 
-      // 1. Initial State (Full viewport edge-to-edge)
       gsap.set(frameRef.current, {
         scale: 1,
         borderRadius: "0px",
-        aspectRatio: initialRatio,
         backgroundColor: "#ffffff",
         transformOrigin: "center center",
       });
@@ -118,58 +113,72 @@ export default function Hero() {
         gsap.set(marqueeRef.current, { opacity: 1 });
       }
 
-      // 2. Scroll-Driven Zoom-Out & Cropping Timeline
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: scrollContainerRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1.5, // Smooth inertial scrub
-        },
+      // Mobile Breakpoint (< 768px): 70% scale target
+      mm.add("(max-width: 767px)", () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: scrollContainerRef.current,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.5,
+          },
+        });
+
+        tl.to(frameRef.current, {
+          scale: 0.7,
+          borderRadius: "16px",
+          aspectRatio: 1.5,
+          backgroundColor: "#c0c0c0",
+          boxShadow: "0 20px 50px -10px rgba(0, 0, 0, 0.7)",
+          ease: "power1.out",
+        }, 0);
+
+        if (portraitRef.current) {
+          tl.to(portraitRef.current, {
+            scale: 1.2,
+            filter: "grayscale(1)",
+            ease: "power1.out",
+          }, 0);
+        }
+
+        if (marqueeRef.current) {
+          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
+        }
       });
 
-      // Frame zooms down to 0.3x, crops down to a 3:2 ratio, gains rounded
-      // corners, shadow, and fades to a light gray background
-      tl.to(
-        frameRef.current,
-        {
+      // Desktop Breakpoint (>= 768px): 30% scale target
+      mm.add("(min-width: 768px)", () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: scrollContainerRef.current,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.5,
+          },
+        });
+
+        tl.to(frameRef.current, {
           scale: 0.3,
-          borderRadius: "20px",
-          aspectRatio: 1.5, // 3:2
+          borderRadius: "24px",
+          aspectRatio: 1.5,
           backgroundColor: "#c0c0c0",
           boxShadow: "0 30px 80px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.15)",
           ease: "power1.out",
-          duration: 1,
-        },
-        0
-      );
+        }, 0);
 
-      // Portrait zooms in from 1.0x up to 1.25x and desaturates to B&W
-      if (portraitRef.current) {
-        tl.to(
-          portraitRef.current,
-          {
+        if (portraitRef.current) {
+          tl.to(portraitRef.current, {
             scale: 1.35,
             filter: "grayscale(1)",
             ease: "power1.out",
-            duration: 1,
-          },
-          0
-        );
-      }
+          }, 0);
+        }
 
-      // Marquee fades out completely by the time the frame reaches 30%
-      if (marqueeRef.current) {
-        tl.to(
-          marqueeRef.current,
-          {
-            opacity: 0,
-            ease: "power1.out",
-            duration: 1,
-          },
-          0
-        );
-      }
+        if (marqueeRef.current) {
+          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
+        }
+      });
+
     }, scrollContainerRef);
 
     return () => ctx.revert();
@@ -183,12 +192,10 @@ export default function Hero() {
       id="home"
       aria-label="Hero section"
     >
-      {/* Pinned Viewport Stage */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
-        {/* Morphing Hero Card */}
         <section
           ref={frameRef}
-          className="relative w-full flex justify-center items-end overflow-hidden text-zinc-900 shadow-2xl"
+          className="relative w-full h-full flex justify-center items-end overflow-hidden text-zinc-900 shadow-2xl"
           style={{ willChange: "transform, border-radius, aspect-ratio, background-color" }}
         >
           {/* Marquee text container */}
@@ -201,21 +208,22 @@ export default function Hero() {
             <MarqueeRow reverse />
           </div>
 
-          {/* Hero image container with zoom-in + grayscale on scroll */}
+          {/* Hero Image Wrapper: Height relative to viewport screen height, width auto */}
           <div
             ref={portraitRef}
-            className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-full z-10 flex justify-center items-end overflow-hidden pointer-events-none"
-            style={{ maxWidth: "650px", willChange: "transform, filter" }}
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 z-10 flex justify-center items-end pointer-events-none h-full w-auto"
+            style={{ willChange: "transform, filter" }}
           >
             <Image
               src="/img/hero.webp"
               alt="Jericho Urbano portrait"
-              fill
+              width={1920}
+              height={1080}
               priority
               unoptimized
               quality={95}
-              sizes="100vw"
-              className="object-cover object-bottom"
+              style={{ height: "100%", width: "auto", objectFit: "contain", objectPosition: "bottom" }}
+              className="max-h-full max-w-none"
             />
           </div>
         </section>
