@@ -133,7 +133,7 @@ export default function Projects() {
                     PROJECTS
                 </h1>
                 <p className="text-sm text-[#fd551d] leading-relaxed font-display">
-                    EXPLORE ALL MY WEB DESIGN AND MEDIA PROJECTS
+                    Explore my web design and media projects
                 </p>
             </div>
 

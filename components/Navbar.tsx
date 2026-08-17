@@ -33,7 +33,6 @@ export default function Navbar() {
 
     const ctx = gsap.context(() => {
       // 1. Hero Section (#home):
-      // As hero zooms down, scrub invert from 0 (black over initial white hero card) to 1 (white over dark #222222)
       ScrollTrigger.create({
         trigger: "#home",
         start: "top top",
@@ -46,8 +45,6 @@ export default function Navbar() {
       });
 
       // 2. Horizontal Scroll Section (#gallery):
-      // As horizontal track scrubs and white-bg-layer opacity goes from 0 to 1,
-      // navbar invert filter scrubs linearly from 1 (white) down to 0 (black) in 1:1 synchronization!
       ScrollTrigger.create({
         trigger: "#gallery",
         start: "top top",
@@ -64,7 +61,6 @@ export default function Navbar() {
       });
 
       // 3. Projects Section (#projects):
-      // Keep invert at 0 (solid black) over white projects section
       ScrollTrigger.create({
         trigger: "#projects",
         start: "top top",
@@ -124,16 +120,16 @@ export default function Navbar() {
     <>
       <header
         ref={headerRef}
-        className="fixed top-0 left-0 w-full h-[70px] mx-auto my-2 px-6 py-6 flex justify-between items-center z-30 bg-transparent"
+        className="fixed top-0 left-0 w-full h-[70px] mx-auto my-2 px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 bg-transparent"
         style={{ "--nav-invert": "0" } as React.CSSProperties}
       >
         <Image
           src="/img/logo.png"
           alt="Jericho Urbano Logo"
-          width={100}
-          height={40}
+          width={120}
+          height={48}
           priority
-          className="logo w-auto h-auto"
+          className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300"
           style={{
             filter: isMenuOpen ? "invert(1)" : "invert(var(--nav-invert, 0))",
           }}
@@ -193,8 +189,8 @@ export default function Navbar() {
             <li
               key={item.label}
               className={`transform transition-all duration-400 ease-out ${isTextVisible
-                  ? "opacity-100 translate-y-0 pointer-events-auto"
-                  : "opacity-0 translate-y-6 pointer-events-none"
+                ? "opacity-100 translate-y-0 pointer-events-auto"
+                : "opacity-0 translate-y-6 pointer-events-none"
                 }`}
               style={{
                 transitionDelay: isTextVisible ? `${index * 90}ms` : '0ms',
