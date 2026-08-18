@@ -122,7 +122,7 @@ export default function Navbar() {
         ref={headerRef}
         className={`fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 transition-all duration-500 ease-in-out sm:bg-transparent sm:backdrop-blur-none ${isOverlayDown
             ? "bg-transparent backdrop-blur-none"
-            : "bg-zinc-950/80 backdrop-blur-md"
+            : "bg-black"
           }`}
         style={{ "--nav-invert": "0" } as React.CSSProperties}
       >
