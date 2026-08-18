@@ -7,16 +7,14 @@ import { useState, useEffect } from "react";
 
 const footerLinks = [
   { label: "HOME", href: "/" },
-  { label: "WORK", href: "/work" },
-  { label: "PRICING", href: "/pricing" },
   { label: "ABOUT", href: "/about" },
+  { label: "PROJECT", href: "/project" },
   { label: "CONTACT", href: "/contact" },
 ];
 
 const contactLinks = [
-  { label: "contact@good-fella.com", href: "mailto:contact@good-fella.com" },
-  { label: "julian@good-fella.com", href: "mailto:julian@good-fella.com" },
-  { label: "adrian@good-fella.com", href: "mailto:adrian@good-fella.com" },
+  { label: "jerichourbano.01.01.04@gmail.com", href: "mailto:jerichourbano.01.01.04@gmail.com" },
+  { label: "+63 956 698 6556", href: "tel:+639566986556" },
 ];
 
 export default function Footer() {
@@ -29,7 +27,7 @@ export default function Footer() {
   return (
     <footer className="w-full min-h-screen text-white font-display flex flex-col" style={{ backgroundColor: '#222222' }}>
       {/* Main Content - Top */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-8 md:pb-12">
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-20 md:pt-16 pb-8 md:pb-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 w-full">
             {/* Column 1: Newsletter */}
@@ -110,7 +108,7 @@ export default function Footer() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="text-sm text-white/60 hover:text-[#fd551d] transition-colors py-1.5"
+                    className="text-sm text-white/60 hover:text-[#fd551d] transition-colors py-1.5 break-all"
                   >
                     {link.label}
                   </Link>
@@ -127,11 +125,11 @@ export default function Footer() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.4, delay: 0.18, ease: [0.33, 1, 0.68, 1] }}
-        className="w-full px-4 sm:px-6 lg:px-8 py-4 md:min-h-[120px] max-h-auto flex justify-center items-center"
+        className="w-full px-4 sm:px-6 lg:px-8 py-4 md:min-h-[100px] max-h-auto flex justify-center items-center"
       >
         <div className="text-center">
           <p className="text-xs text-white/40">
-             @ {currentYear} Jericho Urbano.
+            @ {currentYear} Jericho Urbano.
           </p>
           <p className="text-xs text-white/40">
             All rights reserved.
@@ -148,7 +146,7 @@ export default function Footer() {
         className="w-full flex justify-center overflow-hidden mt-auto"
       >
         <div className="w-full">
-          <span className="block font-bold tracking-tight text-center whitespace-nowrap text-[clamp(3rem,15vw,20rem)] text-black">
+          <span className="block font-bold tracking-tight text-center whitespace-nowrap text-[clamp(2.5rem,12vw,18rem)] text-black">
             @echo_ng
           </span>
         </div>
