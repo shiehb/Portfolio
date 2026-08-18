@@ -17,6 +17,13 @@ const contactLinks = [
   { label: "+63 956 698 6556", href: "tel:+639566986556" },
 ];
 
+const socialLinks = [
+  { label: "Facebook", href: "https://facebook.com/echong.urbano" },
+  { label: "Instagram", href: "https://www.instagram.com/echo_.ng/" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/jericho-urbano-1a886a406/" },
+  { label: "GitHub", href: "https://github.com/shiehb" },
+];
+
 export default function Footer() {
   const [currentYear, setCurrentYear] = useState(2024);
 
@@ -119,21 +126,42 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Copyright - Center */}
+      {/* Socials and Copyright - Center */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.4, delay: 0.18, ease: [0.33, 1, 0.68, 1] }}
-        className="w-full px-4 sm:px-6 lg:px-8 py-4 md:min-h-[100px] max-h-auto flex justify-center items-center"
+        className="w-full px-4 sm:px-6 lg:px-8 py-4 md:min-h-[140px] max-h-auto flex justify-center items-center"
       >
-        <div className="text-center">
-          <p className="text-xs text-white/40">
-            @ {currentYear} Jericho Urbano.
-          </p>
-          <p className="text-xs text-white/40">
-            All rights reserved.
-          </p>
+        <div className="text-center space-y-4">
+          {/* Social Links */}
+          <div className="flex justify-center items-center gap-4 sm:gap-6 flex-wrap">
+            {socialLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs sm:text-sm text-white/40 hover:text-[#fd551d] transition-colors uppercase tracking-wider"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Divider */}
+          <div className="w-12 h-px bg-white/10 mx-auto" />
+
+          {/* Copyright */}
+          <div>
+            <p className="text-xs text-white/40">
+              @ {currentYear} Jericho Urbano.
+            </p>
+            <p className="text-xs text-white/40">
+              All rights reserved.
+            </p>
+          </div>
         </div>
       </motion.div>
 
