@@ -113,8 +113,8 @@ export default function Hero() {
         gsap.set(marqueeRef.current, { opacity: 1 });
       }
 
-      // Mobile Breakpoint (< 768px): 70% scale target
-      mm.add("(max-width: 767px)", () => {
+      // Mobile (< 640px): 70% scale target
+      mm.add("(max-width: 639px)", () => {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: scrollContainerRef.current,
@@ -125,7 +125,7 @@ export default function Hero() {
         });
 
         tl.to(frameRef.current, {
-          scale: 0.7,
+          scale: 0.70,
           borderRadius: "16px",
           aspectRatio: 1.5,
           backgroundColor: "#c0c0c0",
@@ -146,8 +146,8 @@ export default function Hero() {
         }
       });
 
-      // Desktop Breakpoint (>= 768px): 30% scale target
-      mm.add("(min-width: 768px)", () => {
+      // Tablet (640px - 1023px): 50% scale target
+      mm.add("(min-width: 640px) and (max-width: 1023px)", () => {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: scrollContainerRef.current,
@@ -158,7 +158,73 @@ export default function Hero() {
         });
 
         tl.to(frameRef.current, {
-          scale: 0.3,
+          scale: 0.50,
+          borderRadius: "20px",
+          aspectRatio: 1.5,
+          backgroundColor: "#c0c0c0",
+          boxShadow: "0 25px 60px -12px rgba(0, 0, 0, 0.75)",
+          ease: "power1.out",
+        }, 0);
+
+        if (portraitRef.current) {
+          tl.to(portraitRef.current, {
+            scale: 1.25,
+            filter: "grayscale(1)",
+            ease: "power1.out",
+          }, 0);
+        }
+
+        if (marqueeRef.current) {
+          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
+        }
+      });
+
+      // Laptop M (1024px - 1279px): 35% scale target
+      mm.add("(min-width: 1024px) and (max-width: 1279px)", () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: scrollContainerRef.current,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.5,
+          },
+        });
+
+        tl.to(frameRef.current, {
+          scale: 0.35,
+          borderRadius: "24px",
+          aspectRatio: 1.5,
+          backgroundColor: "#c0c0c0",
+          boxShadow: "0 30px 80px -15px rgba(0, 0, 0, 0.85)",
+          ease: "power1.out",
+        }, 0);
+
+        if (portraitRef.current) {
+          tl.to(portraitRef.current, {
+            scale: 1.3,
+            filter: "grayscale(1)",
+            ease: "power1.out",
+          }, 0);
+        }
+
+        if (marqueeRef.current) {
+          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
+        }
+      });
+
+      // Laptop L (1280px - 2559px): 40% scale target
+      mm.add("(min-width: 1280px) and (max-width: 2559px)", () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: scrollContainerRef.current,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.5,
+          },
+        });
+
+        tl.to(frameRef.current, {
+          scale: 0.40,
           borderRadius: "24px",
           aspectRatio: 1.5,
           backgroundColor: "#c0c0c0",
@@ -169,6 +235,39 @@ export default function Hero() {
         if (portraitRef.current) {
           tl.to(portraitRef.current, {
             scale: 1.35,
+            filter: "grayscale(1)",
+            ease: "power1.out",
+          }, 0);
+        }
+
+        if (marqueeRef.current) {
+          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
+        }
+      });
+
+      // 4K (>= 2560px): 45% scale target
+      mm.add("(min-width: 2560px)", () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: scrollContainerRef.current,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.5,
+          },
+        });
+
+        tl.to(frameRef.current, {
+          scale: 0.45,
+          borderRadius: "28px",
+          aspectRatio: 1.5,
+          backgroundColor: "#c0c0c0",
+          boxShadow: "0 40px 100px -20px rgba(0, 0, 0, 0.9)",
+          ease: "power1.out",
+        }, 0);
+
+        if (portraitRef.current) {
+          tl.to(portraitRef.current, {
+            scale: 1.4,
             filter: "grayscale(1)",
             ease: "power1.out",
           }, 0);
@@ -208,7 +307,7 @@ export default function Hero() {
             <MarqueeRow reverse />
           </div>
 
-          {/* Hero Image Wrapper: Height relative to viewport screen height, width auto */}
+          {/* Hero Image Wrapper */}
           <div
             ref={portraitRef}
             className="absolute bottom-0 left-1/2 -translate-x-1/2 z-10 flex justify-center items-end pointer-events-none h-full w-auto"

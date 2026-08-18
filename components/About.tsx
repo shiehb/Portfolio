@@ -96,8 +96,8 @@ function WordsPullUpMultiStyle({
 export default function About() {
   return (
     <section id="about" className="text-white font-display">
-      {/* Zero vertical padding on mobile (py-0), restores vertical padding on desktop (md:py-12) */}
-      <div className="py-0 md:py-12 md:min-h-screen flex justify-center items-center px-4">
+      {/* Removed md:min-h-screen and set controlled vertical padding for tight spacing */}
+      <div className="py-12 md:py-20 flex justify-center items-center px-4">
         <div className="text-center">
           <span className="block mb-2 md:mb-6 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] font-display">
             ABOUT
