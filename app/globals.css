@@ -1,3 +1,4 @@
+/* app/globals.css */
 @import "tailwindcss";
 
 @font-face {
@@ -8,12 +9,10 @@
 }
 
 @keyframes blink {
-
   0%,
   100% {
     opacity: 1;
   }
-
   50% {
     opacity: 0.2;
   }
@@ -51,7 +50,6 @@
 }
 
 @layer components {
-
   .font-display {
     font-family: var(--font-display);
   }
@@ -92,7 +90,6 @@
     @apply text-white no-underline font-black uppercase tracking-wider transition-all duration-300 relative inline-block;
   }
 
-  /* Reserved brackets for hover state */
   .nav-menu-link::before {
     content: "> ";
     opacity: 0;
@@ -110,7 +107,6 @@
     opacity: 1;
   }
 
-  /* Slow blinking animation on hover */
   .nav-menu-link:hover {
     @apply text-[#fff];
     animation: blink 1.2s infinite ease-in-out;
@@ -136,4 +132,74 @@
   .marquee-text-dark {
     @apply text-black;
   }
+}
+
+/* app/globals.css - Add at the end of the file */
+
+@keyframes waveFloat {
+  0%, 100% {
+    transform: translateY(0px) scaleY(1);
+  }
+  25% {
+    transform: translateY(-10px) scaleY(1.05);
+  }
+  50% {
+    transform: translateY(5px) scaleY(0.95);
+  }
+  75% {
+    transform: translateY(-5px) scaleY(1.02);
+  }
+}
+
+@keyframes waveDisrupt {
+  0%, 100% {
+    transform: translateX(0) scaleX(1) skewX(0deg);
+  }
+  25% {
+    transform: translateX(-20px) scaleX(1.02) skewX(1deg);
+  }
+  50% {
+    transform: translateX(15px) scaleX(0.98) skewX(-1deg);
+  }
+  75% {
+    transform: translateX(-10px) scaleX(1.01) skewX(0.5deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.3;
+  }
+}
+
+@keyframes pulse-glow-delayed {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.2;
+  }
+}
+
+.animate-wave {
+  animation: waveFloat 8s ease-in-out infinite;
+}
+
+.animate-wave-disrupt {
+  animation: waveDisrupt 10s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+.animate-pulse-glow-delayed {
+  animation: pulse-glow-delayed 5s ease-in-out infinite 1s;
 }

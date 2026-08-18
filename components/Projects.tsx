@@ -38,7 +38,6 @@ export default function Projects() {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // 1. Header Text Reveal Animation
             if (headerRef.current) {
                 gsap.fromTo(
                     headerRef.current.children,
@@ -58,41 +57,45 @@ export default function Projects() {
                 );
             }
 
-            // 2. Staggered Batch Entrance & Scale Reveal
-            ScrollTrigger.batch(".batch-image", {
-                onEnter: (batch) =>
-                    gsap.fromTo(
-                        batch,
-                        { autoAlpha: 0, y: 55, scale: 0.92 },
-                        {
-                            autoAlpha: 1,
-                            y: 0,
-                            scale: 1,
-                            stagger: 0.08,
-                            duration: 0.8,
-                            ease: "power3.out",
-                            overwrite: "auto",
-                        }
-                    ),
-            });
+            const batchElements = document.querySelectorAll(".batch-image");
+            if (batchElements.length > 0) {
+                ScrollTrigger.batch(".batch-image", {
+                    onEnter: (batch) =>
+                        gsap.fromTo(
+                            batch,
+                            { autoAlpha: 0, y: 55, scale: 0.92 },
+                            {
+                                autoAlpha: 1,
+                                y: 0,
+                                scale: 1,
+                                stagger: 0.08,
+                                duration: 0.8,
+                                ease: "power3.out",
+                                overwrite: "auto",
+                            }
+                        ),
+                });
+            }
 
-            // 3. Scroll-Driven Inner Image Parallax Photo Zoom
             const images = gsap.utils.toArray<HTMLElement>(".project-img-inner");
             images.forEach((img) => {
-                gsap.fromTo(
-                    img,
-                    { scale: 1.25 },
-                    {
-                        scale: 1.0,
-                        ease: "none",
-                        scrollTrigger: {
-                            trigger: img.parentElement,
-                            start: "top bottom",
-                            end: "bottom top",
-                            scrub: true,
-                        },
-                    }
-                );
+                const parent = img.parentElement;
+                if (parent) {
+                    gsap.fromTo(
+                        img,
+                        { scale: 1.25 },
+                        {
+                            scale: 1.0,
+                            ease: "none",
+                            scrollTrigger: {
+                                trigger: parent,
+                                start: "top bottom",
+                                end: "bottom top",
+                                scrub: true,
+                            },
+                        }
+                    );
+                }
             });
         }, sectionRef);
 
@@ -105,7 +108,6 @@ export default function Projects() {
             ref={sectionRef}
             className="relative z-10 py-4 px-3 sm:px-6 bg-white min-h-screen text-zinc-900 font-display"
         >
-            {/* Header */}
             <div ref={headerRef} className="text-center max-w-[560px] mx-auto my-2">
                 <h1 className="font-normal text-[clamp(1.3rem,3vw,1.8rem)] mb-3 tracking-[0.05em] uppercase text-zinc-900 font-display">
                     PROJECTS
@@ -115,7 +117,6 @@ export default function Projects() {
                 </p>
             </div>
 
-            {/* Responsive Grid: Mobile (2), Tablet (3), Desktop (4) */}
             <div className="max-w-[1280px] mx-auto w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
                 {projectImages.map((src, index) => (
                     <div

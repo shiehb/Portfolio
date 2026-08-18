@@ -1,8 +1,10 @@
+// components/Navbar.tsx
 'use client';
 
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -11,28 +13,35 @@ if (typeof window !== "undefined") {
 }
 
 const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Projects", href: "#projects" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Projects", href: "/projects" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
   const [navState, setNavState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+  const isHome = pathname === "/";
 
   const isMenuOpen = navState === 'opening' || navState === 'open';
   const isOverlayDown = navState === 'opening' || navState === 'open' || navState === 'closing';
   const isTextVisible = navState === 'open';
 
-  // Scrub logo and menu button invert filter (0 to 1) continuously with scroll on desktop
+  // Scrub logo and menu button invert filter
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
 
+    if (!document.querySelector("#home")) {
+      header.style.setProperty("--nav-invert", "1");
+      return;
+    }
+
     const ctx = gsap.context(() => {
-      // 1. Hero Section (#home):
       ScrollTrigger.create({
         trigger: "#home",
         start: "top top",
@@ -44,35 +53,37 @@ export default function Navbar() {
         },
       });
 
-      // 2. Horizontal Scroll Section (#gallery):
-      ScrollTrigger.create({
-        trigger: "#gallery",
-        start: "top top",
-        end: () => {
-          const gallery = document.querySelector("#gallery");
-          const innerTrack = gallery?.querySelector(".will-change-transform");
-          return innerTrack ? `+=${(innerTrack as HTMLElement).scrollWidth}` : "bottom top";
-        },
-        scrub: true,
-        onUpdate: (self) => {
-          const val = Math.max(0, Math.min(1, 1 - self.progress));
-          header.style.setProperty("--nav-invert", val.toFixed(3));
-        },
-      });
+      const gallery = document.querySelector("#gallery");
+      if (gallery) {
+        ScrollTrigger.create({
+          trigger: "#gallery",
+          start: "top top",
+          end: () => {
+            const innerTrack = gallery.querySelector(".will-change-transform");
+            return innerTrack ? `+=${(innerTrack as HTMLElement).scrollWidth}` : "bottom top";
+          },
+          scrub: true,
+          onUpdate: (self) => {
+            const val = Math.max(0, Math.min(1, 1 - self.progress));
+            header.style.setProperty("--nav-invert", val.toFixed(3));
+          },
+        });
+      }
 
-      // 3. Projects Section (#projects):
-      ScrollTrigger.create({
-        trigger: "#projects",
-        start: "top top",
-        end: "bottom bottom",
-        onUpdate: () => {
-          header.style.setProperty("--nav-invert", "0");
-        },
-      });
+      if (document.querySelector("#projects")) {
+        ScrollTrigger.create({
+          trigger: "#projects",
+          start: "top top",
+          end: "bottom bottom",
+          onUpdate: () => {
+            header.style.setProperty("--nav-invert", "0");
+          },
+        });
+      }
     });
 
     return () => ctx.revert();
-  }, []);
+  }, [pathname]);
 
   const handleToggle = () => {
     if (navState === 'closed') {
@@ -80,6 +91,12 @@ export default function Navbar() {
     } else if (navState === 'open' || navState === 'opening') {
       setNavState('closing');
     }
+  };
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    setPendingHref(href);
+    setNavState('closing');
   };
 
   useEffect(() => {
@@ -93,15 +110,14 @@ export default function Navbar() {
       timer = setTimeout(() => {
         setNavState('closed');
         if (pendingHref) {
-          const target = document.querySelector(pendingHref);
-          target?.scrollIntoView({ behavior: 'smooth' });
+          router.push(pendingHref);
           setPendingHref(null);
         }
-      }, 250);
+      }, 300);
     }
 
     return () => clearTimeout(timer);
-  }, [navState, pendingHref]);
+  }, [navState, pendingHref, router]);
 
   useEffect(() => {
     document.body.style.overflow = isOverlayDown ? 'hidden' : '';
@@ -110,36 +126,38 @@ export default function Navbar() {
     };
   }, [isOverlayDown]);
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    setPendingHref(href);
-    setNavState('closing');
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   return (
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 transition-all duration-500 ease-in-out sm:bg-transparent sm:backdrop-blur-none ${isOverlayDown
+        className={`fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 transition-all duration-500 ease-in-out sm:bg-transparent sm:backdrop-blur-none ${
+          isOverlayDown
             ? "bg-transparent backdrop-blur-none"
             : "bg-black"
-          }`}
-        style={{ "--nav-invert": "0" } as React.CSSProperties}
+        }`}
+        style={{ "--nav-invert": isHome ? "0" : "1" } as React.CSSProperties}
       >
         {/* LOGO */}
-        <Image
-          src="/img/logo.png"
-          alt="Jericho Urbano Logo"
-          width={120}
-          height={48}
-          priority
-          className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300 [filter:invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
-          style={
-            isMenuOpen
-              ? { filter: "invert(1)" }
-              : undefined
-          }
-        />
+        <Link href="/" aria-label="Go to home page">
+          <Image
+            src="/img/logo.png"
+            alt="Jericho Urbano Logo"
+            width={120}
+            height={48}
+            priority
+            className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300 [filter:invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
+            style={
+              isMenuOpen
+                ? { filter: "invert(1)" }
+                : undefined
+            }
+          />
+        </Link>
 
         <div className="flex items-center justify-end gap-3 ml-auto">
           {/* MENU / CLOSE BUTTON */}
@@ -189,8 +207,9 @@ export default function Navbar() {
 
       {/* OVERLAY MENU */}
       <nav
-        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 text-white transform transition-transform duration-500 ease-in-out z-20 flex items-center justify-center ${isOverlayDown ? "translate-y-0" : "-translate-y-full"
-          }`}
+        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 text-white transform transition-transform duration-500 ease-in-out z-20 flex items-center justify-center ${
+          isOverlayDown ? "translate-y-0" : "-translate-y-full"
+        }`}
         id="nav-menu"
         aria-label="Main navigation"
       >
@@ -198,17 +217,22 @@ export default function Navbar() {
           {navItems.map((item, index) => (
             <li
               key={item.label}
-              className={`transform transition-all duration-400 ease-out ${isTextVisible
+              className={`transform transition-all duration-400 ease-out ${
+                isTextVisible
                   ? "opacity-100 translate-y-0 pointer-events-auto"
                   : "opacity-0 translate-y-6 pointer-events-none"
-                }`}
+              }`}
               style={{
                 transitionDelay: isTextVisible ? `${index * 90}ms` : '0ms',
               }}
             >
               <Link
                 href={item.href}
-                className="nav-menu-link text-white hover:text-zinc-300 transition-colors"
+                className={`nav-menu-link transition-colors ${
+                  isActive(item.href)
+                    ? "text-[#fd551d]"
+                    : "text-white hover:text-zinc-300"
+                }`}
                 onClick={(e) => handleLinkClick(e, item.href)}
               >
                 {item.label}
