@@ -1,9 +1,23 @@
-// components/Footer.tsx (Closer to Reference Image)
+// components/Footer.tsx
 'use client';
 
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+
+const footerLinks = [
+  { label: "HOME", href: "/" },
+  { label: "WORK", href: "/work" },
+  { label: "PRICING", href: "/pricing" },
+  { label: "ABOUT", href: "/about" },
+  { label: "CONTACT", href: "/contact" },
+];
+
+const contactLinks = [
+  { label: "contact@good-fella.com", href: "mailto:contact@good-fella.com" },
+  { label: "julian@good-fella.com", href: "mailto:julian@good-fella.com" },
+  { label: "adrian@good-fella.com", href: "mailto:adrian@good-fella.com" },
+];
 
 export default function Footer() {
   const [currentYear, setCurrentYear] = useState(2024);
@@ -12,156 +26,133 @@ export default function Footer() {
     setCurrentYear(new Date().getFullYear());
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
-    <footer className="bg-zinc-950 border-t border-zinc-800/50 text-white font-display">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16">
-        {/* Main Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          {/* Location */}
-          <div>
-            <h4 className="text-[9px] uppercase tracking-[0.2em] text-[#c0c0c0] mb-3 font-medium">
-              LOCATION
-            </h4>
-            <div className="space-y-1">
-              <p className="text-xs text-white">Vadodara</p>
-              <p className="text-xs text-[#c0c0c0]">Gujarat.390020</p>
-            </div>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="text-[9px] uppercase tracking-[0.2em] text-[#c0c0c0] mb-3 font-medium">
-              CONTACT
-            </h4>
-            <div className="space-y-1">
-              <a 
-                href="tel:+919825916417" 
-                className="text-xs text-white hover:text-[#fd551d] transition-colors block"
-              >
-                +91 98259 16417
-              </a>
-              <a 
-                href="mailto:onethirddesigner@gmail.com" 
-                className="text-xs text-[#c0c0c0] hover:text-white transition-colors block"
-              >
-                onethirddesigner@gmail.com
-              </a>
-            </div>
-          </div>
-
-          {/* Follow */}
-          <div>
-            <h4 className="text-[9px] uppercase tracking-[0.2em] text-[#c0c0c0] mb-3 font-medium">
-              FOLLOW
-            </h4>
-            <div className="space-y-1">
-              <a 
-                href="https://instagram.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-[#c0c0c0] hover:text-white transition-colors block"
-              >
-                Instagram
-              </a>
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-[#c0c0c0] hover:text-white transition-colors block"
-              >
-                LinkedIn
-              </a>
-              <a 
-                href="https://dribbble.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-[#c0c0c0] hover:text-white transition-colors block"
-              >
-                Dribbble
-              </a>
-              <a 
-                href="https://twitter.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-[#c0c0c0] hover:text-white transition-colors block"
-              >
-                X (Twitter)
-              </a>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <div>
-            <h4 className="text-[9px] uppercase tracking-[0.2em] text-[#c0c0c0] mb-3 font-medium">
-              NAVIGATION
-            </h4>
-            <div className="space-y-1">
-              <Link 
-                href="/" 
-                className="text-xs text-[#c0c0c0] hover:text-white transition-colors block"
-              >
-                Home
-              </Link>
-              <Link 
-                href="/about" 
-                className="text-xs text-[#c0c0c0] hover:text-white transition-colors block"
-              >
-                About
-              </Link>
-              <Link 
-                href="/projects" 
-                className="text-xs text-[#c0c0c0] hover:text-white transition-colors block"
-              >
-                Projects
-              </Link>
-              <Link 
-                href="/contact" 
-                className="text-xs text-[#c0c0c0] hover:text-white transition-colors block"
-              >
-                Contact
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="mt-10 pt-6 border-t border-zinc-800/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-[10px] text-[#c0c0c0]">
-            &copy; {currentYear} Jericho Urbano. All rights reserved.
-          </p>
-
-          <button
-            onClick={scrollToTop}
-            className="text-[10px] uppercase tracking-[0.15em] text-[#c0c0c0] hover:text-white transition-colors flex items-center gap-2"
-          >
-            Back To Top
-            <svg 
-              className="w-3 h-3" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
+    <footer className="w-full min-h-screen text-white font-display flex flex-col" style={{ backgroundColor: '#222222' }}>
+      {/* Main Content - Top */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-8 md:pb-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 w-full">
+            {/* Column 1: Newsletter */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, ease: [0.33, 1, 0.68, 1] }}
+              className="md:col-span-1"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M5 15l7-7 7 7" 
-              />
-            </svg>
-          </button>
-        </div>
+              <h3 className="text-sm font-medium tracking-wider text-white/80 mb-3">
+                Don't miss out on future updates.
+              </h3>
+              <div className="flex flex-col gap-3 max-w-xs">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#fd551d]/50 transition-colors"
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#fd551d]/50 transition-colors"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-4 mt-3">
+                <button 
+                  className="px-6 py-2.5 text-white text-sm font-medium rounded-md transition-colors"
+                  style={{ backgroundColor: '#fd551d' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e44a18'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fd551d'}
+                >
+                  SUBSCRIBE
+                </button>
+                <span className="text-xs text-white/40">Unsubscribe anytime.</span>
+              </div>
+              <div className="mt-4 space-y-1">
+                <p className="text-xs font-medium tracking-wider" style={{ color: '#fd551d' }}>
+                  - ACCEPTING PROJECTS. JOIN THE WAITLIST.
+                </p>
+                <p className="text-xs font-medium tracking-wider" style={{ color: '#fd551d' }}>
+                  - ONLY 3 SPOTS LEFT
+                </p>
+              </div>
+            </motion.div>
 
-        {/* Love Note */}
-        <div className="mt-4 text-center">
-          <p className="text-[9px] text-zinc-700 tracking-[0.05em]">
-            Designed with <span className="text-[#fd551d]">❤</span> & care
-          </p>
+            {/* Column 2: Navigation */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.06, ease: [0.33, 1, 0.68, 1] }}
+              className="md:col-span-1"
+            >
+              <div className="flex flex-col">
+                {footerLinks.map((link) => (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className="text-sm text-white/60 hover:text-[#fd551d] transition-colors py-1.5"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Column 3: Contact */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.12, ease: [0.33, 1, 0.68, 1] }}
+              className="md:col-span-1"
+            >
+              <div className="flex flex-col">
+                {contactLinks.map((link) => (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className="text-sm text-white/60 hover:text-[#fd551d] transition-colors py-1.5"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
+
+      {/* Copyright - Center */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, delay: 0.18, ease: [0.33, 1, 0.68, 1] }}
+        className="w-full px-4 sm:px-6 lg:px-8 py-4 md:min-h-[120px] max-h-auto flex justify-center items-center"
+      >
+        <div className="text-center">
+          <p className="text-xs text-white/40">
+             @ {currentYear} Jericho Urbano.
+          </p>
+          <p className="text-xs text-white/40">
+            All rights reserved.
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Logo - Bottom Center - Fixed at bottom of footer */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, delay: 0.24, ease: [0.33, 1, 0.68, 1] }}
+        className="w-full flex justify-center overflow-hidden mt-auto"
+      >
+        <div className="w-full">
+          <span className="block font-bold tracking-tight text-center whitespace-nowrap text-[clamp(3rem,15vw,20rem)] text-black">
+            @echo_ng
+          </span>
+        </div>
+      </motion.div>
     </footer>
   );
 }
