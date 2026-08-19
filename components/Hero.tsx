@@ -19,9 +19,8 @@ const PIXELS_PER_SECOND = 60;
 function MarqueeWords({ reverse }: { reverse: boolean }) {
   return (
     <div
-      className={`flex items-center py-2 shrink-0 ${
-        reverse ? "marquee-text-dark" : "marquee-text-light"
-      }`}
+      className={`flex items-center py-2 shrink-0 ${reverse ? "marquee-text-dark" : "marquee-text-light"
+        }`}
     >
       {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, index) => (
         <span key={index} className="marquee-text shrink-0 px-6 select-none">
@@ -135,6 +134,7 @@ export default function Hero() {
   const portraitRef = useRef<HTMLDivElement>(null);
   const marqueeRef = useRef<HTMLDivElement>(null);
   const signatureContainerRef = useRef<HTMLDivElement>(null);
+  const aboutTitleRef = useRef<HTMLDivElement>(null);
   const signaturePathsRef = useRef<(SVGPathElement | null)[]>([]);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -155,6 +155,7 @@ export default function Hero() {
     if (!scrollContainerRef.current || !frameRef.current || !isMounted) return;
 
     const ctx = gsap.context(() => {
+      // Initial state for the frame
       gsap.set(frameRef.current, {
         width: "100vw",
         height: "100vh",
@@ -170,6 +171,7 @@ export default function Hero() {
         top: "0",
       });
 
+      // Initial state for portrait
       if (portraitRef.current) {
         gsap.set(portraitRef.current, {
           scale: 1.0,
@@ -179,10 +181,21 @@ export default function Hero() {
         });
       }
 
+      // Initial state for marquee
       if (marqueeRef.current) {
         gsap.set(marqueeRef.current, { opacity: 1 });
       }
 
+      // Initial state for ABOUT title
+      if (aboutTitleRef.current) {
+        gsap.set(aboutTitleRef.current, {
+          opacity: 0,
+          y: 30,
+          scale: 0.9,
+        });
+      }
+
+      // Initial state for signature paths
       signaturePathsRef.current.forEach((path) => {
         if (path) {
           const length = path.getTotalLength ? path.getTotalLength() : 1200;
@@ -193,6 +206,7 @@ export default function Hero() {
         }
       });
 
+      // Initial state for signature container
       if (signatureContainerRef.current) {
         gsap.set(signatureContainerRef.current, {
           opacity: 0,
@@ -201,6 +215,7 @@ export default function Hero() {
         });
       }
 
+      // Main timeline with scroll trigger
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: scrollContainerRef.current,
@@ -211,6 +226,7 @@ export default function Hero() {
         },
       });
 
+      // 1. Frame zoom out animation
       tl.to(
         frameRef.current,
         {
@@ -225,6 +241,7 @@ export default function Hero() {
         0
       );
 
+      // 2. Portrait scale and grayscale
       if (portraitRef.current) {
         tl.to(
           portraitRef.current,
@@ -237,6 +254,7 @@ export default function Hero() {
         );
       }
 
+      // 3. Marquee fades out
       if (marqueeRef.current) {
         tl.to(
           marqueeRef.current,
@@ -248,7 +266,9 @@ export default function Hero() {
         );
       }
 
+      // 4. Signature animation - centered with stroke drawing
       if (signatureContainerRef.current) {
+        // Fade in signature container
         tl.fromTo(
           signatureContainerRef.current,
           { opacity: 0, scale: 0.85, y: 15 },
@@ -262,6 +282,7 @@ export default function Hero() {
           0.38
         );
 
+        // Draw each path stroke
         signaturePathsRef.current.forEach((path, idx) => {
           if (path) {
             const startOffset = 0.40 + idx * 0.04;
@@ -276,6 +297,22 @@ export default function Hero() {
             );
           }
         });
+      }
+
+      // 5. ABOUT title appears only at 100% zoomout (end of scroll)
+      if (aboutTitleRef.current) {
+        tl.fromTo(
+          aboutTitleRef.current,
+          { opacity: 0, y: 30, scale: 0.9 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            ease: "power2.out",
+            duration: 0.3,
+          },
+          0.95
+        );
       }
     }, scrollContainerRef);
 
@@ -300,6 +337,7 @@ export default function Hero() {
             position: "relative",
           }}
         >
+          {/* Marquee Background */}
           <div
             ref={marqueeRef}
             className="absolute left-0 right-0 top-1/3 -translate-y-1/2 md:top-1/2 md:-translate-y-1/2 z-0 flex flex-col pointer-events-none will-change-[opacity]"
@@ -309,6 +347,7 @@ export default function Hero() {
             <MarqueeRow reverse />
           </div>
 
+          {/* Portrait Image */}
           <div
             ref={portraitRef}
             className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter]"
@@ -320,9 +359,8 @@ export default function Hero() {
               <img
                 src="/img/hero.webp"
                 alt="Jericho Urbano portrait"
-                className={`w-full h-full object-cover object-center select-none pointer-events-none transition-opacity duration-700 ${
-                  imageLoaded ? "opacity-100" : "opacity-0"
-                }`}
+                className={`w-full h-full object-cover object-center select-none pointer-events-none transition-opacity duration-700 ${imageLoaded ? "opacity-100" : "opacity-0"
+                  }`}
                 draggable={false}
                 loading="eager"
                 onLoad={() => setImageLoaded(true)}
@@ -340,6 +378,7 @@ export default function Hero() {
             </div>
           </div>
 
+          {/* Signature - Centered */}
           <div
             ref={signatureContainerRef}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none flex flex-col items-center justify-center w-[88%] max-w-[340px] sm:max-w-[440px] md:max-w-[540px] px-2"
@@ -350,6 +389,7 @@ export default function Hero() {
               xmlns="http://www.w3.org/2000/svg"
               className="w-full h-auto drop-shadow-[0_10px_30px_rgba(253,85,29,0.45)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
             >
+              {/* 1. Main Iconic Elongated Left Loop */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[0] = el;
@@ -361,6 +401,7 @@ export default function Hero() {
                 strokeLinejoin="round"
               />
 
+              {/* 2. Cursive baseline scribble */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[1] = el;
@@ -372,6 +413,7 @@ export default function Hero() {
                 strokeLinejoin="round"
               />
 
+              {/* 3. Top-Right Monogram Flourish Loop */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[2] = el;
@@ -383,6 +425,7 @@ export default function Hero() {
                 strokeLinejoin="round"
               />
 
+              {/* 4. Sharp Dynamic Horizontal Piercing Slash */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[3] = el;
@@ -394,6 +437,7 @@ export default function Hero() {
                 strokeLinejoin="round"
               />
 
+              {/* 5. Far-Right Accent Dot */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[4] = el;
@@ -407,6 +451,16 @@ export default function Hero() {
             </svg>
           </div>
         </section>
+
+        {/* ABOUT Title - Outside the frame, at the bottom, larger size */}
+        <div
+          ref={aboutTitleRef}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+        >
+          <span className="font-display text-lg sm:text-xl md:text-2xl lg:text-3xl uppercase tracking-[0.3em] text-white/60">
+            ABOUT
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -38,13 +38,6 @@ export default function Navbar() {
     const header = headerRef.current;
     if (!header) return;
 
-    // Set initial state based on pathname
-    if (isHome) {
-      header.style.setProperty("--nav-invert", "0");
-    } else {
-      header.style.setProperty("--nav-invert", "1");
-    }
-
     if (!document.querySelector("#home")) {
       header.style.setProperty("--nav-invert", "1");
       return;
@@ -92,7 +85,7 @@ export default function Navbar() {
     });
 
     return () => ctx.revert();
-  }, [pathname, isHome]);
+  }, [pathname]);
 
   const handleToggle = () => {
     if (navState === 'closed') {
@@ -149,11 +142,9 @@ export default function Navbar() {
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 transition-all duration-500 ease-in-out ${isOverlayDown
-            ? "bg-transparent backdrop-blur-none"
-            : isHome
-              ? "bg-transparent"
-              : "bg-black"
+        className={`fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 transition-all duration-500 ease-in-out sm:bg-transparent sm:backdrop-blur-none ${isOverlayDown
+          ? "bg-transparent backdrop-blur-none"
+          : "bg-black"
           }`}
         style={{ "--nav-invert": isHome ? "0" : "1" } as React.CSSProperties}
       >
@@ -164,38 +155,24 @@ export default function Navbar() {
             width={120}
             height={48}
             priority
-            className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300"
-            style={{
-              filter: isMenuOpen
-                ? "invert(1)"
-                : isHome
-                  ? "invert(var(--nav-invert, 0))"
-                  : "invert(1)",
-            }}
+            className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300 [filter:invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
+            style={
+              isMenuOpen
+                ? { filter: "invert(1)" }
+                : undefined
+            }
           />
         </Link>
 
         <div className="flex items-center justify-end gap-3 ml-auto">
           <button
             type="button"
-            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 border-2 border-current rounded-md p-2 transition-all duration-300"
-            style={{
-              color: isMenuOpen
-                ? "#ffffff"
-                : isHome
-                  ? `rgba(255, 255, 255, ${1 - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-invert') || '0')})`
-                  : "#ffffff",
-              borderColor: isMenuOpen
-                ? "#ffffff"
-                : isHome
-                  ? `rgba(255, 255, 255, ${1 - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-invert') || '0')})`
-                  : "#ffffff",
-              filter: isMenuOpen
-                ? "none"
-                : isHome
-                  ? `invert(var(--nav-invert, 0))`
-                  : "none",
-            }}
+            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 text-white stroke-white border-2 border-current rounded-md p-2 sm:text-zinc-900 sm:stroke-zinc-900 transition-all duration-300 [filter:brightness(0)_invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
+            style={
+              isMenuOpen
+                ? { filter: "brightness(0) invert(1)" }
+                : undefined
+            }
             aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMenuOpen}
             onClick={handleToggle}
@@ -243,8 +220,8 @@ export default function Navbar() {
             <li
               key={item.label}
               className={`transform transition-all duration-400 ease-out ${isTextVisible
-                  ? "opacity-100 translate-y-0 pointer-events-auto"
-                  : "opacity-0 translate-y-6 pointer-events-none"
+                ? "opacity-100 translate-y-0 pointer-events-auto"
+                : "opacity-0 translate-y-6 pointer-events-none"
                 }`}
               style={{
                 transitionDelay: isTextVisible ? `${index * 90}ms` : '0ms',
@@ -253,8 +230,8 @@ export default function Navbar() {
               <Link
                 href={item.href}
                 className={`nav-menu-link transition-colors ${isActive(item.href)
-                    ? "text-[#fd551d]"
-                    : "text-white hover:text-zinc-300"
+                  ? "text-[#fd551d]"
+                  : "text-white hover:text-zinc-300"
                   }`}
                 onClick={(e) => handleLinkClick(e, item.href)}
               >
