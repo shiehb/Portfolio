@@ -91,38 +91,12 @@ export default function AboutPage() {
     useEffect(() => {
         // Reset loading state when component mounts
         resetLoading();
-
         setTotalItems(1);
 
-        const images = ['/img/hero.webp'];
-        let loaded = 0;
-
-        images.forEach(src => {
-            const img = new window.Image();
-            img.src = src;
-            const onDone = () => {
-                loaded++;
-                if (loaded === images.length && !hasIncremented.current) {
-                    hasIncremented.current = true;
-                    incrementLoaded();
-                }
-            };
-            if (img.complete) {
-                onDone();
-            } else {
-                img.onload = onDone;
-                img.onerror = onDone;
-            }
-        });
-
-        const timer = setTimeout(() => {
-            if (!hasIncremented.current) {
-                hasIncremented.current = true;
-                incrementLoaded();
-            }
-        }, 150);
-
-        return () => clearTimeout(timer);
+        if (!hasIncremented.current) {
+            hasIncremented.current = true;
+            incrementLoaded();
+        }
     }, [setTotalItems, incrementLoaded, resetLoading]);
 
     useEffect(() => {
@@ -136,18 +110,13 @@ export default function AboutPage() {
             });
         };
 
-        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     return (
         <div className="min-h-screen bg-[#222222] text-white font-display">
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="relative py-16 px-4 text-center overflow-hidden"
-            >
+            <div className="relative py-16 px-4 text-center overflow-hidden animate-in fade-in duration-500">
                 <div className="absolute inset-0 bg-gradient-to-b from-[#fd551d]/5 to-transparent" />
 
                 <div className="relative z-10 max-w-4xl mx-auto">
@@ -163,14 +132,9 @@ export default function AboutPage() {
                         cinematic narratives, and meaningful brand identities.
                     </p>
                 </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="flex flex-wrap justify-center gap-2 px-4 pb-8"
-            >
+            <div className="flex flex-wrap justify-center gap-2 px-4 pb-8">
                 {[
                     { id: "skills", label: "Skills" },
                     { id: "experience", label: "Experience" },
@@ -188,14 +152,9 @@ export default function AboutPage() {
                         {item.label}
                     </a>
                 ))}
-            </motion.div>
+            </div>
 
-            <motion.section
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="max-w-6xl mx-auto px-4 pb-20"
-            >
+            <section className="max-w-6xl mx-auto px-4 pb-20">
                 <div className="grid md:grid-cols-2 gap-12 items-start">
                     <div>
                         <h2 className="text-2xl sm:text-3xl font-bold mb-4">
@@ -242,12 +201,13 @@ export default function AboutPage() {
                                 alt="Jericho Urbano"
                                 fill
                                 priority
+                                sizes="(max-width: 768px) 100vw, 400px"
                                 className="object-cover"
                             />
                         </div>
                     </div>
                 </div>
-            </motion.section>
+            </section>
 
             <section id="skills" className="section-anchor max-w-6xl mx-auto px-4 pb-20">
                 <motion.div
@@ -377,7 +337,6 @@ export default function AboutPage() {
                                             width={48}
                                             height={48}
                                             className="object-cover"
-                                            unoptimized
                                         />
                                     </div>
                                     <div>

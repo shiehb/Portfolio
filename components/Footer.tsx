@@ -248,13 +248,28 @@ export default function Footer() {
       {/* Logo - Bottom Center with subtle watermark branding */}
       <div
         aria-hidden="true"
+        role="presentation"
         className="w-full flex justify-center overflow-hidden pointer-events-none select-none"
       >
-        <div className="w-full">
-          <span className="block font-bold tracking-tight text-center whitespace-nowrap text-[clamp(2.5rem,12vw,18rem)] text-white/[0.03]">
+        <svg
+          viewBox="0 0 1000 140"
+          className="w-full max-h-[140px] opacity-[0.03] fill-white"
+          role="presentation"
+          aria-hidden="true"
+        >
+          <text
+            x="50%"
+            y="65%"
+            dominantBaseline="middle"
+            textAnchor="middle"
+            fontSize="120"
+            fontWeight="900"
+            fontFamily="var(--font-display)"
+            letterSpacing="-0.02em"
+          >
             @echo_ng
-          </span>
-        </div>
+          </text>
+        </svg>
       </div>
     </footer>
   );

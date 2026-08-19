@@ -133,24 +133,29 @@ export default function Navbar() {
   useEffect(() => {
     updateHeaderColor();
 
+    if (!isHome) {
+      return;
+    }
+
+    let ticking = false;
     const handleScroll = () => {
-      updateHeaderColor();
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateHeaderColor();
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll, { passive: true });
 
-    const onTicker = () => {
-      updateHeaderColor();
-    };
-    gsap.ticker.add(onTicker);
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
-      gsap.ticker.remove(onTicker);
     };
-  }, [updateHeaderColor]);
+  }, [isHome, updateHeaderColor]);
 
   const handleToggle = () => {
     if (navState === 'closed') {
