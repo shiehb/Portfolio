@@ -3,9 +3,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -21,10 +20,12 @@ const navItems = [
 ];
 
 export default function Navbar() {
-  const { isLoading } = useLoading();
   const [navState, setNavState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+  const currentInvertVal = useRef<number>(0);
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === "/";
@@ -33,59 +34,123 @@ export default function Navbar() {
   const isOverlayDown = navState === 'opening' || navState === 'open' || navState === 'closing';
   const isTextVisible = navState === 'open';
 
-  // All hooks must be called before any conditional returns
-  useEffect(() => {
-    const header = headerRef.current;
-    if (!header) return;
+  // Apply direct inversion filter: 0 = Original Black, 1 = Inverted White
+  const applyInvert = useCallback((val: number) => {
+    const clamped = Math.max(0, Math.min(1, val));
+    currentInvertVal.current = clamped;
 
-    if (!document.querySelector("#home")) {
-      header.style.setProperty("--nav-invert", "1");
+    if (logoRef.current) {
+      logoRef.current.style.filter = `invert(${clamped})`;
+    }
+    if (menuBtnRef.current) {
+      menuBtnRef.current.style.filter = `invert(${clamped})`;
+    }
+  }, []);
+
+  const updateHeaderColor = useCallback(() => {
+    if (isMenuOpen) {
+      if (logoRef.current) logoRef.current.style.filter = "invert(1)";
+      if (menuBtnRef.current) menuBtnRef.current.style.filter = "invert(1)";
       return;
     }
 
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: "#home",
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
-        onUpdate: (self) => {
-          const val = Math.min(1, self.progress * 2);
-          header.style.setProperty("--nav-invert", val.toFixed(3));
-        },
-      });
+    if (!isHome) {
+      // Subpages (/projects, /about, /contact) have dark (#222222) backgrounds -> White elements (1)
+      applyInvert(1);
+      return;
+    }
 
-      const gallery = document.querySelector("#gallery");
-      if (gallery) {
-        ScrollTrigger.create({
-          trigger: "#gallery",
-          start: "top top",
-          end: () => {
-            const innerTrack = gallery.querySelector(".will-change-transform");
-            return innerTrack ? `+=${(innerTrack as HTMLElement).scrollWidth}` : "bottom top";
-          },
-          scrub: true,
-          onUpdate: (self) => {
-            const val = Math.max(0, Math.min(1, 1 - self.progress));
-            header.style.setProperty("--nav-invert", val.toFixed(3));
-          },
-        });
+    const headerY = 35;
+    const footerEl = document.querySelector("footer");
+    const projectsEl = document.querySelector("#projects");
+    const galleryEl = document.querySelector("#gallery");
+    const aboutEl = document.querySelector("#about");
+    const homeEl = document.querySelector("#home");
+    const heroFrameEl = document.querySelector("#hero-zoom-frame");
+
+    // 1. Footer Section on Main Page (Dark #222222 bg -> White elements 1)
+    if (footerEl) {
+      const rect = footerEl.getBoundingClientRect();
+      if (rect.top <= headerY) {
+        applyInvert(1);
+        return;
       }
+    }
 
-      if (document.querySelector("#projects")) {
-        ScrollTrigger.create({
-          trigger: "#projects",
-          start: "top top",
-          end: "bottom bottom",
-          onUpdate: () => {
-            header.style.setProperty("--nav-invert", "0");
-          },
-        });
+    // 2. Projects Section on Main Page (White bg -> Black elements 0)
+    if (projectsEl) {
+      const rect = projectsEl.getBoundingClientRect();
+      if (rect.top <= headerY && rect.bottom > headerY) {
+        applyInvert(0);
+        return;
       }
-    });
+    }
 
-    return () => ctx.revert();
-  }, [pathname]);
+    // 3. Gallery Section on Main Page (Starts Black 1, transitions to White 0)
+    if (galleryEl) {
+      const rect = galleryEl.getBoundingClientRect();
+      if (rect.top <= headerY && rect.bottom > headerY) {
+        const scrollableDist = rect.height - window.innerHeight;
+        const progress = scrollableDist > 0 ? Math.max(0, Math.min(1, -rect.top / scrollableDist)) : 0;
+        applyInvert(1 - progress);
+        return;
+      }
+    }
+
+    // 4. About Section on Main Page (Black bg -> White elements 1)
+    if (aboutEl) {
+      const rect = aboutEl.getBoundingClientRect();
+      if (rect.top <= headerY && rect.bottom > headerY) {
+        applyInvert(1);
+        return;
+      }
+    }
+
+    // 5. Hero Section on Main Page (Starts White 0, zooms into Black 1)
+    if (homeEl) {
+      const rect = homeEl.getBoundingClientRect();
+      if (rect.top <= headerY && rect.bottom > headerY) {
+        if (heroFrameEl) {
+          const frameRect = heroFrameEl.getBoundingClientRect();
+          if (frameRect.top <= headerY && frameRect.bottom >= headerY) {
+            const shrinkProgress = Math.max(0, Math.min(1, -rect.top / (window.innerHeight * 0.7)));
+            applyInvert(shrinkProgress);
+          } else {
+            applyInvert(1);
+          }
+        } else {
+          const shrinkProgress = Math.max(0, Math.min(1, -rect.top / (window.innerHeight * 0.7)));
+          applyInvert(shrinkProgress);
+        }
+        return;
+      }
+    }
+
+    // Default to White elements (1) for dark background areas
+    applyInvert(1);
+  }, [isMenuOpen, isHome, applyInvert]);
+
+  useEffect(() => {
+    updateHeaderColor();
+
+    const handleScroll = () => {
+      updateHeaderColor();
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+
+    const onTicker = () => {
+      updateHeaderColor();
+    };
+    gsap.ticker.add(onTicker);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      gsap.ticker.remove(onTicker);
+    };
+  }, [updateHeaderColor]);
 
   const handleToggle = () => {
     if (navState === 'closed') {
@@ -133,46 +198,30 @@ export default function Navbar() {
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-  // Return null after all hooks are called
-  if (isLoading) {
-    return null;
-  }
-
   return (
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 transition-all duration-500 ease-in-out sm:bg-transparent sm:backdrop-blur-none ${isOverlayDown
-          ? "bg-transparent backdrop-blur-none"
-          : "bg-black"
-          }`}
-        style={{ "--nav-invert": isHome ? "0" : "1" } as React.CSSProperties}
+        className="fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 bg-transparent pointer-events-none"
       >
-        <Link href="/" aria-label="Go to home page">
-          <Image
-            src="/img/logo.png"
-            alt="Jericho Urbano Logo"
-            width={120}
-            height={48}
-            priority
-            className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300 [filter:invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
-            style={
-              isMenuOpen
-                ? { filter: "invert(1)" }
-                : undefined
-            }
-          />
+        <Link href="/" aria-label="Go to home page" className="pointer-events-auto flex items-center">
+          <div ref={logoRef} className="flex items-center">
+            <Image
+              src="/img/logo.png"
+              alt="Jericho Urbano Logo"
+              width={120}
+              height={48}
+              priority
+              className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px]"
+            />
+          </div>
         </Link>
 
-        <div className="flex items-center justify-end gap-3 ml-auto">
+        <div className="flex items-center justify-end gap-3 ml-auto pointer-events-auto">
           <button
+            ref={menuBtnRef}
             type="button"
-            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 text-white stroke-white border-2 border-current rounded-md p-2 sm:text-zinc-900 sm:stroke-zinc-900 transition-all duration-300 [filter:brightness(0)_invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
-            style={
-              isMenuOpen
-                ? { filter: "brightness(0) invert(1)" }
-                : undefined
-            }
+            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 text-black border-2 border-black rounded-md p-2 hover:opacity-80 cursor-pointer"
             aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMenuOpen}
             onClick={handleToggle}

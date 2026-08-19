@@ -63,7 +63,7 @@
   }
 
   .logo {
-    @apply w-auto object-contain block transition-all duration-350;
+    @apply w-auto object-contain block;
     height: clamp(36px, 8vw, 60px);
     max-width: clamp(150px, 20vw, 200px);
   }
@@ -73,18 +73,13 @@
   }
 
   .menu-btn {
-    @apply bg-transparent border-3 border-black rounded px-0 cursor-pointer flex items-center justify-center text-black font-black leading-none transition-all duration-350;
-    width: clamp(42px, 8vw, 60px);
-    height: clamp(42px, 8vw, 60px);
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
-  }
-
-  .menu-btn-invert {
-    @apply border-white text-white brightness-0 invert saturate-100;
+    @apply bg-transparent border-2 border-black rounded-md cursor-pointer flex items-center justify-center text-black leading-none;
+    width: clamp(40px, 6vw, 50px);
+    height: clamp(40px, 6vw, 50px);
   }
 
   .menu-btn:hover {
-    @apply opacity-80 transition-opacity duration-300;
+    @apply opacity-80;
   }
 
   .nav-menu-link {
