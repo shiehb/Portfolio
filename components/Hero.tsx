@@ -136,9 +136,15 @@ export default function Hero() {
   const marqueeRef = useRef<HTMLDivElement>(null);
   const signatureContainerRef = useRef<HTMLDivElement>(null);
   const signaturePathsRef = useRef<(SVGPathElement | null)[]>([]);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (!scrollContainerRef.current || !frameRef.current) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!scrollContainerRef.current || !frameRef.current || !isMounted) return;
 
     const ctx = gsap.context(() => {
       // Initial state: Full screen 100vw x 100vh, 0px radius, white background
@@ -151,10 +157,19 @@ export default function Hero() {
         backgroundColor: "#ffffff",
         boxShadow: "0 0 0 rgba(0,0,0,0)",
         transformOrigin: "center center",
+        position: "relative",
+        margin: "0 auto",
+        left: "0",
+        top: "0",
       });
 
       if (portraitRef.current) {
-        gsap.set(portraitRef.current, { scale: 1.0, filter: "grayscale(0%)" });
+        gsap.set(portraitRef.current, {
+          scale: 1.0,
+          filter: "grayscale(0%)",
+          x: "0%",
+          y: "0%",
+        });
       }
 
       if (marqueeRef.current) {
@@ -266,7 +281,7 @@ export default function Hero() {
     }, scrollContainerRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [isMounted]);
 
   return (
     <div
@@ -282,7 +297,11 @@ export default function Hero() {
         <section
           ref={frameRef}
           id="hero-zoom-frame"
-          className="relative flex justify-center items-end overflow-hidden text-zinc-900 will-change-[width,height,border-radius,background-color]"
+          className="relative flex justify-center items-center overflow-hidden text-zinc-900 will-change-[width,height,border-radius,background-color]"
+          style={{
+            margin: "auto",
+            position: "relative",
+          }}
         >
           {/* Marquee text container */}
           <div
@@ -294,17 +313,36 @@ export default function Hero() {
             <MarqueeRow reverse />
           </div>
 
-          {/* Hero Portrait Image */}
+          {/* Hero Portrait Image - FIXED CENTERED CROP */}
           <div
             ref={portraitRef}
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 z-10 flex justify-center items-end pointer-events-none h-full w-auto will-change-[transform,filter]"
+            className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter]"
           >
-            <img
-              src="/img/hero.webp"
-              alt="Jericho Urbano portrait"
-              className="max-h-full max-w-none h-full w-auto object-contain object-bottom select-none pointer-events-none"
-              draggable={false}
-            />
+            <div className="relative w-full h-full overflow-hidden">
+              {!imageLoaded && (
+                <div className="absolute inset-0 bg-[#222222] animate-pulse" />
+              )}
+              <img
+                src="/img/hero.webp"
+                alt="Jericho Urbano portrait"
+                className={`w-full h-full object-cover object-center select-none pointer-events-none transition-opacity duration-700 ${
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                draggable={false}
+                loading="eager"
+                onLoad={() => setImageLoaded(true)}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  minWidth: "100%",
+                  minHeight: "100%",
+                  width: "auto",
+                  height: "auto",
+                }}
+              />
+            </div>
           </div>
 
           {/* Animated Handwritten Signature from E-SIGNITURE-URBANO_JERICHO (Animates at ~50% scroll at center) */}
