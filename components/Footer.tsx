@@ -4,17 +4,13 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { Copy, Check, Clock, MapPin, ArrowUpRight } from "lucide-react";
 
 const footerLinks = [
   { label: "HOME", href: "/" },
   { label: "ABOUT", href: "/about" },
-  { label: "PROJECT", href: "/project" },
+  { label: "PROJECTS", href: "/projects" },
   { label: "CONTACT", href: "/contact" },
-];
-
-const contactLinks = [
-  { label: "jerichourbano.01.01.04@gmail.com", href: "mailto:jerichourbano.01.01.04@gmail.com" },
-  { label: "+63 956 698 6556", href: "tel:+639566986556" },
 ];
 
 const socialLinks = [
@@ -24,20 +20,62 @@ const socialLinks = [
   { label: "GitHub", href: "https://github.com/shiehb" },
 ];
 
+const EMAIL = "jerichourbano.01.01.04@gmail.com";
+const PHONE = "+63 956 698 6556";
+
 export default function Footer() {
   const [currentYear, setCurrentYear] = useState(2024);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
+  const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
+
+    // Update Philippine Standard Time (GMT+8)
+    const updateTime = () => {
+      try {
+        const timeStr = new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Manila",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        }).format(new Date());
+        setCurrentTime(timeStr);
+      } catch {
+        setCurrentTime("");
+      }
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
   }, []);
 
+  const handleCopyEmail = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(EMAIL);
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2000);
+  };
+
+  const handleCopyPhone = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(PHONE.replace(/\s+/g, ''));
+    setCopiedPhone(true);
+    setTimeout(() => setCopiedPhone(false), 2000);
+  };
+
   return (
-    <footer className="w-full min-h-screen text-white font-display flex flex-col" style={{ backgroundColor: '#222222' }}>
+    <footer className="w-full min-h-screen text-white font-display flex flex-col justify-between bg-[#222222]">
       {/* Main Content - Top */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 pt-20 md:pt-16 pb-8 md:pb-12">
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-20 md:pt-28 pb-12 md:pb-16">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 w-full">
-            {/* Column 1: Newsletter */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 w-full">
+            {/* Column 1: Navigation */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -45,81 +83,137 @@ export default function Footer() {
               transition={{ duration: 0.4, ease: [0.33, 1, 0.68, 1] }}
               className="md:col-span-1"
             >
-              <h3 className="text-sm font-medium tracking-wider text-white/80 mb-3">
-                Don't miss out on future updates.
-              </h3>
-              <div className="flex flex-col gap-3 max-w-xs">
-                <input
-                  type="text"
-                  placeholder="Name"
-                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#fd551d]/50 transition-colors"
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#fd551d]/50 transition-colors"
-                />
-              </div>
-              <div className="flex flex-wrap items-center gap-4 mt-3">
-                <button 
-                  className="px-6 py-2.5 text-white text-sm font-medium rounded-md transition-colors"
-                  style={{ backgroundColor: '#fd551d' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e44a18'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fd551d'}
-                >
-                  SUBSCRIBE
-                </button>
-                <span className="text-xs text-white/40">Unsubscribe anytime.</span>
-              </div>
-              <div className="mt-4 space-y-1">
-                <p className="text-xs font-medium tracking-wider" style={{ color: '#fd551d' }}>
-                  - ACCEPTING PROJECTS. JOIN THE WAITLIST.
-                </p>
-                <p className="text-xs font-medium tracking-wider" style={{ color: '#fd551d' }}>
-                  - ONLY 3 SPOTS LEFT
-                </p>
-              </div>
-            </motion.div>
-
-            {/* Column 2: Navigation */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.06, ease: [0.33, 1, 0.68, 1] }}
-              className="md:col-span-1"
-            >
-              <div className="flex flex-col">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] mb-4">
+                Navigation
+              </span>
+              <div className="flex flex-col items-start gap-2.5">
                 {footerLinks.map((link) => (
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="text-sm text-white/60 hover:text-[#fd551d] transition-colors py-1.5"
+                    className="group inline-flex items-center gap-1.5 text-sm sm:text-base text-zinc-300 hover:text-[#fd551d] transition-colors py-1 w-fit"
                   >
-                    {link.label}
+                    <span>{link.label}</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 translate-y-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-200 text-[#fd551d]" />
                   </Link>
                 ))}
               </div>
             </motion.div>
 
-            {/* Column 3: Contact */}
+            {/* Column 2: Contact */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.12, ease: [0.33, 1, 0.68, 1] }}
+              transition={{ duration: 0.4, delay: 0.08, ease: [0.33, 1, 0.68, 1] }}
               className="md:col-span-1"
             >
-              <div className="flex flex-col">
-                {contactLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="text-sm text-white/60 hover:text-[#fd551d] transition-colors py-1.5 break-all"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] mb-4">
+                Contact
+              </span>
+              <div className="flex flex-col items-start gap-4">
+                {/* Email with Quick Copy */}
+                <div className="flex flex-col items-start gap-1 w-full max-w-sm">
+                  <span className="text-xs text-zinc-500 uppercase tracking-wider">Email</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <a
+                      href={`mailto:${EMAIL}`}
+                      className="text-sm sm:text-base text-zinc-300 hover:text-[#fd551d] transition-colors break-all"
+                    >
+                      {EMAIL}
+                    </a>
+                    <button
+                      onClick={handleCopyEmail}
+                      type="button"
+                      aria-label="Copy Email"
+                      className="relative p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer inline-flex items-center justify-center border border-white/10"
+                    >
+                      {copiedEmail ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                      {copiedEmail && (
+                        <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[#fd551d] text-white text-[10px] font-semibold rounded shadow-md whitespace-nowrap animate-in fade-in zoom-in duration-150">
+                          Copied!
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Phone with Quick Copy */}
+                <div className="flex flex-col items-start gap-1 w-full max-w-sm">
+                  <span className="text-xs text-zinc-500 uppercase tracking-wider">Phone</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <a
+                      href={`tel:${PHONE.replace(/\s+/g, '')}`}
+                      className="text-sm sm:text-base text-zinc-300 hover:text-[#fd551d] transition-colors"
+                    >
+                      {PHONE}
+                    </a>
+                    <button
+                      onClick={handleCopyPhone}
+                      type="button"
+                      aria-label="Copy Phone"
+                      className="relative p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer inline-flex items-center justify-center border border-white/10"
+                    >
+                      {copiedPhone ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                      {copiedPhone && (
+                        <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[#fd551d] text-white text-[10px] font-semibold rounded shadow-md whitespace-nowrap animate-in fade-in zoom-in duration-150">
+                          Copied!
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Column 3: Location & Time Zone */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.16, ease: [0.33, 1, 0.68, 1] }}
+              className="md:col-span-1"
+            >
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] mb-4">
+                Location & Timezone
+              </span>
+              <div className="flex flex-col items-start gap-4">
+                {/* Location */}
+                <div className="flex items-start gap-2.5 text-zinc-300">
+                  <MapPin className="w-4 h-4 text-[#fd551d] mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm sm:text-base font-medium text-white">Philippines</p>
+                    <p className="text-xs text-zinc-400">Available Worldwide (Remote)</p>
+                  </div>
+                </div>
+
+                {/* Live Time */}
+                <div className="flex items-start gap-2.5 text-zinc-300">
+                  <Clock className="w-4 h-4 text-[#fd551d] mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm sm:text-base font-mono font-medium text-white">
+                      {currentTime || "GMT+8 (PHT)"}
+                    </p>
+                    <p className="text-xs text-zinc-400">Philippine Standard Time (GMT+8)</p>
+                  </div>
+                </div>
+
+                {/* Status Indicator */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs mt-1">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span>Available for projects</span>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -131,19 +225,19 @@ export default function Footer() {
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.4, delay: 0.18, ease: [0.33, 1, 0.68, 1] }}
-        className="w-full px-4 sm:px-6 lg:px-8 py-4 md:min-h-[140px] max-h-auto flex justify-center items-center"
+        transition={{ duration: 0.4, delay: 0.2, ease: [0.33, 1, 0.68, 1] }}
+        className="w-full px-4 sm:px-6 lg:px-8 py-8 flex justify-center items-center"
       >
         <div className="text-center space-y-4">
           {/* Social Links */}
-          <div className="flex justify-center items-center gap-4 sm:gap-6 flex-wrap">
+          <div className="flex justify-center items-center gap-4 sm:gap-8 flex-wrap">
             {socialLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs sm:text-sm text-white/40 hover:text-[#fd551d] transition-colors uppercase tracking-wider"
+                className="text-xs sm:text-sm text-zinc-400 hover:text-[#fd551d] transition-colors uppercase tracking-wider"
               >
                 {link.label}
               </Link>
@@ -155,26 +249,23 @@ export default function Footer() {
 
           {/* Copyright */}
           <div>
-            <p className="text-xs text-white/40">
-              @ {currentYear} Jericho Urbano.
-            </p>
-            <p className="text-xs text-white/40">
-              All rights reserved.
+            <p className="text-xs text-zinc-500">
+              © {currentYear} Jericho Urbano. All rights reserved.
             </p>
           </div>
         </div>
       </motion.div>
 
-      {/* Logo - Bottom Center - Fixed at bottom of footer */}
+      {/* Logo - Bottom Center with subtle watermark branding */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.4, delay: 0.24, ease: [0.33, 1, 0.68, 1] }}
-        className="w-full flex justify-center overflow-hidden mt-auto"
+        className="w-full flex justify-center overflow-hidden pointer-events-none select-none"
       >
         <div className="w-full">
-          <span className="block font-bold tracking-tight text-center whitespace-nowrap text-[clamp(2.5rem,12vw,18rem)] text-black">
+          <span className="block font-bold tracking-tight text-center whitespace-nowrap text-[clamp(2.5rem,12vw,18rem)] text-white/[0.03]">
             @echo_ng
           </span>
         </div>
