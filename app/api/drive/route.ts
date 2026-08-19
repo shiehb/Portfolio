@@ -8,69 +8,6 @@ const CATEGORY_FOLDERS: Record<string, string> = {
     website: "1aOWMBHdYlGcg_7_ZyKq0Q-gWiRlnkary",
 };
 
-const FALLBACK_PROJECTS = [
-    {
-        id: "mock-g1",
-        category: "graphics",
-        image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-g2",
-        category: "graphics",
-        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-g3",
-        category: "graphics",
-        image: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-p1",
-        category: "photo",
-        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-p2",
-        category: "photo",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-p3",
-        category: "photo",
-        image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-v1",
-        category: "video",
-        image: "https://images.unsplash.com/photo-1536240478700-b869070f9279?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-v2",
-        category: "video",
-        image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-v3",
-        category: "video",
-        image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-w1",
-        category: "website",
-        image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-w2",
-        category: "website",
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-        id: "mock-w3",
-        category: "website",
-        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop"
-    }
-];
-
 interface DriveFile {
     id: string;
     name?: string;
@@ -82,10 +19,10 @@ export async function GET() {
     const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
 
     if (!apiKey) {
-        return NextResponse.json({
-            projects: FALLBACK_PROJECTS,
-            warning: "GOOGLE_DRIVE_API_KEY not configured, serving fallback gallery."
-        });
+        return NextResponse.json(
+            { projects: [], error: "GOOGLE_DRIVE_API_KEY not configured." },
+            { status: 500 }
+        );
     }
 
     try {
@@ -119,14 +56,13 @@ export async function GET() {
         const results = await Promise.all(fetchPromises);
         const projects = results.flat();
 
-        if (projects.length === 0) {
-            return NextResponse.json({ projects: FALLBACK_PROJECTS });
-        }
-
         return NextResponse.json({ projects });
     } catch (error: unknown) {
         const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        console.warn("Drive fetch error, using fallback:", errorMsg);
-        return NextResponse.json({ projects: FALLBACK_PROJECTS });
+        console.error("Drive fetch error:", errorMsg);
+        return NextResponse.json(
+            { projects: [], error: "Failed to fetch projects." },
+            { status: 500 }
+        );
     }
-}
+}
