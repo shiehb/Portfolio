@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Loader2, Home, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -27,13 +27,12 @@ export default function ProjectsPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [imageDimensions, setImageDimensions] = useState<Record<string, { width: number; height: number }>>({});
-  const [animationsInitialized, setAnimationsInitialized] = useState(false);
   const [filterKey, setFilterKey] = useState(0);
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const hasIncremented = useRef(false);
+  const animationsInitializedRef = useRef(false);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -59,38 +58,11 @@ export default function ProjectsPage() {
             return hasValidId && hasValidImage && hasValidCategory;
           });
 
-        // Shuffle projects on initial load
-        const shuffled = [...fetchedProjects].sort(() => Math.random() - 0.5);
-        setProjects(shuffled || []);
-
-        // Get image dimensions for all projects
-        const dimensions: Record<string, { width: number; height: number }> = {};
-        await Promise.all(
-          shuffled.map((project) => {
-            return new Promise<void>((resolve) => {
-              const img = new window.Image();
-              img.onload = function () {
-                dimensions[project.id] = {
-                  width: img.width,
-                  height: img.height
-                };
-                resolve();
-              };
-              img.onerror = function () {
-                dimensions[project.id] = {
-                  width: 1,
-                  height: 1
-                };
-                resolve();
-              };
-              img.src = project.image;
-            });
-          })
-        );
-        setImageDimensions(dimensions);
-      } catch (err: any) {
+        setProjects(fetchedProjects || []);
+      } catch (err: unknown) {
         console.error("Error fetching projects:", err);
-        setError(err.message || "Failed to load projects from Google Drive.");
+        const message = err instanceof Error ? err.message : "Failed to load projects from Google Drive.";
+        setError(message);
       } finally {
         setIsLoading(false);
         if (!hasIncremented.current) {
@@ -114,7 +86,7 @@ export default function ProjectsPage() {
     animationTimeoutRef.current = setTimeout(() => {
       const ctx = gsap.context(() => {
         // Header animations - only run once
-        if (headerRef.current && !animationsInitialized) {
+        if (headerRef.current && !animationsInitializedRef.current) {
           gsap.fromTo(
             headerRef.current.children,
             { y: 45, opacity: 0 },
@@ -175,7 +147,7 @@ export default function ProjectsPage() {
         }
 
         // Parallax animations - run once
-        if (!animationsInitialized) {
+        if (!animationsInitializedRef.current) {
           const images = gsap.utils.toArray<HTMLElement>(".project-img-inner");
           images.forEach((img) => {
             const parent = img.parentElement;
@@ -198,7 +170,7 @@ export default function ProjectsPage() {
           });
         }
 
-        setAnimationsInitialized(true);
+        animationsInitializedRef.current = true;
       }, sectionRef);
 
       return () => {
@@ -213,28 +185,14 @@ export default function ProjectsPage() {
     };
   }, [isLoading, projects.length, filterKey]);
 
-  // Shuffle function
-  const shuffleArray = <T,>(array: T[]): T[] => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
-
-  // Memoize filtered and shuffled projects
+  // Memoize filtered projects
   const filteredProjects = useMemo(() => {
-    // First filter by category
-    const filtered = projects
+    return projects
       .filter((p) => {
         if (selectedCategory === "all") return true;
         return p.category === selectedCategory;
       })
       .filter(project => project.image && project.image.trim() !== '');
-
-    // Then shuffle
-    return shuffleArray(filtered);
   }, [projects, selectedCategory]);
 
   // Handle filter change
@@ -251,17 +209,9 @@ export default function ProjectsPage() {
     { id: "website", label: "Website" },
   ];
 
-  const getAspectRatio = (projectId: string | number) => {
-    const dims = imageDimensions[projectId];
-    if (dims && dims.width && dims.height) {
-      return dims.width / dims.height;
-    }
-    return 1;
-  };
-
-  const getPaddingBottom = (projectId: string | number) => {
-    const ratio = getAspectRatio(projectId);
-    return `${(1 / ratio) * 100}%`;
+  const getPaddingBottom = (index: number) => {
+    const ratios = ['125%', '100%', '75%', '133%'];
+    return ratios[index % ratios.length];
   };
 
   return (
@@ -296,8 +246,8 @@ export default function ProjectsPage() {
             key={cat.id}
             onClick={() => handleFilterChange(cat.id)}
             className={`px-4 py-2 rounded-full text-xs uppercase tracking-wider transition-all duration-300 ${selectedCategory === cat.id
-                ? "bg-[#fd551d] text-white"
-                : "bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700"
+              ? "bg-[#fd551d] text-white"
+              : "bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700"
               }`}
           >
             {cat.label}
@@ -325,7 +275,7 @@ export default function ProjectsPage() {
               key={filterKey}
               className="max-w-[1280px] mx-auto w-full columns-2 md:columns-3 lg:columns-4 gap-2.5 sm:gap-4 [&>div]:mb-2.5 sm:[&>div]:mb-4"
             >
-              {filteredProjects.map((project) => (
+              {filteredProjects.map((project, index) => (
                 <div
                   key={project.id}
                   className="batch-image opacity-0 invisible w-full relative overflow-hidden will-change-transform shadow-sm group rounded-sm bg-zinc-900 break-inside-avoid"
@@ -333,18 +283,18 @@ export default function ProjectsPage() {
                   <div
                     className="project-img-inner w-full relative overflow-hidden transition-transform duration-500 ease-out group-hover:scale-105"
                     style={{
-                      paddingBottom: getPaddingBottom(project.id),
+                      paddingBottom: getPaddingBottom(index),
                       height: 0
                     }}
                   >
                     <Image
                       src={project.image}
-                      alt="Project media"
+                      alt={project.category ? `${project.category} visual project by Jericho Urbano` : "Jericho Urbano design and web project"}
                       fill
-                      unoptimized
                       sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       className="object-cover absolute inset-0 w-full h-full"
                       style={{ objectFit: 'cover' }}
+                      loading="lazy"
                       onError={(e) => {
                         const parent = e.currentTarget.closest('.batch-image');
                         if (parent) {

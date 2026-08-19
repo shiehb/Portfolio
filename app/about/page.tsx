@@ -100,20 +100,19 @@ export default function AboutPage() {
         images.forEach(src => {
             const img = new window.Image();
             img.src = src;
-            img.onload = () => {
+            const onDone = () => {
                 loaded++;
                 if (loaded === images.length && !hasIncremented.current) {
                     hasIncremented.current = true;
                     incrementLoaded();
                 }
             };
-            img.onerror = () => {
-                loaded++;
-                if (loaded === images.length && !hasIncremented.current) {
-                    hasIncremented.current = true;
-                    incrementLoaded();
-                }
-            };
+            if (img.complete) {
+                onDone();
+            } else {
+                img.onload = onDone;
+                img.onerror = onDone;
+            }
         });
 
         const timer = setTimeout(() => {
@@ -121,7 +120,7 @@ export default function AboutPage() {
                 hasIncremented.current = true;
                 incrementLoaded();
             }
-        }, 1000);
+        }, 150);
 
         return () => clearTimeout(timer);
     }, [setTotalItems, incrementLoaded, resetLoading]);
@@ -182,8 +181,8 @@ export default function AboutPage() {
                         key={item.id}
                         href={`#${item.id}`}
                         className={`px-4 py-2 rounded-full text-xs uppercase tracking-[0.1em] transition-all duration-300 ${activeSection === item.id
-                                ? "bg-[#fd551d] text-white shadow-lg shadow-[#fd551d]/30"
-                                : "bg-zinc-800/50 text-[#c0c0c0] hover:bg-zinc-700/50 hover:text-white"
+                            ? "bg-[#fd551d] text-white shadow-lg shadow-[#fd551d]/30"
+                            : "bg-zinc-800/50 text-[#c0c0c0] hover:bg-zinc-700/50 hover:text-white"
                             }`}
                     >
                         {item.label}
@@ -386,7 +385,7 @@ export default function AboutPage() {
                                         <p className="text-xs text-[#c0c0c0]">{testimonial.role}</p>
                                     </div>
                                 </div>
-                                <p className="text-sm text-[#c0c0c0] italic">"{testimonial.quote}"</p>
+                                <p className="text-sm text-[#c0c0c0] italic">&ldquo;{testimonial.quote}&rdquo;</p>
                                 <div className="mt-3 text-[#fd551d] text-xs">★★★★★</div>
                             </motion.div>
                         ))}
@@ -420,7 +419,7 @@ export default function AboutPage() {
                                 <div className="text-4xl mb-3">✨</div>
                                 <h3 className="text-sm font-bold text-white mb-2">Aesthetic Excellence</h3>
                                 <p className="text-xs text-[#c0c0c0]">
-                                    Beauty and functionality aren't mutually exclusive. I believe in
+                                    Beauty and functionality aren&apos;t mutually exclusive. I believe in
                                     creating experiences that are both visually stunning and usable.
                                 </p>
                             </div>

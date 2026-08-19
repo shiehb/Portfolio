@@ -5,26 +5,26 @@ import { useRef, useEffect } from "react";
 import { useLoading } from "@/lib/LoadingContext";
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 
-function AnimatedLetter({
-  char,
+function AnimatedWord({
+  word,
   index,
   total,
   progress,
 }: {
-  char: string;
+  word: string;
   index: number;
   total: number;
   progress: MotionValue<number>;
 }) {
-  const charProgress = index / total;
-  const start = charProgress - 0.1;
-  const end = charProgress + 0.05;
+  const wordProgress = index / total;
+  const start = Math.max(0, wordProgress - 0.15);
+  const end = Math.min(1, wordProgress + 0.1);
 
-  const opacity = useTransform(progress, [start, end], [0.2, 1]);
+  const opacity = useTransform(progress, [start, end], [0.25, 1]);
 
   return (
-    <motion.span style={{ opacity }} className="inline-block">
-      {char === " " ? "\u00A0" : char}
+    <motion.span style={{ opacity }} className="inline-block mr-[0.25em]">
+      {word}
     </motion.span>
   );
 }
@@ -34,19 +34,19 @@ function AnimatedParagraph({ text, className = "" }: { text: string; className?:
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start 0.8", "end 0.2"],
+    offset: ["start 0.85", "end 0.25"],
   });
 
-  const chars = text.split("");
+  const words = text.split(" ");
 
   return (
     <p ref={ref} className={className}>
-      {chars.map((char, index) => (
-        <AnimatedLetter
+      {words.map((word, index) => (
+        <AnimatedWord
           key={index}
-          char={char}
+          word={word}
           index={index}
-          total={chars.length}
+          total={words.length}
           progress={scrollYProgress}
         />
       ))}

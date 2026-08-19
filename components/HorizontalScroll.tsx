@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useLoading } from '@/lib/LoadingContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -160,20 +161,17 @@ export default function GallerySection({
                         {images.map((img, index) => (
                             <div
                                 key={index}
-                                className="relative h-[60vh] md:h-[90vh] w-full md:w-auto shrink-0 overflow-hidden bg-neutral-950 group flex items-center justify-center border-none outline-none"
+                                className="relative h-[60vh] md:h-[90vh] w-full md:w-[60vw] shrink-0 overflow-hidden bg-neutral-950 group flex items-center justify-center border-none outline-none"
                             >
-                                <img
+                                <Image
                                     src={img.src}
-                                    alt={img.alt}
-                                    referrerPolicy="no-referrer"
-                                    className="h-full w-full md:w-auto max-w-none object-cover transition-transform duration-700 ease-out group-hover:scale-105 border-none outline-none"
-                                    loading={index === 0 ? 'eager' : 'lazy'}
+                                    alt={img.alt || img.title || `Gallery visual ${index + 1}`}
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 60vw"
+                                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 border-none outline-none"
+                                    loading="lazy"
                                     onLoad={handleImageLoad}
-                                    onError={(e) => {
-                                        (e.currentTarget as HTMLImageElement).src =
-                                            defaultGalleryImages[index % defaultGalleryImages.length].src;
-                                        handleImageLoad();
-                                    }}
+                                    onError={handleImageLoad}
                                 />
                             </div>
                         ))}

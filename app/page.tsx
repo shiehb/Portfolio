@@ -39,13 +39,17 @@ export default function Home() {
           incrementLoaded();
         }
       };
-      img.onload = onLoadOrError;
-      img.onerror = onLoadOrError;
+      if (img.complete) {
+        onLoadOrError();
+      } else {
+        img.onload = onLoadOrError;
+        img.onerror = onLoadOrError;
+      }
     });
 
     const timer = setTimeout(() => {
       incrementLoaded();
-    }, 400);
+    }, 150);
 
     return () => {
       clearTimeout(timer);

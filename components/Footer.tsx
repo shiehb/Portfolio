@@ -24,14 +24,12 @@ const EMAIL = "jerichourbano.01.01.04@gmail.com";
 const PHONE = "+63 956 698 6556";
 
 export default function Footer() {
-  const [currentYear, setCurrentYear] = useState(2024);
+  const [currentYear] = useState(() => new Date().getFullYear());
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-
     // Update Philippine Standard Time (GMT+8)
     const updateTime = () => {
       try {
@@ -114,7 +112,7 @@ export default function Footer() {
               <div className="flex flex-col items-start gap-4">
                 {/* Email with Quick Copy */}
                 <div className="flex flex-col items-start gap-1 w-full max-w-sm">
-                  <span className="text-xs text-zinc-500 uppercase tracking-wider">Email</span>
+                  <span className="text-xs text-zinc-400 uppercase tracking-wider">Email</span>
                   <div className="flex items-center gap-2 flex-wrap">
                     <a
                       href={`mailto:${EMAIL}`}
@@ -144,7 +142,7 @@ export default function Footer() {
 
                 {/* Phone with Quick Copy */}
                 <div className="flex flex-col items-start gap-1 w-full max-w-sm">
-                  <span className="text-xs text-zinc-500 uppercase tracking-wider">Phone</span>
+                  <span className="text-xs text-zinc-400 uppercase tracking-wider">Phone</span>
                   <div className="flex items-center gap-2 flex-wrap">
                     <a
                       href={`tel:${PHONE.replace(/\s+/g, '')}`}
@@ -240,7 +238,7 @@ export default function Footer() {
 
           {/* Copyright */}
           <div>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-zinc-400">
               © {currentYear} Jericho Urbano. All rights reserved.
             </p>
           </div>
@@ -248,11 +246,8 @@ export default function Footer() {
       </motion.div>
 
       {/* Logo - Bottom Center with subtle watermark branding */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.4, delay: 0.24, ease: [0.33, 1, 0.68, 1] }}
+      <div
+        aria-hidden="true"
         className="w-full flex justify-center overflow-hidden pointer-events-none select-none"
       >
         <div className="w-full">
@@ -260,7 +255,7 @@ export default function Footer() {
             @echo_ng
           </span>
         </div>
-      </motion.div>
+      </div>
     </footer>
   );
 }

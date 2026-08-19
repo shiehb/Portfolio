@@ -2,7 +2,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  allowedDevOrigins: [
+    "ais-dev-pfjs22sj6qnnysmlx2vrkp-829392694658.asia-east1.run.app",
+    "ais-pre-pfjs22sj6qnnysmlx2vrkp-829392694658.asia-east1.run.app",
+    "*.run.app",
+    "localhost:3000",
+  ],
   images: {
+    qualities: [75, 85],
     remotePatterns: [
       {
         protocol: "https",
@@ -57,6 +65,8 @@ const nextConfig: NextConfig = {
       'framer-motion',
       'lucide-react',
       '@paper-design/shaders-react',
+      'gsap',
+      'lenis',
     ],
   },
 
@@ -84,15 +94,6 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/font/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/_next/image(.*)',
         headers: [
           {
             key: 'Cache-Control',

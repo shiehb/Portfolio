@@ -18,12 +18,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [loadedCount, setLoadedCount] = useState(0);
   const [totalItems, setTotalItems] = useState(1);
-  const [isMounted, setIsMounted] = useState(false);
   const hasLoadedRef = useRef(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const incrementLoaded = useCallback(() => {
     if (hasLoadedRef.current) return;
@@ -40,26 +35,24 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!isMounted) return;
-
-    // Force loading complete after 5 seconds max
+    // Force loading complete quickly if assets take too long
     const forceTimer = setTimeout(() => {
       if (isLoading && !hasLoadedRef.current) {
         hasLoadedRef.current = true;
         setIsLoading(false);
       }
-    }, 5000);
+    }, 600);
 
     if (loadedCount >= totalItems && totalItems > 0 && !hasLoadedRef.current) {
       hasLoadedRef.current = true;
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 2000);
+      }, 100);
       return () => clearTimeout(timer);
     }
 
     return () => clearTimeout(forceTimer);
-  }, [loadedCount, totalItems, isMounted, isLoading]);
+  }, [loadedCount, totalItems, isLoading]);
 
   return (
     <LoadingContext.Provider value={{

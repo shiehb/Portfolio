@@ -26,12 +26,11 @@ export default function Projects() {
     const [projects, setProjects] = useState<ProjectItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [imageDimensions, setImageDimensions] = useState<Record<string, { width: number; height: number }>>({});
-    const [animationsInitialized, setAnimationsInitialized] = useState(false);
 
     const sectionRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
     const hasIncremented = useRef(false);
+    const animationsInitializedRef = useRef(false);
     const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
@@ -54,39 +53,13 @@ export default function Projects() {
                         return hasValidId && hasValidImage && hasValidCategory;
                     });
 
-                // Shuffle and select 12 projects on initial load
-                const shuffled = [...fetchedProjects].sort(() => Math.random() - 0.5);
-                const selectedProjects = shuffled.slice(0, 12);
-
-                const dimensions: Record<string, { width: number; height: number }> = {};
-                await Promise.all(
-                    selectedProjects.map((project) => {
-                        return new Promise<void>((resolve) => {
-                            const img = new window.Image();
-                            img.onload = function () {
-                                dimensions[project.id] = {
-                                    width: img.width,
-                                    height: img.height
-                                };
-                                resolve();
-                            };
-                            img.onerror = function () {
-                                dimensions[project.id] = {
-                                    width: 1,
-                                    height: 1
-                                };
-                                resolve();
-                            };
-                            img.src = project.image;
-                        });
-                    })
-                );
-
-                setImageDimensions(dimensions);
+                // Select 12 projects on initial load
+                const selectedProjects = fetchedProjects.slice(0, 12);
                 setProjects(selectedProjects);
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error("Error fetching projects:", err);
-                setError(err.message || "Failed to load projects from Google Drive.");
+                const message = err instanceof Error ? err.message : "Failed to load projects from Google Drive.";
+                setError(message);
             } finally {
                 setIsLoading(false);
                 if (!hasIncremented.current) {
@@ -109,7 +82,7 @@ export default function Projects() {
 
         animationTimeoutRef.current = setTimeout(() => {
             const ctx = gsap.context(() => {
-                if (headerRef.current && !animationsInitialized) {
+                if (headerRef.current && !animationsInitializedRef.current) {
                     gsap.fromTo(
                         headerRef.current.children,
                         { y: 45, opacity: 0 },
@@ -137,7 +110,7 @@ export default function Projects() {
                 }
 
                 // Parallax animations
-                if (!animationsInitialized) {
+                if (!animationsInitializedRef.current) {
                     const images = gsap.utils.toArray<HTMLElement>(".project-img-inner");
                     images.forEach((img) => {
                         const parent = img.parentElement;
@@ -160,7 +133,7 @@ export default function Projects() {
                     });
                 }
 
-                setAnimationsInitialized(true);
+                animationsInitializedRef.current = true;
             }, sectionRef);
 
             return () => {
@@ -179,17 +152,9 @@ export default function Projects() {
         return projects.filter(project => project.image && project.image.trim() !== '');
     }, [projects]);
 
-    const getAspectRatio = (projectId: string | number) => {
-        const dims = imageDimensions[projectId];
-        if (dims && dims.width && dims.height) {
-            return dims.width / dims.height;
-        }
-        return 1;
-    };
-
-    const getPaddingBottom = (projectId: string | number) => {
-        const ratio = getAspectRatio(projectId);
-        return `${(1 / ratio) * 100}%`;
+    const getPaddingBottom = (index: number) => {
+        const ratios = ['125%', '100%', '75%', '133%'];
+        return ratios[index % ratios.length];
     };
 
     return (
@@ -199,9 +164,9 @@ export default function Projects() {
             className="relative z-10 py-12 px-3 sm:px-6 bg-white min-h-screen text-zinc-900 font-display"
         >
             <div ref={headerRef} className="text-center max-w-[560px] mx-auto mb-8">
-                <h1 className="font-normal text-[clamp(1.5rem,4vw,2.2rem)] mb-2 tracking-[0.05em] uppercase text-zinc-900 font-display">
+                <h2 className="font-normal text-[clamp(1.5rem,4vw,2.2rem)] mb-2 tracking-[0.05em] uppercase text-zinc-900 font-display">
                     PROJECTS
-                </h1>
+                </h2>
                 <p className="text-sm text-[#fd551d] leading-relaxed font-display">
                     Explore my web design, media, and visual projects
                 </p>
@@ -222,7 +187,7 @@ export default function Projects() {
 
             {!isLoading && !error && (
                 <div className="max-w-[1280px] mx-auto w-full columns-2 md:columns-3 lg:columns-4 gap-2.5 sm:gap-4 [&>div]:mb-2.5 sm:[&>div]:mb-4">
-                    {validProjects.map((project) => {
+                    {validProjects.map((project, index) => {
                         return (
                             <div
                                 key={project.id}
@@ -231,18 +196,18 @@ export default function Projects() {
                                 <div
                                     className="project-img-inner w-full relative overflow-hidden transition-transform duration-500 ease-out group-hover:scale-105"
                                     style={{
-                                        paddingBottom: getPaddingBottom(project.id),
+                                        paddingBottom: getPaddingBottom(index),
                                         height: 0
                                     }}
                                 >
                                     <Image
                                         src={project.image}
-                                        alt="Project thumbnail"
+                                        alt={project.category ? `${project.category} visual project by Jericho Urbano` : "Jericho Urbano design and web project"}
                                         fill
-                                        unoptimized
                                         sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                         className="object-cover absolute inset-0 w-full h-full"
                                         style={{ objectFit: 'cover' }}
+                                        loading="lazy"
                                         onError={(e) => {
                                             const parent = e.currentTarget.closest('.batch-image');
                                             if (parent) {

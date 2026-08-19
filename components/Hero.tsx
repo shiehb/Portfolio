@@ -1,5 +1,6 @@
 // components/Hero.tsx
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -137,7 +138,6 @@ export default function Hero() {
   const aboutTitleRef = useRef<HTMLDivElement>(null);
   const signaturePathsRef = useRef<(SVGPathElement | null)[]>([]);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const hasIncremented = useRef(false);
 
   useEffect(() => {
@@ -148,11 +148,7 @@ export default function Hero() {
   }, [imageLoaded, incrementLoaded]);
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!scrollContainerRef.current || !frameRef.current || !isMounted) return;
+    if (!scrollContainerRef.current || !frameRef.current) return;
 
     const ctx = gsap.context(() => {
       // Initial state for the frame
@@ -317,7 +313,7 @@ export default function Hero() {
     }, scrollContainerRef);
 
     return () => ctx.revert();
-  }, [isMounted]);
+  }, []);
 
   return (
     <div
@@ -335,6 +331,8 @@ export default function Hero() {
           style={{
             margin: "auto",
             position: "relative",
+            width: "100%",
+            height: "100%",
           }}
         >
           {/* Marquee Background */}
@@ -353,27 +351,17 @@ export default function Hero() {
             className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter]"
           >
             <div className="relative w-full h-full overflow-hidden">
-              {!imageLoaded && (
-                <div className="absolute inset-0 bg-[#222222] animate-pulse" />
-              )}
-              <img
+              <Image
                 src="/img/hero.webp"
-                alt="Jericho Urbano portrait"
-                className={`w-full h-full object-cover object-center select-none pointer-events-none transition-opacity duration-700 ${imageLoaded ? "opacity-100" : "opacity-0"
-                  }`}
+                alt="Jericho Urbano - Visual Artist and Web Developer"
+                fill
+                priority
+                fetchPriority="high"
+                sizes="(max-width: 768px) 100vw, 1200px"
+                quality={85}
+                className="object-cover object-center select-none pointer-events-none"
                 draggable={false}
-                loading="eager"
                 onLoad={() => setImageLoaded(true)}
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  minWidth: "100%",
-                  minHeight: "100%",
-                  width: "auto",
-                  height: "auto",
-                }}
               />
             </div>
           </div>

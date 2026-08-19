@@ -20,7 +20,7 @@ export default function ContactPage() {
         hasIncremented.current = true;
         incrementLoaded();
       }
-    }, 500);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [setTotalItems, incrementLoaded, resetLoading]);
