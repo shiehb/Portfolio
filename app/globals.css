@@ -9,10 +9,12 @@
 }
 
 @keyframes blink {
+
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.2;
   }
@@ -26,11 +28,12 @@
   }
 
   html {
-    @apply scroll-smooth;
+    height: 100%;
   }
 
   body {
-    @apply m-0 overflow-x-hidden min-h-screen;
+    @apply m-0 min-h-screen;
+    overflow-x: clip;
     background-color: var(--background);
     color: var(--foreground);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -137,40 +140,53 @@
 /* app/globals.css - Add at the end of the file */
 
 @keyframes waveFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) scaleY(1);
   }
+
   25% {
     transform: translateY(-10px) scaleY(1.05);
   }
+
   50% {
     transform: translateY(5px) scaleY(0.95);
   }
+
   75% {
     transform: translateY(-5px) scaleY(1.02);
   }
 }
 
 @keyframes waveDisrupt {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0) scaleX(1) skewX(0deg);
   }
+
   25% {
     transform: translateX(-20px) scaleX(1.02) skewX(1deg);
   }
+
   50% {
     transform: translateX(15px) scaleX(0.98) skewX(-1deg);
   }
+
   75% {
     transform: translateX(-10px) scaleX(1.01) skewX(0.5deg);
   }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.2;
   }
+
   50% {
     transform: scale(1.5);
     opacity: 0.3;
@@ -178,10 +194,13 @@
 }
 
 @keyframes pulse-glow-delayed {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.1;
   }
+
   50% {
     transform: scale(1.5);
     opacity: 0.2;

@@ -1,15 +1,13 @@
 // app/page.tsx
 'use client';
 
-import { Suspense, lazy, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import Hero from "../components/Hero";
 import About from "../components/About";
+import HorizontalScroll from "../components/HorizontalScroll";
+import Projects from "../components/Projects";
 import SmoothScroll from "../components/SmoothScroll";
 import { useLoading } from "@/lib/LoadingContext";
-
-// Lazy load components
-const LazyHorizontalScroll = lazy(() => import("../components/HorizontalScroll"));
-const LazyProjects = lazy(() => import("../components/Projects"));
 
 export default function Home() {
   const { setTotalItems, incrementLoaded, resetLoading } = useLoading();
@@ -22,7 +20,7 @@ export default function Home() {
     if (hasInitialized.current) return;
     hasInitialized.current = true;
 
-    setTotalItems(4);
+    setTotalItems(2);
 
     let loadedCount = 0;
     const totalImages = 2;
@@ -47,15 +45,10 @@ export default function Home() {
 
     const timer = setTimeout(() => {
       incrementLoaded();
-    }, 500);
-
-    const timer2 = setTimeout(() => {
-      incrementLoaded();
-    }, 800);
+    }, 400);
 
     return () => {
       clearTimeout(timer);
-      clearTimeout(timer2);
     };
   }, [setTotalItems, incrementLoaded, resetLoading]);
 
@@ -65,14 +58,8 @@ export default function Home() {
         <div className="relative z-10">
           <Hero />
           <About />
-
-          <Suspense fallback={null}>
-            <LazyHorizontalScroll />
-          </Suspense>
-
-          <Suspense fallback={null}>
-            <LazyProjects />
-          </Suspense>
+          <HorizontalScroll />
+          <Projects />
         </div>
       </main>
     </SmoothScroll>
