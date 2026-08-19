@@ -1,4 +1,3 @@
-// next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -41,7 +40,7 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: false,
-    contentDispositionType: 'inline',
+    contentDispositionType: "inline",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
@@ -56,44 +55,43 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   experimental: {
-    webpackMemoryOptimizations: true,
     optimizePackageImports: [
-      'framer-motion',
-      'lucide-react',
-      '@paper-design/shaders-react',
-      'gsap',
-      'lenis',
+      "framer-motion",
+      "lucide-react",
+      "@paper-design/shaders-react",
+      "gsap",
+      "lenis",
     ],
   },
 
   turbopack: {
     resolveAlias: {},
-    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
-    debugIds: process.env.NODE_ENV === 'development',
+    resolveExtensions: [".tsx", ".ts", ".jsx", ".js", ".mjs", ".json"],
+    debugIds: process.env.NODE_ENV === "development",
     rules: {},
   },
 
   async headers() {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       return [];
     }
 
     return [
       {
-        source: '/img/(.*)',
+        source: "/img/(.*)",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
       {
-        source: '/font/(.*)',
+        source: "/font/(.*)",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
