@@ -1,6 +1,8 @@
+// components/Projects.tsx
 'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from 'react';
+import { useLoading } from '@/lib/LoadingContext';
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -33,8 +35,18 @@ const projectImages = [
 ];
 
 export default function Projects() {
+    const { incrementLoaded } = useLoading();
+    const [imagesLoaded, setImagesLoaded] = useState(0);
+    const hasIncremented = useRef(false);
     const sectionRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (imagesLoaded >= projectImages.length && !hasIncremented.current) {
+            hasIncremented.current = true;
+            incrementLoaded();
+        }
+    }, [imagesLoaded, projectImages.length, incrementLoaded]);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -102,6 +114,10 @@ export default function Projects() {
         return () => ctx.revert();
     }, []);
 
+    const handleImageLoad = () => {
+        setImagesLoaded(prev => prev + 1);
+    };
+
     return (
         <section
             id="projects"
@@ -131,6 +147,8 @@ export default function Projects() {
                                 unoptimized
                                 sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                 className="object-cover"
+                                onLoad={handleImageLoad}
+                                onError={handleImageLoad}
                             />
                         </div>
                     </div>

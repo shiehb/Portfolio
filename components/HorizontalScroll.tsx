@@ -1,6 +1,8 @@
+// components/HorizontalScroll.tsx
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import { useLoading } from '@/lib/LoadingContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -42,10 +44,19 @@ interface HorizontalScrollProps {
 export default function GallerySection({
     images = defaultGalleryImages,
 }: HorizontalScrollProps) {
+    const { incrementLoaded } = useLoading();
+    const [imagesLoaded, setImagesLoaded] = useState(0);
     const triggerRef = useRef<HTMLDivElement>(null);
     const outerTrackRef = useRef<HTMLDivElement>(null);
     const innerTrackRef = useRef<HTMLDivElement>(null);
     const bgOverlayRef = useRef<HTMLDivElement>(null);
+
+    // Track image loading
+    useEffect(() => {
+        if (imagesLoaded >= images.length) {
+            incrementLoaded();
+        }
+    }, [imagesLoaded, images.length, incrementLoaded]);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -119,6 +130,11 @@ export default function GallerySection({
         return () => ctx.revert();
     }, [images]);
 
+    // Handle image load tracking
+    const handleImageLoad = () => {
+        setImagesLoaded(prev => prev + 1);
+    };
+
     return (
         <section
             id="gallery"
@@ -152,9 +168,11 @@ export default function GallerySection({
                                     referrerPolicy="no-referrer"
                                     className="h-full w-full md:w-auto max-w-none object-cover transition-transform duration-700 ease-out group-hover:scale-105 border-none outline-none"
                                     loading={index === 0 ? 'eager' : 'lazy'}
+                                    onLoad={handleImageLoad}
                                     onError={(e) => {
                                         (e.currentTarget as HTMLImageElement).src =
                                             defaultGalleryImages[index % defaultGalleryImages.length].src;
+                                        handleImageLoad();
                                     }}
                                 />
                             </div>

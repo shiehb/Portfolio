@@ -1,6 +1,8 @@
+// components/About.tsx
 'use client';
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import { useLoading } from "@/lib/LoadingContext";
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 
 function AnimatedLetter({
@@ -94,33 +96,42 @@ function WordsPullUpMultiStyle({
 }
 
 export default function About() {
-  return (
-    <section id="about" className="text-white font-display">
-      {/* Removed md:min-h-screen and set controlled vertical padding for tight spacing */}
-      <div className="py-12 md:py-20 flex justify-center items-center px-4">
-        <div className="text-center">
-          <span className="block mb-2 md:mb-6 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] font-display">
-            ABOUT
-          </span>
+    const { incrementLoaded } = useLoading();
+    const hasIncremented = useRef(false);
 
-          <WordsPullUpMultiStyle
-            className="mx-auto max-w-3xl text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-[0.95] sm:leading-[0.9] text-[#fff] font-display"
-            segments={[
-              { text: "I am Jericho Urbano,", className: "font-normal" },
-              { text: "a VISUAL ARTIST & WEB DEVELOPER.", className: "text-[#fd551d]" },
-              {
-                text: "Specializing in immersive digital experiences, videography, and narrative aesthetics.",
-                className: "font-normal",
-              },
-            ]}
-          />
+    useEffect(() => {
+        if (!hasIncremented.current) {
+            hasIncremented.current = true;
+            incrementLoaded();
+        }
+    }, [incrementLoaded]);
 
-          <AnimatedParagraph
-            className="mx-auto mt-4 md:mt-10 max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-[#c0c0c0] font-display"
-            text="Crafting high-impact interactive web applications, cinematic narratives, and brand identities with seamless motion physics, minimalist spatial layouts, and precision color science."
-          />
-        </div>
-      </div>
-    </section>
-  );
+    return (
+        <section id="about" className="text-white font-display">
+            <div className="py-12 md:py-20 flex justify-center items-center px-4">
+                <div className="text-center">
+                    <span className="block mb-2 md:mb-6 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] font-display">
+                        ABOUT
+                    </span>
+
+                    <WordsPullUpMultiStyle
+                        className="mx-auto max-w-3xl text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-[0.95] sm:leading-[0.9] text-[#fff] font-display"
+                        segments={[
+                            { text: "I am Jericho Urbano,", className: "font-normal" },
+                            { text: "a VISUAL ARTIST & WEB DEVELOPER.", className: "text-[#fd551d]" },
+                            {
+                                text: "Specializing in immersive digital experiences, videography, and narrative aesthetics.",
+                                className: "font-normal",
+                            },
+                        ]}
+                    />
+
+                    <AnimatedParagraph
+                        className="mx-auto mt-4 md:mt-10 max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-[#c0c0c0] font-display"
+                        text="Crafting high-impact interactive web applications, cinematic narratives, and brand identities with seamless motion physics, minimalist spatial layouts, and precision color science."
+                    />
+                </div>
+            </div>
+        </section>
+    );
 }

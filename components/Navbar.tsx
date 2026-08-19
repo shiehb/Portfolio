@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -20,6 +21,7 @@ const navItems = [
 ];
 
 export default function Navbar() {
+  const { isLoading } = useLoading();
   const [navState, setNavState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -31,10 +33,17 @@ export default function Navbar() {
   const isOverlayDown = navState === 'opening' || navState === 'open' || navState === 'closing';
   const isTextVisible = navState === 'open';
 
-  // Scrub logo and menu button invert filter
+  // All hooks must be called before any conditional returns
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
+
+    // Set initial state based on pathname
+    if (isHome) {
+      header.style.setProperty("--nav-invert", "0");
+    } else {
+      header.style.setProperty("--nav-invert", "1");
+    }
 
     if (!document.querySelector("#home")) {
       header.style.setProperty("--nav-invert", "1");
@@ -83,7 +92,7 @@ export default function Navbar() {
     });
 
     return () => ctx.revert();
-  }, [pathname]);
+  }, [pathname, isHome]);
 
   const handleToggle = () => {
     if (navState === 'closed') {
@@ -131,18 +140,23 @@ export default function Navbar() {
     return pathname === href || pathname.startsWith(href + "/");
   };
 
+  // Return null after all hooks are called
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 transition-all duration-500 ease-in-out sm:bg-transparent sm:backdrop-blur-none ${
-          isOverlayDown
+        className={`fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 transition-all duration-500 ease-in-out ${isOverlayDown
             ? "bg-transparent backdrop-blur-none"
-            : "bg-black"
-        }`}
+            : isHome
+              ? "bg-transparent"
+              : "bg-black"
+          }`}
         style={{ "--nav-invert": isHome ? "0" : "1" } as React.CSSProperties}
       >
-        {/* LOGO */}
         <Link href="/" aria-label="Go to home page">
           <Image
             src="/img/logo.png"
@@ -150,25 +164,38 @@ export default function Navbar() {
             width={120}
             height={48}
             priority
-            className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300 [filter:invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
-            style={
-              isMenuOpen
-                ? { filter: "invert(1)" }
-                : undefined
-            }
+            className="logo w-[55px] xs:w-[65px] sm:w-[80px] md:w-[95px] lg:w-[110px] h-auto object-contain max-h-[45px] transition-all duration-300"
+            style={{
+              filter: isMenuOpen
+                ? "invert(1)"
+                : isHome
+                  ? "invert(var(--nav-invert, 0))"
+                  : "invert(1)",
+            }}
           />
         </Link>
 
         <div className="flex items-center justify-end gap-3 ml-auto">
-          {/* MENU / CLOSE BUTTON */}
           <button
             type="button"
-            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 text-white stroke-white border-2 border-current rounded-md p-2 sm:text-zinc-900 sm:stroke-zinc-900 transition-all duration-300 [filter:brightness(0)_invert(1)] sm:[filter:invert(var(--nav-invert,0))]"
-            style={
-              isMenuOpen
-                ? { filter: "brightness(0) invert(1)" }
-                : undefined
-            }
+            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 border-2 border-current rounded-md p-2 transition-all duration-300"
+            style={{
+              color: isMenuOpen
+                ? "#ffffff"
+                : isHome
+                  ? `rgba(255, 255, 255, ${1 - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-invert') || '0')})`
+                  : "#ffffff",
+              borderColor: isMenuOpen
+                ? "#ffffff"
+                : isHome
+                  ? `rgba(255, 255, 255, ${1 - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-invert') || '0')})`
+                  : "#ffffff",
+              filter: isMenuOpen
+                ? "none"
+                : isHome
+                  ? `invert(var(--nav-invert, 0))`
+                  : "none",
+            }}
             aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMenuOpen}
             onClick={handleToggle}
@@ -205,11 +232,9 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* OVERLAY MENU */}
       <nav
-        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 text-white transform transition-transform duration-500 ease-in-out z-20 flex items-center justify-center ${
-          isOverlayDown ? "translate-y-0" : "-translate-y-full"
-        }`}
+        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 text-white transform transition-transform duration-500 ease-in-out z-20 flex items-center justify-center ${isOverlayDown ? "translate-y-0" : "-translate-y-full"
+          }`}
         id="nav-menu"
         aria-label="Main navigation"
       >
@@ -217,22 +242,20 @@ export default function Navbar() {
           {navItems.map((item, index) => (
             <li
               key={item.label}
-              className={`transform transition-all duration-400 ease-out ${
-                isTextVisible
+              className={`transform transition-all duration-400 ease-out ${isTextVisible
                   ? "opacity-100 translate-y-0 pointer-events-auto"
                   : "opacity-0 translate-y-6 pointer-events-none"
-              }`}
+                }`}
               style={{
                 transitionDelay: isTextVisible ? `${index * 90}ms` : '0ms',
               }}
             >
               <Link
                 href={item.href}
-                className={`nav-menu-link transition-colors ${
-                  isActive(item.href)
+                className={`nav-menu-link transition-colors ${isActive(item.href)
                     ? "text-[#fd551d]"
                     : "text-white hover:text-zinc-300"
-                }`}
+                  }`}
                 onClick={(e) => handleLinkClick(e, item.href)}
               >
                 {item.label}

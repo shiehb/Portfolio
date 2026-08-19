@@ -1,4 +1,6 @@
+// components/Hero.tsx
 import { useEffect, useRef, useState } from "react";
+import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -87,7 +89,6 @@ function MarqueeRow({ reverse = false }: { reverse?: boolean }) {
   );
 }
 
-// Function to calculate target dimensions responsively (3:2 Portrait on mobile, 3:2 Landscape on desktop)
 export function get3x2TargetDimensions() {
   if (typeof window === "undefined") {
     return { targetWidth: 900, targetHeight: 600, borderRadius: "24px" };
@@ -102,13 +103,11 @@ export function get3x2TargetDimensions() {
   let borderRadius = "24px";
 
   if (isMobile) {
-    // 3:2 Portrait orientation (2:3 ratio: Height = Width * 1.5, exact 3:2 vertical)
     targetWidth = Math.min(vw * 0.82, (vh * 0.70) / 1.5, 340);
     targetHeight = Math.round(targetWidth * 1.5);
     targetWidth = Math.round(targetWidth);
     borderRadius = "20px";
   } else {
-    // 3:2 Landscape orientation (3:2 ratio: Width = Height * 1.5, exact 3:2 horizontal)
     if (vw < 1024) {
       targetWidth = Math.min(vw * 0.75, (vh * 0.65) * 1.5, 620);
       borderRadius = "20px";
@@ -130,6 +129,7 @@ export function get3x2TargetDimensions() {
 }
 
 export default function Hero() {
+  const { incrementLoaded } = useLoading();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
@@ -138,6 +138,14 @@ export default function Hero() {
   const signaturePathsRef = useRef<(SVGPathElement | null)[]>([]);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const hasIncremented = useRef(false);
+
+  useEffect(() => {
+    if (imageLoaded && !hasIncremented.current) {
+      hasIncremented.current = true;
+      incrementLoaded();
+    }
+  }, [imageLoaded, incrementLoaded]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -147,7 +155,6 @@ export default function Hero() {
     if (!scrollContainerRef.current || !frameRef.current || !isMounted) return;
 
     const ctx = gsap.context(() => {
-      // Initial state: Full screen 100vw x 100vh, 0px radius, white background
       gsap.set(frameRef.current, {
         width: "100vw",
         height: "100vh",
@@ -176,7 +183,6 @@ export default function Hero() {
         gsap.set(marqueeRef.current, { opacity: 1 });
       }
 
-      // Initial state for signature paths (prepared for drawing animation)
       signaturePathsRef.current.forEach((path) => {
         if (path) {
           const length = path.getTotalLength ? path.getTotalLength() : 1200;
@@ -195,7 +201,6 @@ export default function Hero() {
         });
       }
 
-      // Universal timeline with dynamic function-based 3:2 target sizing
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: scrollContainerRef.current,
@@ -206,7 +211,6 @@ export default function Hero() {
         },
       });
 
-      // 1. Frame dimension & style transition (Full screen -> 3:2 Portrait on mobile / 3:2 Landscape on desktop)
       tl.to(
         frameRef.current,
         {
@@ -221,7 +225,6 @@ export default function Hero() {
         0
       );
 
-      // 2. Portrait image slight scale & grayscale transition
       if (portraitRef.current) {
         tl.to(
           portraitRef.current,
@@ -234,7 +237,6 @@ export default function Hero() {
         );
       }
 
-      // 3. Background marquee typography fades out
       if (marqueeRef.current) {
         tl.to(
           marqueeRef.current,
@@ -246,9 +248,7 @@ export default function Hero() {
         );
       }
 
-      // 4. Animated Signature at center appearing around 50% scroll
       if (signatureContainerRef.current) {
-        // Fade in & rise container around 38% - 52%
         tl.fromTo(
           signatureContainerRef.current,
           { opacity: 0, scale: 0.85, y: 15 },
@@ -262,7 +262,6 @@ export default function Hero() {
           0.38
         );
 
-        // Animate stroke writing live from 40% to 65% scroll
         signaturePathsRef.current.forEach((path, idx) => {
           if (path) {
             const startOffset = 0.40 + idx * 0.04;
@@ -291,9 +290,7 @@ export default function Hero() {
       id="home"
       aria-label="Hero section"
     >
-      {/* Sticky viewport container */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
-        {/* Animated Frame: morphs smoothly from 100vw x 100vh full screen into 3:2 portrait/landscape card */}
         <section
           ref={frameRef}
           id="hero-zoom-frame"
@@ -303,7 +300,6 @@ export default function Hero() {
             position: "relative",
           }}
         >
-          {/* Marquee text container */}
           <div
             ref={marqueeRef}
             className="absolute left-0 right-0 top-1/3 -translate-y-1/2 md:top-1/2 md:-translate-y-1/2 z-0 flex flex-col pointer-events-none will-change-[opacity]"
@@ -313,7 +309,6 @@ export default function Hero() {
             <MarqueeRow reverse />
           </div>
 
-          {/* Hero Portrait Image - FIXED CENTERED CROP */}
           <div
             ref={portraitRef}
             className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter]"
@@ -345,7 +340,6 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Animated Handwritten Signature from E-SIGNITURE-URBANO_JERICHO (Animates at ~50% scroll at center) */}
           <div
             ref={signatureContainerRef}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none flex flex-col items-center justify-center w-[88%] max-w-[340px] sm:max-w-[440px] md:max-w-[540px] px-2"
@@ -356,7 +350,6 @@ export default function Hero() {
               xmlns="http://www.w3.org/2000/svg"
               className="w-full h-auto drop-shadow-[0_10px_30px_rgba(253,85,29,0.45)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
             >
-              {/* 1. Main Iconic Elongated Left Loop (J/U apex loop and bottom curve) */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[0] = el;
@@ -368,7 +361,6 @@ export default function Hero() {
                 strokeLinejoin="round"
               />
 
-              {/* 2. Cursive baseline scribble ("ericho" waves under crossbar) */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[1] = el;
@@ -380,7 +372,6 @@ export default function Hero() {
                 strokeLinejoin="round"
               />
 
-              {/* 3. Top-Right Monogram Flourish Loop */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[2] = el;
@@ -392,7 +383,6 @@ export default function Hero() {
                 strokeLinejoin="round"
               />
 
-              {/* 4. Sharp Dynamic Horizontal Piercing Slash */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[3] = el;
@@ -404,7 +394,6 @@ export default function Hero() {
                 strokeLinejoin="round"
               />
 
-              {/* 5. Far-Right Accent Dot (precisely aligned along the slash trajectory) */}
               <path
                 ref={(el) => {
                   signaturePathsRef.current[4] = el;

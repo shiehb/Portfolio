@@ -2,13 +2,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react";
+import { useLoading } from "@/lib/LoadingContext";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
-// Project data with categories
 const projectsData = [
-  // WEBSITE PROJECTS
   {
     id: 1,
     title: "E-Commerce Platform",
@@ -69,8 +68,6 @@ const projectsData = [
     year: "2023",
     tags: ["React", "Node.js", "MongoDB"],
   },
-
-  // PHOTO PROJECTS
   {
     id: 7,
     title: "Urban Landscapes",
@@ -121,8 +118,6 @@ const projectsData = [
     year: "2024",
     tags: ["Night", "Long Exposure", "Urban"],
   },
-
-  // VIDEO PROJECTS
   {
     id: 12,
     title: "Brand Documentary",
@@ -185,7 +180,6 @@ const projectsData = [
   },
 ];
 
-// Filter categories
 const categories = [
   { id: "all", label: "All Projects", icon: "✦" },
   { id: "website", label: "Websites", icon: "⚡" },
@@ -194,10 +188,50 @@ const categories = [
 ];
 
 export default function ProjectsPage() {
+  const { setTotalItems, incrementLoaded, resetLoading } = useLoading();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredProjects, setFilteredProjects] = useState(projectsData);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const hasIncremented = useRef(false);
+
+  useEffect(() => {
+    // Reset loading state when component mounts
+    resetLoading();
+
+    setTotalItems(1);
+
+    const imageUrls = projectsData.map(p => p.image);
+    let loaded = 0;
+
+    imageUrls.forEach(src => {
+      const img = new window.Image();
+      img.src = src;
+      img.onload = () => {
+        loaded++;
+        if (loaded === imageUrls.length && !hasIncremented.current) {
+          hasIncremented.current = true;
+          incrementLoaded();
+        }
+      };
+      img.onerror = () => {
+        loaded++;
+        if (loaded === imageUrls.length && !hasIncremented.current) {
+          hasIncremented.current = true;
+          incrementLoaded();
+        }
+      };
+    });
+
+    const timer = setTimeout(() => {
+      if (!hasIncremented.current) {
+        hasIncremented.current = true;
+        incrementLoaded();
+      }
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [setTotalItems, incrementLoaded, resetLoading]);
 
   useEffect(() => {
     if (selectedCategory === "all") {
@@ -207,7 +241,6 @@ export default function ProjectsPage() {
     }
   }, [selectedCategory]);
 
-  // Count projects per category
   const getCategoryCount = (categoryId: string) => {
     if (categoryId === "all") return projectsData.length;
     return projectsData.filter(p => p.category === categoryId).length;
@@ -215,7 +248,6 @@ export default function ProjectsPage() {
 
   return (
     <div ref={sectionRef} className="min-h-screen bg-[#222222] text-white font-display">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -234,7 +266,6 @@ export default function ProjectsPage() {
         </p>
       </motion.div>
 
-      {/* Filter Categories */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -245,11 +276,10 @@ export default function ProjectsPage() {
           <button
             key={category.id}
             onClick={() => setSelectedCategory(category.id)}
-            className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm uppercase tracking-[0.1em] font-display transition-all duration-300 ${
-              selectedCategory === category.id
+            className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm uppercase tracking-[0.1em] font-display transition-all duration-300 ${selectedCategory === category.id
                 ? "bg-[#fd551d] text-white shadow-lg shadow-[#fd551d]/30"
                 : "bg-zinc-800/50 text-[#c0c0c0] hover:bg-zinc-700/50 hover:text-white"
-            }`}
+              }`}
           >
             <span className="mr-1 sm:mr-2">{category.icon}</span>
             {category.label}
@@ -260,7 +290,6 @@ export default function ProjectsPage() {
         ))}
       </motion.div>
 
-      {/* Projects Grid */}
       <AnimatePresence mode="wait">
         <motion.div
           key={selectedCategory}
@@ -281,25 +310,21 @@ export default function ProjectsPage() {
                 onHoverEnd={() => setHoveredId(null)}
                 className="group relative overflow-hidden rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-[#fd551d]/50 transition-all duration-500"
               >
-                {/* Project Image */}
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <Image
                     src={project.image}
                     alt={project.title}
                     fill
                     unoptimized
-                    className={`object-cover transition-transform duration-700 ${
-                      hoveredId === project.id ? "scale-110" : "scale-100"
-                    }`}
+                    className={`object-cover transition-transform duration-700 ${hoveredId === project.id ? "scale-110" : "scale-100"
+                      }`}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
-                  
-                  {/* Category Badge */}
+
                   <div className="absolute top-3 left-3 px-2 py-1 bg-black/70 backdrop-blur-sm rounded-full text-[8px] sm:text-[10px] uppercase tracking-[0.1em] text-[#c0c0c0] border border-white/10">
                     {project.category}
                   </div>
 
-                  {/* Hover Overlay */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: hoveredId === project.id ? 1 : 0 }}
@@ -333,7 +358,6 @@ export default function ProjectsPage() {
                   </motion.div>
                 </div>
 
-                {/* Project Info (visible on desktop, below image on mobile) */}
                 <div className="p-4 sm:p-5">
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="text-sm sm:text-base font-bold text-white">
@@ -351,7 +375,6 @@ export default function ProjectsPage() {
             ))}
           </div>
 
-          {/* Empty State */}
           {filteredProjects.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
