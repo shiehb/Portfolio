@@ -6,6 +6,7 @@ import Hero from "../components/Hero";
 import About from "../components/About";
 import SmoothScroll from "../components/SmoothScroll";
 import Loading from "./loading";
+// REMOVE: import PaperShader from "@/components/PaperShader";
 
 // Lazy load components
 const LazyHorizontalScroll = lazy(() => import("../components/HorizontalScroll"));
@@ -15,7 +16,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate initial loading
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1500);
@@ -29,17 +29,19 @@ export default function Home() {
 
   return (
     <SmoothScroll>
-      <main className="min-h-screen bg-[#222222] text-white">
-        <Hero />
-        <About />
-        
-        <Suspense fallback={<Loading />}>
-          <LazyHorizontalScroll />
-        </Suspense>
-        
-        <Suspense fallback={<Loading />}>
-          <LazyProjects />
-        </Suspense>
+      <main className="min-h-screen  text-white relative">
+        <div className="relative z-10">
+          <Hero />
+          <About />
+          
+          <Suspense fallback={<Loading />}>
+            <LazyHorizontalScroll />
+          </Suspense>
+          
+          <Suspense fallback={<Loading />}>
+            <LazyProjects />
+          </Suspense>
+        </div>
       </main>
     </SmoothScroll>
   );

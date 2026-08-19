@@ -1,7 +1,4 @@
-'use client';
-
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -19,9 +16,13 @@ const PIXELS_PER_SECOND = 60;
 
 function MarqueeWords({ reverse }: { reverse: boolean }) {
   return (
-    <div className={`flex items-center py-2 shrink-0 ${reverse ? "marquee-text-dark" : "marquee-text-light"}`}>
+    <div
+      className={`flex items-center py-2 shrink-0 ${
+        reverse ? "marquee-text-dark" : "marquee-text-light"
+      }`}
+    >
       {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, index) => (
-        <span key={index} className="marquee-text shrink-0 px-4">
+        <span key={index} className="marquee-text shrink-0 px-6 select-none">
           {item}
         </span>
       ))}
@@ -70,7 +71,7 @@ function MarqueeRow({ reverse = false }: { reverse?: boolean }) {
   }, [distance, reverse]);
 
   return (
-    <div className="relative overflow-hidden whitespace-nowrap w-full">
+    <div className="relative overflow-hidden whitespace-nowrap w-full pointer-events-none">
       <div ref={containerRef} className="flex will-change-transform">
         <div ref={trackRef} className="flex shrink-0">
           <MarqueeWords reverse={reverse} />
@@ -86,198 +87,182 @@ function MarqueeRow({ reverse = false }: { reverse?: boolean }) {
   );
 }
 
+// Function to calculate target dimensions responsively (3:2 Portrait on mobile, 3:2 Landscape on desktop)
+export function get3x2TargetDimensions() {
+  if (typeof window === "undefined") {
+    return { targetWidth: 900, targetHeight: 600, borderRadius: "24px" };
+  }
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const isMobile = vw < 640;
+
+  let targetWidth: number;
+  let targetHeight: number;
+  let borderRadius = "24px";
+
+  if (isMobile) {
+    // 3:2 Portrait orientation (2:3 ratio: Height = Width * 1.5, exact 3:2 vertical)
+    targetWidth = Math.min(vw * 0.82, (vh * 0.70) / 1.5, 340);
+    targetHeight = Math.round(targetWidth * 1.5);
+    targetWidth = Math.round(targetWidth);
+    borderRadius = "20px";
+  } else {
+    // 3:2 Landscape orientation (3:2 ratio: Width = Height * 1.5, exact 3:2 horizontal)
+    if (vw < 1024) {
+      targetWidth = Math.min(vw * 0.75, (vh * 0.65) * 1.5, 620);
+      borderRadius = "20px";
+    } else if (vw < 1280) {
+      targetWidth = Math.min(vw * 0.60, (vh * 0.70) * 1.5, 780);
+      borderRadius = "24px";
+    } else if (vw < 2560) {
+      targetWidth = Math.min(vw * 0.52, (vh * 0.72) * 1.5, 960);
+      borderRadius = "24px";
+    } else {
+      targetWidth = Math.min(vw * 0.45, (vh * 0.75) * 1.5, 1440);
+      borderRadius = "28px";
+    }
+    targetHeight = Math.round(targetWidth / 1.5);
+    targetWidth = Math.round(targetWidth);
+  }
+
+  return { targetWidth, targetHeight, borderRadius };
+}
+
 export default function Hero() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
   const marqueeRef = useRef<HTMLDivElement>(null);
+  const signatureContainerRef = useRef<HTMLDivElement>(null);
+  const signaturePathsRef = useRef<(SVGPathElement | null)[]>([]);
 
   useEffect(() => {
     if (!scrollContainerRef.current || !frameRef.current) return;
 
     const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
-
+      // Initial state: Full screen 100vw x 100vh, 0px radius, white background
       gsap.set(frameRef.current, {
-        scale: 1,
+        width: "100vw",
+        height: "100vh",
+        maxWidth: "100vw",
+        maxHeight: "100vh",
         borderRadius: "0px",
         backgroundColor: "#ffffff",
+        boxShadow: "0 0 0 rgba(0,0,0,0)",
         transformOrigin: "center center",
       });
 
       if (portraitRef.current) {
-        gsap.set(portraitRef.current, { scale: 1.0, filter: "grayscale(0)" });
+        gsap.set(portraitRef.current, { scale: 1.0, filter: "grayscale(0%)" });
       }
 
       if (marqueeRef.current) {
         gsap.set(marqueeRef.current, { opacity: 1 });
       }
 
-      // Mobile (< 640px): 70% scale target
-      mm.add("(max-width: 639px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: scrollContainerRef.current,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 1.5,
-          },
-        });
-
-        tl.to(frameRef.current, {
-          scale: 0.70,
-          borderRadius: "16px",
-          aspectRatio: 1.5,
-          backgroundColor: "#c0c0c0",
-          boxShadow: "0 20px 50px -10px rgba(0, 0, 0, 0.7)",
-          ease: "power1.out",
-        }, 0);
-
-        if (portraitRef.current) {
-          tl.to(portraitRef.current, {
-            scale: 1.2,
-            filter: "grayscale(1)",
-            ease: "power1.out",
-          }, 0);
-        }
-
-        if (marqueeRef.current) {
-          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
+      // Initial state for signature paths (prepared for drawing animation)
+      signaturePathsRef.current.forEach((path) => {
+        if (path) {
+          const length = path.getTotalLength ? path.getTotalLength() : 1200;
+          gsap.set(path, {
+            strokeDasharray: length,
+            strokeDashoffset: length,
+          });
         }
       });
 
-      // Tablet (640px - 1023px): 50% scale target
-      mm.add("(min-width: 640px) and (max-width: 1023px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: scrollContainerRef.current,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 1.5,
-          },
+      if (signatureContainerRef.current) {
+        gsap.set(signatureContainerRef.current, {
+          opacity: 0,
+          scale: 0.85,
+          y: 20,
         });
+      }
 
-        tl.to(frameRef.current, {
-          scale: 0.50,
-          borderRadius: "20px",
-          aspectRatio: 1.5,
-          backgroundColor: "#c0c0c0",
-          boxShadow: "0 25px 60px -12px rgba(0, 0, 0, 0.75)",
-          ease: "power1.out",
-        }, 0);
-
-        if (portraitRef.current) {
-          tl.to(portraitRef.current, {
-            scale: 1.25,
-            filter: "grayscale(1)",
-            ease: "power1.out",
-          }, 0);
-        }
-
-        if (marqueeRef.current) {
-          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
-        }
+      // Universal timeline with dynamic function-based 3:2 target sizing
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: scrollContainerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1.2,
+          invalidateOnRefresh: true,
+        },
       });
 
-      // Laptop M (1024px - 1279px): 35% scale target
-      mm.add("(min-width: 1024px) and (max-width: 1279px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: scrollContainerRef.current,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 1.5,
-          },
-        });
-
-        tl.to(frameRef.current, {
-          scale: 0.35,
-          borderRadius: "24px",
-          aspectRatio: 1.5,
+      // 1. Frame dimension & style transition (Full screen -> 3:2 Portrait on mobile / 3:2 Landscape on desktop)
+      tl.to(
+        frameRef.current,
+        {
+          width: () => `${get3x2TargetDimensions().targetWidth}px`,
+          height: () => `${get3x2TargetDimensions().targetHeight}px`,
+          borderRadius: () => get3x2TargetDimensions().borderRadius,
           backgroundColor: "#c0c0c0",
-          boxShadow: "0 30px 80px -15px rgba(0, 0, 0, 0.85)",
+          boxShadow:
+            "0 30px 80px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.15)",
           ease: "power1.out",
-        }, 0);
+        },
+        0
+      );
 
-        if (portraitRef.current) {
-          tl.to(portraitRef.current, {
-            scale: 1.3,
-            filter: "grayscale(1)",
+      // 2. Portrait image slight scale & grayscale transition
+      if (portraitRef.current) {
+        tl.to(
+          portraitRef.current,
+          {
+            scale: () => (window.innerWidth < 640 ? 1.15 : 1.35),
+            filter: "grayscale(100%)",
             ease: "power1.out",
-          }, 0);
-        }
-
-        if (marqueeRef.current) {
-          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
-        }
-      });
-
-      // Laptop L (1280px - 2559px): 40% scale target
-      mm.add("(min-width: 1280px) and (max-width: 2559px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: scrollContainerRef.current,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 1.5,
           },
-        });
+          0
+        );
+      }
 
-        tl.to(frameRef.current, {
-          scale: 0.40,
-          borderRadius: "24px",
-          aspectRatio: 1.5,
-          backgroundColor: "#c0c0c0",
-          boxShadow: "0 30px 80px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.15)",
-          ease: "power1.out",
-        }, 0);
-
-        if (portraitRef.current) {
-          tl.to(portraitRef.current, {
-            scale: 1.35,
-            filter: "grayscale(1)",
+      // 3. Background marquee typography fades out
+      if (marqueeRef.current) {
+        tl.to(
+          marqueeRef.current,
+          {
+            opacity: 0,
             ease: "power1.out",
-          }, 0);
-        }
-
-        if (marqueeRef.current) {
-          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
-        }
-      });
-
-      // 4K (>= 2560px): 45% scale target
-      mm.add("(min-width: 2560px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: scrollContainerRef.current,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 1.5,
           },
+          0
+        );
+      }
+
+      // 4. Animated Signature at center appearing around 50% scroll
+      if (signatureContainerRef.current) {
+        // Fade in & rise container around 38% - 52%
+        tl.fromTo(
+          signatureContainerRef.current,
+          { opacity: 0, scale: 0.85, y: 15 },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            ease: "power2.out",
+            duration: 0.25,
+          },
+          0.38
+        );
+
+        // Animate stroke writing live from 40% to 65% scroll
+        signaturePathsRef.current.forEach((path, idx) => {
+          if (path) {
+            const startOffset = 0.40 + idx * 0.04;
+            tl.to(
+              path,
+              {
+                strokeDashoffset: 0,
+                ease: "power1.inOut",
+                duration: 0.24,
+              },
+              startOffset
+            );
+          }
         });
-
-        tl.to(frameRef.current, {
-          scale: 0.45,
-          borderRadius: "28px",
-          aspectRatio: 1.5,
-          backgroundColor: "#c0c0c0",
-          boxShadow: "0 40px 100px -20px rgba(0, 0, 0, 0.9)",
-          ease: "power1.out",
-        }, 0);
-
-        if (portraitRef.current) {
-          tl.to(portraitRef.current, {
-            scale: 1.4,
-            filter: "grayscale(1)",
-            ease: "power1.out",
-          }, 0);
-        }
-
-        if (marqueeRef.current) {
-          tl.to(marqueeRef.current, { opacity: 0, ease: "power1.out" }, 0);
-        }
-      });
-
+      }
     }, scrollContainerRef);
 
     return () => ctx.revert();
@@ -291,39 +276,108 @@ export default function Hero() {
       id="home"
       aria-label="Hero section"
     >
+      {/* Sticky viewport container */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
+        {/* Animated Frame: morphs smoothly from 100vw x 100vh full screen into 3:2 portrait/landscape card */}
         <section
           ref={frameRef}
-          className="relative w-full h-full flex justify-center items-end overflow-hidden text-zinc-900 shadow-2xl"
-          style={{ willChange: "transform, border-radius, aspect-ratio, background-color" }}
+          id="hero-zoom-frame"
+          className="relative flex justify-center items-end overflow-hidden text-zinc-900 will-change-[width,height,border-radius,background-color]"
         >
           {/* Marquee text container */}
           <div
             ref={marqueeRef}
-            className="absolute left-0 right-0 top-1/3 -translate-y-1/2 md:top-1/2 md:-translate-y-1/2 z-0 flex flex-col pointer-events-none"
+            className="absolute left-0 right-0 top-1/3 -translate-y-1/2 md:top-1/2 md:-translate-y-1/2 z-0 flex flex-col pointer-events-none will-change-[opacity]"
             aria-hidden="true"
           >
             <MarqueeRow />
             <MarqueeRow reverse />
           </div>
 
-          {/* Hero Image Wrapper */}
+          {/* Hero Portrait Image */}
           <div
             ref={portraitRef}
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 z-10 flex justify-center items-end pointer-events-none h-full w-auto"
-            style={{ willChange: "transform, filter" }}
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 z-10 flex justify-center items-end pointer-events-none h-full w-auto will-change-[transform,filter]"
           >
-            <Image
+            <img
               src="/img/hero.webp"
               alt="Jericho Urbano portrait"
-              width={1920}
-              height={1080}
-              priority
-              unoptimized
-              quality={95}
-              style={{ height: "100%", width: "auto", objectFit: "contain", objectPosition: "bottom" }}
-              className="max-h-full max-w-none"
+              className="max-h-full max-w-none h-full w-auto object-contain object-bottom select-none pointer-events-none"
+              draggable={false}
             />
+          </div>
+
+          {/* Animated Handwritten Signature from E-SIGNITURE-URBANO_JERICHO (Animates at ~50% scroll at center) */}
+          <div
+            ref={signatureContainerRef}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none flex flex-col items-center justify-center w-[88%] max-w-[340px] sm:max-w-[440px] md:max-w-[540px] px-2"
+          >
+            <svg
+              viewBox="0 0 1000 950"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-full h-auto drop-shadow-[0_10px_30px_rgba(253,85,29,0.45)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+            >
+              {/* 1. Main Iconic Elongated Left Loop (J/U apex loop and bottom curve) */}
+              <path
+                ref={(el) => {
+                  signaturePathsRef.current[0] = el;
+                }}
+                d="M 390 490 C 330 630, 220 760, 150 760 C 110 760, 125 680, 175 560 C 265 310, 395 185, 475 185 C 510 185, 505 245, 460 370 C 395 550, 305 735, 270 855 C 310 750, 355 625, 395 490"
+                stroke="#fd551d"
+                strokeWidth="16"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* 2. Cursive baseline scribble ("ericho" waves under crossbar) */}
+              <path
+                ref={(el) => {
+                  signaturePathsRef.current[1] = el;
+                }}
+                d="M 450 515 C 475 510, 485 480, 505 480 C 520 480, 530 525, 550 500 C 565 480, 575 480, 595 515 C 610 535, 630 490, 645 515"
+                stroke="#fd551d"
+                strokeWidth="14"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* 3. Top-Right Monogram Flourish Loop */}
+              <path
+                ref={(el) => {
+                  signaturePathsRef.current[2] = el;
+                }}
+                d="M 610 380 C 590 310, 630 215, 690 215 C 750 215, 755 315, 695 400 C 645 460, 595 435, 605 370 C 615 300, 670 270, 675 350 C 680 410, 635 445, 620 445"
+                stroke="#fd551d"
+                strokeWidth="15"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* 4. Sharp Dynamic Horizontal Piercing Slash */}
+              <path
+                ref={(el) => {
+                  signaturePathsRef.current[3] = el;
+                }}
+                d="M 480 435 L 860 290"
+                stroke="#fd551d"
+                strokeWidth="17"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* 5. Far-Right Accent Dot (precisely aligned along the slash trajectory) */}
+              <path
+                ref={(el) => {
+                  signaturePathsRef.current[4] = el;
+                }}
+                d="M 945 258 C 945 250, 955 250, 955 258 C 955 266, 945 266, 945 258 Z"
+                stroke="#fd551d"
+                strokeWidth="20"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
         </section>
       </div>
