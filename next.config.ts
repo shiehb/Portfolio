@@ -56,10 +56,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // Conditionally enable experimental features
   experimental: {
-    // Only enable optimizeCss if critters is installed
-    optimizeCss: process.env.NODE_ENV === 'production',
     webpackMemoryOptimizations: true,
     optimizePackageImports: [
       'framer-motion',
