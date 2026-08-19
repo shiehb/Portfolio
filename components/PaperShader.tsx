@@ -13,24 +13,24 @@ export default function PaperShader() {
         pointerEvents: "none",
         width: "100vw",
         height: "100vh",
-        background: "transparent", // Changed from "#222222" to "transparent"
+        background: "transparent",
       }}
       aria-hidden="true"
     >
       <Dithering
-        colorBack="#222222" // Keep this dark so the dithering pattern is visible
+        colorBack="#222222"
         colorFront="#fd551d"
         shape="warp"
         type="2x2"
         speed={0.3}
         size={1}
         className="w-full h-full block"
-        style={{ 
-          width: "100%", 
+        style={{
+          width: "100%",
           height: "100%",
           opacity: 0.1,
           mixBlendMode: "overlay",
-          background: "transparent", // Ensure the shader itself is transparent
+          background: "transparent",
         }}
         minPixelRatio={1}
       />

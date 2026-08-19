@@ -45,6 +45,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
         };
     }, [isLoading]);
 
+    // Don't render anything until Lenis is ready and loading is complete
     if (!isReady || isLoading) {
         return null;
     }

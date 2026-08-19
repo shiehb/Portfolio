@@ -6,7 +6,7 @@ import Hero from "../components/Hero";
 import About from "../components/About";
 import HorizontalScroll from "../components/HorizontalScroll";
 import Projects from "../components/Projects";
-import SmoothScroll from "../components/SmoothScroll";
+import SmoothScrollWrapper from "@/components/SmoothScrollWrapper";
 import { useLoading } from "@/lib/LoadingContext";
 
 export default function Home() {
@@ -53,7 +53,7 @@ export default function Home() {
   }, [setTotalItems, incrementLoaded, resetLoading]);
 
   return (
-    <SmoothScroll>
+    <SmoothScrollWrapper>
       <main className="min-h-screen text-white relative">
         <div className="relative z-10">
           <Hero />
@@ -62,6 +62,6 @@ export default function Home() {
           <Projects />
         </div>
       </main>
-    </SmoothScroll>
+    </SmoothScrollWrapper>
   );
 }

@@ -1,21 +1,21 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import PaperShader from "@/components/PaperShader";
 import { LoadingProvider } from "@/lib/LoadingContext";
 import GlobalLoader from "@/components/GlobalLoader";
+import PaperShaderWrapper from "@/components/PaperShaderWrapper";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// Load custom font with swap - CORRECTED PATH
+const departureMono = localFont({
+  src: "../public/font/departure-mono.otf", // Try this path
+  // OR if the file is in the root of public:
+  // src: "../../public/font/departure-mono.otf",
+  display: "swap",
+  variable: "--font-display",
+  fallback: ["SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", "monospace"],
 });
 
 export const metadata: Metadata = {
@@ -32,12 +32,12 @@ export default function RootLayout({ children }: LayoutProps) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${departureMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col relative">
         <LoadingProvider>
           <GlobalLoader />
-          <PaperShader />
+          <PaperShaderWrapper />
           <div className="relative z-10 flex flex-col min-h-full">
             <Navbar />
             <main className="flex-1">{children}</main>
