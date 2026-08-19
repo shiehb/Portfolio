@@ -24,17 +24,9 @@ export default function GlobalLoader() {
             className="text-center"
           >
             <h2 className="text-2xl font-black tracking-tight">
-              Jericho<span className="text-[#fd551d]">.</span>
+              @echo_<span className="text-[#fd551d]">.</span>ng
             </h2>
           </motion.div>
-
-          {/* Animated progress bar */}
-          <motion.div
-            initial={{ width: "0%" }}
-            animate={{ width: "100%" }}
-            transition={{ duration: 2, ease: "easeInOut" }}
-            className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-[#fd551d] to-orange-400"
-          />
 
           {/* Loading dots animation */}
           <motion.div
