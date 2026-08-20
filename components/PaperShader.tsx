@@ -27,9 +27,15 @@ export default function PaperShader() {
   const [colorBack, setColorBack] = useState("#222222");
   const lastBackRef = useRef("#222222");
 
-  // Reset to dark theme defaults on non-home pages
+  // Set theme colors based on route
   useEffect(() => {
-    if (pathname !== "/") {
+    if (pathname === "/about") {
+      const rafId = requestAnimationFrame(() => {
+        setColorBack("#ffffff");
+        lastBackRef.current = "#ffffff";
+      });
+      return () => cancelAnimationFrame(rafId);
+    } else if (pathname !== "/") {
       const rafId = requestAnimationFrame(() => {
         setColorBack("#222222");
         lastBackRef.current = "#222222";
