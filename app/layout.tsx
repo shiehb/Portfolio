@@ -94,7 +94,19 @@ export default function RootLayout({ children }: LayoutProps) {
         <link rel="preload" as="image" href="/img/logo.png" />
         {/* Preload critical font */}
         <link rel="preload" as="font" href="/font/departure-mono.otf" type="font/otf" crossOrigin="anonymous" />
-        {/* Prevent flash on initial load */}
+        {/* Prevent flash on initial load and force scroll to top on reload */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined') {
+                if ('scrollRestoration' in history) {
+                  history.scrollRestoration = 'manual';
+                }
+                window.scrollTo(0, 0);
+              }
+            `,
+          }}
+        />
         <style>{`
           body { background-color: #222222; }
           .page-transition-overlay {

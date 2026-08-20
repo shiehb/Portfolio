@@ -1,7 +1,9 @@
+// components/Projects.tsx
 'use client';
 
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useLoading } from '@/lib/LoadingContext';
+import { triggerPageTransition } from '@/lib/transitionEvents';
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
@@ -32,6 +34,13 @@ export default function Projects() {
     const hasIncremented = useRef(false);
     const animationsInitializedRef = useRef(false);
     const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleViewAllClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault();
+        triggerPageTransition(() => {
+            window.location.href = '/projects';
+        });
+    };
 
     useEffect(() => {
         async function fetchDriveProjects() {
@@ -223,6 +232,7 @@ export default function Projects() {
                     {validProjects.length > 0 && (
                         <Link
                             href="/projects"
+                            onClick={handleViewAllClick}
                             className="batch-image w-full relative overflow-hidden shadow-sm group rounded-sm bg-gradient-to-br from-zinc-50 to-zinc-100 border-2 border-dashed border-zinc-300 hover:border-[#fd551d] hover:from-zinc-100 hover:to-zinc-200 transition-all duration-500 flex flex-col items-center justify-center text-center p-4 group break-inside-avoid"
                             style={{ minHeight: '200px' }}
                         >

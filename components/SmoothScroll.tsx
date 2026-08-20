@@ -9,13 +9,38 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
+    if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+    }
+    ScrollTrigger.clearScrollMemory('manual');
 }
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
     const { isLoading } = useLoading();
 
     useEffect(() => {
+        if (typeof window !== 'undefined') {
+            if ('scrollRestoration' in window.history) {
+                window.history.scrollRestoration = 'manual';
+            }
+            window.scrollTo(0, 0);
+        }
+
+        const handleBeforeUnload = () => {
+            window.scrollTo(0, 0);
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
+
+    useEffect(() => {
         if (isLoading) return;
+
+        // Ensure window scroll is at top before Lenis and ScrollTrigger engage
+        window.scrollTo(0, 0);
 
         const lenis = new Lenis({
             duration: 1.2,
@@ -27,6 +52,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
             touchMultiplier: 2,
         });
 
+        lenis.scrollTo(0, { immediate: true });
         lenis.on('scroll', ScrollTrigger.update);
 
         const updateTicker = (time: number) => {
@@ -35,6 +61,9 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
         gsap.ticker.add(updateTicker);
         gsap.ticker.lagSmoothing(0);
+
+        // Refresh triggers with top baseline
+        ScrollTrigger.refresh();
 
         return () => {
             gsap.ticker.remove(updateTicker);

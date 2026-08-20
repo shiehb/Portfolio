@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { Copy, Check, Clock, MapPin, ArrowUpRight } from "lucide-react";
+import { triggerPageTransition } from '@/lib/transitionEvents';
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -38,6 +39,13 @@ export default function Footer() {
   const col2Ref = useRef<HTMLDivElement>(null);
   const col3Ref = useRef<HTMLDivElement>(null);
   const socialRef = useRef<HTMLDivElement>(null);
+
+  const handleFooterLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    triggerPageTransition(() => {
+      window.location.href = href;
+    });
+  };
 
   useEffect(() => {
     // Update Philippine Standard Time (GMT+8)
@@ -145,6 +153,7 @@ export default function Footer() {
                   <Link
                     key={link.label}
                     href={link.href}
+                    onClick={(e) => handleFooterLinkClick(e, link.href)}
                     className="group inline-flex items-center gap-1.5 text-sm sm:text-base text-white/90 hover:text-[#fd551d] transition-colors py-1 w-fit font-medium"
                   >
                     <span>{link.label}</span>
@@ -259,7 +268,7 @@ export default function Footer() {
           {/* Social Links */}
           <div className="flex justify-center items-center gap-4 sm:gap-8 flex-wrap">
             {socialLinks.map((link) => (
-              <Link
+              <a
                 key={link.label}
                 href={link.href}
                 target="_blank"
@@ -267,7 +276,7 @@ export default function Footer() {
                 className="text-xs sm:text-sm text-white hover:text-[#fd551d] transition-colors uppercase tracking-wider font-medium"
               >
                 {link.label}
-              </Link>
+              </a>
             ))}
           </div>
 

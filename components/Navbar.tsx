@@ -7,6 +7,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { triggerPageTransition } from '@/lib/transitionEvents';
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -162,17 +163,17 @@ export default function Navbar() {
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     
-    // Show transition overlay immediately
-    const overlay = document.querySelector('.page-transition-overlay') as HTMLDivElement;
-    if (overlay) {
-      gsap.set(overlay, { 
-        opacity: 1, 
-        display: 'block' 
-      });
-    }
+    // Immediately close menu without animation (hide it instantly)
+    setNavState('closed');
     
-    setPendingHref(href);
-    setNavState('closing');
+    // Small delay to ensure menu is hidden before transition starts
+    setTimeout(() => {
+      // Trigger page transition with zoom-in effect
+      triggerPageTransition(() => {
+        // After transition animation completes, navigate
+        router.push(href);
+      });
+    }, 50);
   };
 
   // Animate menu icon when state changes

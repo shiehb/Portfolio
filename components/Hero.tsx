@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.clearScrollMemory("manual");
 }
 
 const marqueeItems = [
@@ -198,14 +199,7 @@ export default function Hero() {
       ease: "power2.out",
     }, 0.2);
 
-    // 3. Marquee fades in
-    tl.to(marqueeRef.current, {
-      opacity: 1,
-      duration: 0.6,
-      ease: "power2.out",
-    }, 0.3);
-
-    // NOTE: Signature is NOT animated here - it will be animated by scroll
+    // NOTE: Marquee and Signature are NOT animated here - they are animated by scroll
 
     // Cleanup
     return () => {
@@ -244,9 +238,9 @@ export default function Hero() {
         });
       }
 
-      // Initial state for marquee
+      // Initial state for marquee - hidden until scroll
       if (marqueeRef.current) {
-        gsap.set(marqueeRef.current, { opacity: 1 });
+        gsap.set(marqueeRef.current, { opacity: 0 });
       }
 
       // Initial state for ABOUT title - hidden until end of scroll
@@ -319,7 +313,18 @@ export default function Hero() {
         );
       }
 
-      // Note: Marquee in background does NOT fade out on zoom out - stays fully visible
+      // 3. Marquee in background - fades in only as user begins scrolling / zooming out
+      if (marqueeRef.current) {
+        tl.to(
+          marqueeRef.current,
+          {
+            opacity: 1,
+            ease: "power1.out",
+            duration: 0.25,
+          },
+          0.08
+        );
+      }
 
       // 4. Signature animation - appears and draws stroke during scroll
       if (signatureContainerRef.current) {
@@ -382,9 +387,9 @@ export default function Hero() {
         {/* Marquee Background in the back - On mobile, positioned below hero crop and above ABOUT title */}
         <div
           ref={marqueeRef}
-          className="absolute inset-x-0 bottom-24 sm:bottom-28 md:top-1/2 md:bottom-auto md:-translate-y-1/2 z-0 flex flex-col pointer-events-none will-change-[transform] select-none"
+          className="absolute inset-x-0 bottom-24 sm:bottom-28 md:top-1/2 md:bottom-auto md:-translate-y-1/2 z-0 flex flex-col pointer-events-none will-change-[transform,opacity] select-none"
           aria-hidden="true"
-          style={{ opacity: 1 }}
+          style={{ opacity: 0 }}
         >
           <MarqueeRow />
           <MarqueeRow reverse />
