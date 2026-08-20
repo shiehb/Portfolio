@@ -57,19 +57,10 @@ export default function Navbar() {
       return;
     }
 
-    if (!isHome) {
-      applyInvert(1);
-      return;
-    }
-
     const headerY = 35;
     const footerEl = document.querySelector("footer");
-    const projectsEl = document.querySelector("#projects");
-    const galleryEl = document.querySelector("#gallery");
-    const aboutEl = document.querySelector("#about");
-    const homeEl = document.querySelector("#home");
-    const heroFrameEl = document.querySelector("#hero-zoom-frame");
 
+    // Check if scrolled into footer on ANY page (footer is dark #222222 -> white logo invert(1))
     if (footerEl) {
       const rect = footerEl.getBoundingClientRect();
       if (rect.top <= headerY) {
@@ -77,6 +68,28 @@ export default function Navbar() {
         return;
       }
     }
+
+    // On the About page, the content background is white -> black logo & menu button (invert 0)
+    if (pathname === "/about") {
+      applyInvert(0);
+      return;
+    }
+
+    if (pathname === "/projects" || pathname === "/contact") {
+      applyInvert(1);
+      return;
+    }
+
+    if (!isHome) {
+      applyInvert(1);
+      return;
+    }
+
+    const projectsEl = document.querySelector("#projects");
+    const galleryEl = document.querySelector("#gallery");
+    const aboutEl = document.querySelector("#about");
+    const homeEl = document.querySelector("#home");
+    const heroFrameEl = document.querySelector("#hero-zoom-frame");
 
     if (projectsEl) {
       const rect = projectsEl.getBoundingClientRect();
@@ -124,14 +137,10 @@ export default function Navbar() {
     }
 
     applyInvert(1);
-  }, [isMenuOpen, isHome, applyInvert]);
+  }, [isMenuOpen, isHome, pathname, applyInvert]);
 
   useEffect(() => {
     updateHeaderColor();
-
-    if (!isHome) {
-      return;
-    }
 
     let ticking = false;
     const handleScroll = () => {
@@ -151,7 +160,7 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, [isHome, updateHeaderColor]);
+  }, [updateHeaderColor]);
 
   const handleToggle = () => {
     if (navState === 'closed') {
@@ -324,7 +333,7 @@ export default function Navbar() {
           className="pointer-events-auto flex items-center cursor-pointer"
           onClick={(e) => handleLinkClick(e, '/')}
         >
-          <div ref={logoRef} className="flex items-center">
+          <div ref={logoRef} className="flex items-center transition-[filter] duration-200">
             <Image
               src="/img/logo.png"
               alt="Jericho Urbano Logo"
@@ -340,7 +349,7 @@ export default function Navbar() {
           <button
             ref={menuBtnRef}
             type="button"
-            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 text-black border-2 border-black rounded-md p-1.5 hover:opacity-80 cursor-pointer"
+            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 text-black border-2 border-black rounded-md p-1.5 hover:opacity-80 cursor-pointer transition-[filter] duration-200"
             aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMenuOpen}
             onClick={handleToggle}
