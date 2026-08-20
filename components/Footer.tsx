@@ -2,9 +2,14 @@
 'use client';
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Copy, Check, Clock, MapPin, ArrowUpRight } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const footerLinks = [
   { label: "HOME", href: "/" },
@@ -28,6 +33,11 @@ export default function Footer() {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>("");
+  
+  const col1Ref = useRef<HTMLDivElement>(null);
+  const col2Ref = useRef<HTMLDivElement>(null);
+  const col3Ref = useRef<HTMLDivElement>(null);
+  const socialRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Update Philippine Standard Time (GMT+8)
@@ -49,6 +59,58 @@ export default function Footer() {
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
+        // Animate columns
+        const columns = [col1Ref.current, col2Ref.current, col3Ref.current];
+        
+        columns.forEach((col, index) => {
+          if (!col) return;
+          
+          // Set initial state
+          gsap.set(col, { opacity: 0, y: 20 });
+          
+          // Animate in
+          gsap.to(col, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            delay: index * 0.12,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: col,
+              start: "top 90%",
+              toggleActions: "play none none none",
+            },
+          });
+        });
+
+        // Animate social section
+        if (socialRef.current) {
+          gsap.set(socialRef.current, { opacity: 0, y: 20 });
+          gsap.to(socialRef.current, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            delay: 0.3,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: socialRef.current,
+              start: "top 90%",
+              toggleActions: "play none none none",
+            },
+          });
+        }
+      });
+
+      return () => ctx.revert();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleCopyEmail = (e: React.MouseEvent) => {
@@ -74,13 +136,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 w-full">
             {/* Column 1: Navigation */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, ease: [0.33, 1, 0.68, 1] }}
-              className="md:col-span-1"
-            >
+            <div ref={col1Ref} className="md:col-span-1">
               <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] mb-4">
                 Navigation
               </span>
@@ -96,16 +152,10 @@ export default function Footer() {
                   </Link>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
             {/* Column 2: Contact */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.08, ease: [0.33, 1, 0.68, 1] }}
-              className="md:col-span-1"
-            >
+            <div ref={col2Ref} className="md:col-span-1">
               <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] mb-4">
                 Contact
               </span>
@@ -170,16 +220,10 @@ export default function Footer() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Column 3: Location & Time Zone */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.16, ease: [0.33, 1, 0.68, 1] }}
-              className="md:col-span-1"
-            >
+            <div ref={col3Ref} className="md:col-span-1">
               <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] mb-4">
                 Location & Timezone
               </span>
@@ -204,19 +248,13 @@ export default function Footer() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Socials and Copyright - Center */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.4, delay: 0.2, ease: [0.33, 1, 0.68, 1] }}
-        className="w-full px-4 sm:px-6 lg:px-8 py-8 flex justify-center items-center"
-      >
+      <div ref={socialRef} className="w-full px-4 sm:px-6 lg:px-8 py-8 flex justify-center items-center">
         <div className="text-center space-y-4">
           {/* Social Links */}
           <div className="flex justify-center items-center gap-4 sm:gap-8 flex-wrap">
@@ -243,7 +281,7 @@ export default function Footer() {
             </p>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Logo - Bottom Center with subtle watermark branding */}
       <div

@@ -3,55 +3,11 @@
 
 import { useRef, useEffect } from "react";
 import { useLoading } from "@/lib/LoadingContext";
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-function AnimatedWord({
-  word,
-  index,
-  total,
-  progress,
-}: {
-  word: string;
-  index: number;
-  total: number;
-  progress: MotionValue<number>;
-}) {
-  const wordProgress = index / total;
-  const start = Math.max(0, wordProgress - 0.15);
-  const end = Math.min(1, wordProgress + 0.1);
-
-  const opacity = useTransform(progress, [start, end], [0.25, 1]);
-
-  return (
-    <motion.span style={{ opacity }} className="inline-block mr-[0.25em]">
-      {word}
-    </motion.span>
-  );
-}
-
-function AnimatedParagraph({ text, className = "" }: { text: string; className?: string }) {
-  const ref = useRef<HTMLParagraphElement>(null);
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start 0.85", "end 0.25"],
-  });
-
-  const words = text.split(" ");
-
-  return (
-    <p ref={ref} className={className}>
-      {words.map((word, index) => (
-        <AnimatedWord
-          key={index}
-          word={word}
-          index={index}
-          total={words.length}
-          progress={scrollYProgress}
-        />
-      ))}
-    </p>
-  );
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
 }
 
 interface Segment {
@@ -66,32 +22,122 @@ function WordsPullUpMultiStyle({
   segments: Segment[];
   className?: string;
 }) {
+  const containerRef = useRef<HTMLHeadingElement>(null);
   const words: { text: string; className?: string }[] = [];
+  
   segments.forEach((segment) => {
     segment.text.split(" ").forEach((word) => {
       words.push({ text: word, className: segment.className });
     });
   });
 
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const wordElements = containerRef.current?.querySelectorAll(".word-span");
+      if (!wordElements) return;
+
+      // Set initial state
+      gsap.set(wordElements, {
+        y: 20,
+        opacity: 0,
+      });
+
+      // Animate in with stagger
+      gsap.to(wordElements, {
+        y: 0,
+        opacity: 1,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: [0.33, 1, 0.68, 1],
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse",
+        },
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <h2 className={className}>
+    <h2 ref={containerRef} className={className}>
       {words.map((word, index) => (
-        <motion.span
+        <span
           key={index}
-          initial={{ y: 20, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{
-            duration: 0.5,
-            delay: index * 0.08,
-            ease: [0.33, 1, 0.68, 1],
-          }}
-          className={`inline-block mr-[0.25em] ${word.className ?? ""}`}
+          className={`word-span inline-block mr-[0.25em] ${word.className ?? ""}`}
         >
           {word.text}
-        </motion.span>
+        </span>
       ))}
     </h2>
+  );
+}
+
+function AnimatedParagraph({ text, className = "" }: { text: string; className?: string }) {
+  const paragraphRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (!paragraphRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const words = paragraphRef.current?.querySelectorAll(".word-span");
+      if (!words || words.length === 0) return;
+
+      // Get the total number of words for progress calculation
+      const totalWords = words.length;
+
+      // Set initial opacity
+      gsap.set(words, { opacity: 0.25 });
+
+      // Create a timeline that triggers on scroll
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: paragraphRef.current,
+          start: "top 85%",
+          end: "bottom 25%",
+          scrub: 1.5,
+        },
+      });
+
+      // Animate each word based on scroll progress
+      words.forEach((word, index) => {
+        const wordProgress = index / totalWords;
+        const start = Math.max(0, wordProgress - 0.15);
+        const end = Math.min(1, wordProgress + 0.1);
+
+        // Create a separate tween for each word that responds to scroll
+        gsap.to(word, {
+          opacity: 1,
+          duration: 0.5,
+          scrollTrigger: {
+            trigger: paragraphRef.current,
+            start: `top ${85 - (start * 60)}%`,
+            end: `top ${85 - (end * 60)}%`,
+            scrub: 1.5,
+          },
+        });
+      });
+    }, paragraphRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const words = text.split(" ");
+
+  return (
+    <p ref={paragraphRef} className={className}>
+      {words.map((word, index) => (
+        <span
+          key={index}
+          className="word-span inline-block mr-[0.25em]"
+        >
+          {word}
+        </span>
+      ))}
+    </p>
   );
 }
 
@@ -110,7 +156,6 @@ export default function About() {
     <section id="about" className="text-white font-display">
       <div className="py-12 md:py-20 flex justify-center items-center px-4">
         <div className="text-center">
-
           <WordsPullUpMultiStyle
             className="mx-auto max-w-3xl text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl leading-[0.95] sm:leading-[0.9] text-[#fff] font-display"
             segments={[
