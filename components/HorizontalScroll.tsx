@@ -21,6 +21,8 @@ interface ScatteredImage {
     left: string;      // Absolute position X in canvas (e.g. "left-[5vw]")
     top: string;       // Absolute position Y in canvas (e.g. "top-[20vh]")
     speed?: number;    // Parallax speed multiplier relative to track scroll
+    mobileOffset?: string; // Tailwind class for mobile scattered alignment
+    mobileHeight?: string; // Custom height for mobile scattered feel
 }
 
 const landoStyleImages: ScatteredImage[] = [
@@ -34,6 +36,8 @@ const landoStyleImages: ScatteredImage[] = [
         left: 'left-[5vw]',
         top: 'top-[20vh]',
         speed: 1.1,
+        mobileOffset: 'w-[80%] self-start',
+        mobileHeight: 'h-[40vh]',
     },
     {
         src: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1600&auto=format&fit=crop',
@@ -45,6 +49,8 @@ const landoStyleImages: ScatteredImage[] = [
         left: 'left-[38vw]',
         top: 'top-[5vh]',
         speed: 0.85,
+        mobileOffset: 'w-[65%] self-end mr-2',
+        mobileHeight: 'h-[30vh]',
     },
     {
         src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop',
@@ -56,6 +62,8 @@ const landoStyleImages: ScatteredImage[] = [
         left: 'left-[42vw]',
         top: 'top-[52vh]',
         speed: 1.25,
+        mobileOffset: 'w-[75%] self-center ml-6',
+        mobileHeight: 'h-[35vh]',
     },
     {
         src: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1600&auto=format&fit=crop',
@@ -67,6 +75,8 @@ const landoStyleImages: ScatteredImage[] = [
         left: 'left-[70vw]',
         top: 'top-[18vh]',
         speed: 0.95,
+        mobileOffset: 'w-[85%] self-start ml-2',
+        mobileHeight: 'h-[48vh]',
     },
     {
         src: 'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1600&auto=format&fit=crop',
@@ -78,6 +88,8 @@ const landoStyleImages: ScatteredImage[] = [
         left: 'left-[108vw]',
         top: 'top-[8vh]',
         speed: 1.15,
+        mobileOffset: 'w-[60%] self-end mr-4',
+        mobileHeight: 'h-[28vh]',
     },
     {
         src: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1600&auto=format&fit=crop',
@@ -89,6 +101,8 @@ const landoStyleImages: ScatteredImage[] = [
         left: 'left-[112vw]',
         top: 'top-[48vh]',
         speed: 0.9,
+        mobileOffset: 'w-[75%] self-start ml-4',
+        mobileHeight: 'h-[38vh]',
     },
     {
         src: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1600&auto=format&fit=crop',
@@ -100,6 +114,8 @@ const landoStyleImages: ScatteredImage[] = [
         left: 'left-[142vw]',
         top: 'top-[22vh]',
         speed: 1.05,
+        mobileOffset: 'w-[80%] self-end',
+        mobileHeight: 'h-[42vh]',
     },
 ];
 
@@ -198,7 +214,7 @@ export default function GallerySection({
 
     // Handle image load tracking
     const handleImageLoad = () => {
-        setImagesLoaded(prev => prev + 1);
+        setImagesLoaded((prev) => prev + 1);
     };
 
     return (
@@ -218,16 +234,15 @@ export default function GallerySection({
             {/* Container */}
             <div className="relative z-10 min-h-screen md:h-screen w-full flex items-center overflow-hidden py-10 md:py-0 border-none outline-none">
                 <div ref={outerTrackRef} className="w-full will-change-transform">
-                    {/* Canvas Inner Track */}
+                    {/* Desktop Scattered Canvas Track */}
                     <div
                         ref={innerTrackRef}
-                        className="relative h-screen w-[185vw] md:w-[175vw] shrink-0 will-change-transform flex-nowrap"
+                        className="hidden md:block relative h-screen w-[185vw] md:w-[175vw] shrink-0 will-change-transform flex-nowrap"
                     >
-                        {/* Desktop Scattered Canvas Layout */}
                         {images.map((img, index) => (
                             <div
-                                key={index}
-                                className={`scattered-card absolute hidden md:flex flex-col group ${img.left} ${img.top} ${img.width} ${img.height} will-change-transform`}
+                                key={`desktop-${index}`}
+                                className={`scattered-card absolute flex flex-col group ${img.left} ${img.top} ${img.width} ${img.height} will-change-transform`}
                             >
                                 {/* Title above image */}
                                 {(img.title || img.year) && (
@@ -243,7 +258,7 @@ export default function GallerySection({
                                         src={img.src}
                                         alt={img.alt || img.title || `Gallery visual ${index + 1}`}
                                         fill
-                                        sizes="(max-width: 768px) 100vw, 35vw"
+                                        sizes="35vw"
                                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 border-none outline-none"
                                         loading="lazy"
                                         onLoad={handleImageLoad}
@@ -252,32 +267,35 @@ export default function GallerySection({
                                 </div>
                             </div>
                         ))}
+                    </div>
 
-                        {/* Mobile Fallback Layout */}
-                        <div className="flex md:hidden flex-col gap-12 px-6 py-12 w-full h-auto overflow-y-auto">
-                            {images.map((img, index) => (
-                                <div key={`mobile-${index}`} className="flex flex-col w-full">
-                                    {(img.title || img.year) && (
-                                        <div className="mb-2 flex items-center justify-between text-xs tracking-widest text-neutral-400 uppercase font-mono">
-                                            <span>{img.title}</span>
-                                            <span>{img.year}</span>
-                                        </div>
-                                    )}
-                                    <div className="relative w-full h-[45vh] overflow-hidden bg-neutral-950">
-                                        <Image
-                                            src={img.src}
-                                            alt={img.alt || img.title || `Gallery visual ${index + 1}`}
-                                            fill
-                                            sizes="100vw"
-                                            className="object-cover"
-                                            loading="lazy"
-                                            onLoad={handleImageLoad}
-                                            onError={handleImageLoad}
-                                        />
+                    {/* Mobile Vertical Scattered Scroll Layout */}
+                    <div className="flex md:hidden flex-col gap-14 px-4 py-12 w-full">
+                        {images.map((img, index) => (
+                            <div
+                                key={`mobile-${index}`}
+                                className={`flex flex-col ${img.mobileOffset || 'w-full'}`}
+                            >
+                                {(img.title || img.year) && (
+                                    <div className="mb-2 flex items-center justify-between text-xs tracking-widest text-neutral-400 uppercase font-mono">
+                                        <span>{img.title}</span>
+                                        <span>{img.year}</span>
                                     </div>
+                                )}
+                                <div className={`relative w-full ${img.mobileHeight || 'h-[40vh]'} overflow-hidden bg-neutral-950`}>
+                                    <Image
+                                        src={img.src}
+                                        alt={img.alt || img.title || `Gallery visual ${index + 1}`}
+                                        fill
+                                        sizes="100vw"
+                                        className="object-cover"
+                                        loading="lazy"
+                                        onLoad={handleImageLoad}
+                                        onError={handleImageLoad}
+                                    />
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
