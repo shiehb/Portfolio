@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { useLoading } from '@/lib/LoadingContext';
 import { triggerPageTransition } from '@/lib/transitionEvents';
 import { getProjects, getCachedProjects, ProjectItem } from '@/lib/projectsData';
 import Image from "next/image";
@@ -17,7 +16,6 @@ if (typeof window !== "undefined") {
 
 export default function ProjectsPage() {
   const router = useRouter();
-  const { incrementLoaded, hasInitialLoaded } = useLoading();
   const [projects, setProjects] = useState<ProjectItem[]>(() => getCachedProjects() || []);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(() => !getCachedProjects() || getCachedProjects()?.length === 0);
@@ -26,7 +24,6 @@ export default function ProjectsPage() {
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const hasIncremented = useRef(false);
   const animationsInitializedRef = useRef(false);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -57,15 +54,11 @@ export default function ProjectsPage() {
         setError(message);
       } finally {
         setIsLoading(false);
-        if (!hasIncremented.current && !hasInitialLoaded) {
-          hasIncremented.current = true;
-          incrementLoaded();
-        }
       }
     }
 
     loadProjects();
-  }, [incrementLoaded, hasInitialLoaded]);
+  }, []);
 
   // Run animations when projects load or filter changes
   useEffect(() => {

@@ -2,20 +2,10 @@
 'use client';
 
 import { useEffect, useRef } from "react";
-import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 
 export default function ContactPage() {
-  const { incrementLoaded, hasInitialLoaded } = useLoading();
-  const hasIncremented = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!hasIncremented.current && !hasInitialLoaded) {
-      hasIncremented.current = true;
-      incrementLoaded();
-    }
-  }, [incrementLoaded, hasInitialLoaded]);
 
   useEffect(() => {
     if (!containerRef.current) return;

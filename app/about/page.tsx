@@ -2,7 +2,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
-import { useLoading } from "@/lib/LoadingContext";
 import { triggerPageTransition } from "@/lib/transitionEvents";
 import Link from "next/link";
 import Image from "next/image";
@@ -92,8 +91,6 @@ const testimonials = [
 
 export default function AboutPage() {
     const router = useRouter();
-    const { incrementLoaded, hasInitialLoaded } = useLoading();
-    const hasIncremented = useRef(false);
     const [activeSection, setActiveSection] = useState("skills");
     
     const headerRef = useRef<HTMLDivElement>(null);
@@ -109,13 +106,6 @@ export default function AboutPage() {
             router.push(href);
         }, href, title);
     };
-
-    useEffect(() => {
-        if (!hasIncremented.current && !hasInitialLoaded) {
-            hasIncremented.current = true;
-            incrementLoaded();
-        }
-    }, [incrementLoaded, hasInitialLoaded]);
 
     useEffect(() => {
         const handleScroll = () => {
