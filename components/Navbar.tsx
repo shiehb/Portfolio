@@ -120,7 +120,7 @@ export default function Navbar() {
           if (frameRect.top <= headerY && frameRect.bottom >= headerY) {
             const shrinkProgress = Math.max(0, Math.min(1, -rect.top / (window.innerHeight * 0.7)));
             if (logoRef.current) logoRef.current.style.filter = `invert(${shrinkProgress})`;
-            setIsWhiteBg(false);
+            setIsWhiteBg(shrinkProgress < 0.5);
           } else {
             if (logoRef.current) logoRef.current.style.filter = "invert(1)";
             setIsWhiteBg(false);
@@ -367,7 +367,7 @@ export default function Navbar() {
               <svg
                 className={`w-full h-full stroke-current transition-colors duration-300 ${
                   isWhiteBg && !isMenuOpen
-                    ? "text-black group-hover:text-white"
+                    ? "text-black"
                     : "text-white group-hover:text-white"
                 }`}
                 fill="none"

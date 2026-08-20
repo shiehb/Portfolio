@@ -89,26 +89,28 @@ export default function Footer() {
       }
     });
 
+    // Guard: don't create a GSAP context/scope before the footer element exists
+    // (e.g. mid page-transition), which is what triggers "Invalid scope" warnings.
+    if (!footerRef.current) return;
+
     const ctx = gsap.context(() => {
-      if (footerRef.current) {
-        gsap.fromTo(
-          columns,
-          { opacity: 0, y: 24 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: footerRef.current,
-              start: "top 95%",
-              toggleActions: "play none none none",
-              once: true,
-            },
-          }
-        );
-      }
+      gsap.fromTo(
+        columns,
+        { opacity: 0, y: 24 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: footerRef.current,
+            start: "top 95%",
+            toggleActions: "play none none none",
+            once: true,
+          },
+        }
+      );
     }, footerRef);
 
     // Refresh triggers when route changes
