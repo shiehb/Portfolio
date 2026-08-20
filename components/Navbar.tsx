@@ -162,6 +162,16 @@ export default function Navbar() {
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    
+    // Show transition overlay immediately
+    const overlay = document.querySelector('.page-transition-overlay') as HTMLDivElement;
+    if (overlay) {
+      gsap.set(overlay, { 
+        opacity: 1, 
+        display: 'block' 
+      });
+    }
+    
     setPendingHref(href);
     setNavState('closing');
   };
@@ -287,7 +297,7 @@ export default function Navbar() {
           router.push(pendingHref);
           setPendingHref(null);
         }
-      }, 350);
+      }, 400);
     }
 
     return () => clearTimeout(timer);
@@ -373,6 +383,7 @@ export default function Navbar() {
             >
               <Link
                 href={item.href}
+                prefetch={true}
                 className={`nav-menu-link transition-colors text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black uppercase tracking-wider ${
                   isActive(item.href)
                     ? "text-[#fd551d]"

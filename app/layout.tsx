@@ -7,6 +7,8 @@ import Footer from "@/components/Footer";
 import { LoadingProvider } from "@/lib/LoadingContext";
 import GlobalLoader from "@/components/GlobalLoader";
 import PaperShaderWrapper from "@/components/PaperShaderWrapper";
+import PageTransition from "@/components/PageTransition";
+import { Suspense } from "react";
 
 // Load custom font with swap display for optimal FCP and CLS
 const departureMono = localFont({
@@ -86,13 +88,42 @@ export default function RootLayout({ children }: LayoutProps) {
       suppressHydrationWarning
       className={`${departureMono.variable} h-full antialiased`}
     >
+      <head>
+        {/* Preload critical images */}
+        <link rel="preload" as="image" href="/img/hero.webp" />
+        <link rel="preload" as="image" href="/img/logo.png" />
+        {/* Preload critical font */}
+        <link rel="preload" as="font" href="/font/departure-mono.otf" type="font/otf" crossOrigin="anonymous" />
+        {/* Prevent flash on initial load */}
+        <style>{`
+          body { background-color: #222222; }
+          .page-transition-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background-color: #222222;
+            pointer-events: none;
+            opacity: 0;
+            display: none;
+          }
+        `}</style>
+      </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col relative">
         <LoadingProvider>
           <GlobalLoader />
           <PaperShaderWrapper />
+          <PageTransition />
           <div className="relative z-10 flex flex-col min-h-full">
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1">
+              <Suspense fallback={
+                <div className="flex items-center justify-center min-h-[50vh]">
+                  <div className="w-8 h-8 border-2 border-[#fd551d] border-t-transparent rounded-full animate-spin" />
+                </div>
+              }>
+                {children}
+              </Suspense>
+            </main>
             <Footer />
           </div>
         </LoadingProvider>

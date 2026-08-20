@@ -1,4 +1,3 @@
-// components/HorizontalScroll.tsx
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
@@ -11,39 +10,105 @@ if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
 }
 
-const defaultGalleryImages = [
+interface ScatteredImage {
+    src: string;
+    alt: string;
+    title?: string;
+    year?: string;
+    category?: string;
+    width: string;     // e.g. "w-[28vw]"
+    height: string;    // e.g. "h-[45vh]"
+    left: string;      // Absolute position X in canvas (e.g. "left-[5vw]")
+    top: string;       // Absolute position Y in canvas (e.g. "top-[20vh]")
+    speed?: number;    // Parallax speed multiplier relative to track scroll
+}
+
+const landoStyleImages: ScatteredImage[] = [
     {
         src: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1600&auto=format&fit=crop',
-        alt: 'Work sample 1',
-        title: 'Monolith Pavilion',
-        category: 'Architecture',
+        alt: 'Monolith Pavilion',
+        title: 'MONOLITH PAVILION',
+        year: '2024',
+        width: 'w-[28vw]',
+        height: 'h-[45vh]',
+        left: 'left-[5vw]',
+        top: 'top-[20vh]',
+        speed: 1.1,
     },
     {
         src: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1600&auto=format&fit=crop',
-        alt: 'Work sample 2',
-        title: 'Vesper Lightfield',
-        category: 'Installation',
+        alt: 'Vesper Lightfield',
+        title: 'VESPER LIGHTFIELD',
+        year: '2023',
+        width: 'w-[20vw]',
+        height: 'h-[30vh]',
+        left: 'left-[38vw]',
+        top: 'top-[5vh]',
+        speed: 0.85,
     },
     {
         src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop',
-        alt: 'Work sample 3',
-        title: 'Chronos Horizon',
-        category: 'Industrial Design',
+        alt: 'Chronos Horizon',
+        title: 'CHRONOS HORIZON',
+        year: '2024',
+        width: 'w-[22vw]',
+        height: 'h-[38vh]',
+        left: 'left-[42vw]',
+        top: 'top-[52vh]',
+        speed: 1.25,
     },
     {
         src: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1600&auto=format&fit=crop',
-        alt: 'Work sample 5',
-        title: 'Solstice Sanctuary',
-        category: 'Interior Architecture',
+        alt: 'Solstice Sanctuary',
+        title: 'SOLSTICE SANCTUARY',
+        year: '2025',
+        width: 'w-[32vw]',
+        height: 'h-[55vh]',
+        left: 'left-[70vw]',
+        top: 'top-[18vh]',
+        speed: 0.95,
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1600&auto=format&fit=crop',
+        alt: 'Apex Pavilion',
+        title: 'BATTERSEA',
+        year: '2024',
+        width: 'w-[18vw]',
+        height: 'h-[28vh]',
+        left: 'left-[108vw]',
+        top: 'top-[8vh]',
+        speed: 1.15,
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1600&auto=format&fit=crop',
+        alt: 'High Performance Gala',
+        title: 'HIGH PERFORMANCE GALA',
+        year: '2024',
+        width: 'w-[24vw]',
+        height: 'h-[40vh]',
+        left: 'left-[112vw]',
+        top: 'top-[48vh]',
+        speed: 0.9,
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1600&auto=format&fit=crop',
+        alt: 'Urban Sanctuary',
+        title: 'BARCELONA',
+        year: '2024',
+        width: 'w-[26vw]',
+        height: 'h-[42vh]',
+        left: 'left-[142vw]',
+        top: 'top-[22vh]',
+        speed: 1.05,
     },
 ];
 
 interface HorizontalScrollProps {
-    images?: { src: string; alt: string; title?: string; category?: string }[];
+    images?: ScatteredImage[];
 }
 
 export default function GallerySection({
-    images = defaultGalleryImages,
+    images = landoStyleImages,
 }: HorizontalScrollProps) {
     const { incrementLoaded } = useLoading();
     const [imagesLoaded, setImagesLoaded] = useState(0);
@@ -153,28 +218,66 @@ export default function GallerySection({
             {/* Container */}
             <div className="relative z-10 min-h-screen md:h-screen w-full flex items-center overflow-hidden py-10 md:py-0 border-none outline-none">
                 <div ref={outerTrackRef} className="w-full will-change-transform">
-                    {/* Inner Track */}
+                    {/* Canvas Inner Track */}
                     <div
                         ref={innerTrackRef}
-                        className="flex flex-col md:flex-row items-center gap-10 px-5 md:pl-10 md:pr-[10vw] will-change-transform"
+                        className="relative h-screen w-[185vw] md:w-[175vw] shrink-0 will-change-transform flex-nowrap"
                     >
+                        {/* Desktop Scattered Canvas Layout */}
                         {images.map((img, index) => (
                             <div
                                 key={index}
-                                className="relative h-[60vh] md:h-[90vh] w-full md:w-[60vw] shrink-0 overflow-hidden bg-neutral-950 group flex items-center justify-center border-none outline-none"
+                                className={`scattered-card absolute hidden md:flex flex-col group ${img.left} ${img.top} ${img.width} ${img.height} will-change-transform`}
                             >
-                                <Image
-                                    src={img.src}
-                                    alt={img.alt || img.title || `Gallery visual ${index + 1}`}
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, 60vw"
-                                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 border-none outline-none"
-                                    loading="lazy"
-                                    onLoad={handleImageLoad}
-                                    onError={handleImageLoad}
-                                />
+                                {/* Title above image */}
+                                {(img.title || img.year) && (
+                                    <div className="mb-2 flex items-center justify-between text-[10px] tracking-widest text-neutral-400 uppercase font-mono">
+                                        <span>{img.title}</span>
+                                        <span>{img.year}</span>
+                                    </div>
+                                )}
+
+                                {/* Image container */}
+                                <div className="relative w-full h-full overflow-hidden bg-neutral-950 group flex items-center justify-center border-none outline-none">
+                                    <Image
+                                        src={img.src}
+                                        alt={img.alt || img.title || `Gallery visual ${index + 1}`}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, 35vw"
+                                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 border-none outline-none"
+                                        loading="lazy"
+                                        onLoad={handleImageLoad}
+                                        onError={handleImageLoad}
+                                    />
+                                </div>
                             </div>
                         ))}
+
+                        {/* Mobile Fallback Layout */}
+                        <div className="flex md:hidden flex-col gap-12 px-6 py-12 w-full h-auto overflow-y-auto">
+                            {images.map((img, index) => (
+                                <div key={`mobile-${index}`} className="flex flex-col w-full">
+                                    {(img.title || img.year) && (
+                                        <div className="mb-2 flex items-center justify-between text-xs tracking-widest text-neutral-400 uppercase font-mono">
+                                            <span>{img.title}</span>
+                                            <span>{img.year}</span>
+                                        </div>
+                                    )}
+                                    <div className="relative w-full h-[45vh] overflow-hidden bg-neutral-950">
+                                        <Image
+                                            src={img.src}
+                                            alt={img.alt || img.title || `Gallery visual ${index + 1}`}
+                                            fill
+                                            sizes="100vw"
+                                            className="object-cover"
+                                            loading="lazy"
+                                            onLoad={handleImageLoad}
+                                            onError={handleImageLoad}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

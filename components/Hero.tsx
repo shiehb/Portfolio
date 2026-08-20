@@ -20,8 +20,9 @@ const PIXELS_PER_SECOND = 60;
 function MarqueeWords({ reverse }: { reverse: boolean }) {
   return (
     <div
-      className={`flex items-center py-2 shrink-0 ${reverse ? "marquee-text-dark" : "marquee-text-light"
-        }`}
+      className={`flex items-center py-2 shrink-0 ${
+        reverse ? "marquee-text-dark" : "marquee-text-light"
+      }`}
     >
       {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, index) => (
         <span key={index} className="marquee-text shrink-0 px-6 select-none">
@@ -139,6 +140,7 @@ export default function Hero() {
   const signaturePathsRef = useRef<(SVGPathElement | null)[]>([]);
   const [imageLoaded, setImageLoaded] = useState(false);
   const hasIncremented = useRef(false);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (imageLoaded && !hasIncremented.current) {
@@ -147,6 +149,71 @@ export default function Hero() {
     }
   }, [imageLoaded, incrementLoaded]);
 
+  // Initial entrance animation to prevent flash
+  useEffect(() => {
+    // Set initial hidden states for all elements
+    if (frameRef.current) {
+      gsap.set(frameRef.current, { opacity: 0 });
+    }
+    if (portraitRef.current) {
+      gsap.set(portraitRef.current, { opacity: 0, scale: 1.1 });
+    }
+    if (marqueeRef.current) {
+      gsap.set(marqueeRef.current, { opacity: 0 });
+    }
+    // Signature starts completely hidden - will be shown by scroll animation
+    if (signatureContainerRef.current) {
+      gsap.set(signatureContainerRef.current, { 
+        opacity: 0, 
+        scale: 0.85,
+        y: 20,
+        visibility: 'hidden' // Ensure it's completely hidden
+      });
+    }
+    // ABOUT title starts hidden
+    if (aboutTitleRef.current) {
+      gsap.set(aboutTitleRef.current, { opacity: 0, y: 30, scale: 0.9 });
+    }
+
+    // Entrance animation timeline - ONLY for elements that should be visible initially
+    const tl = gsap.timeline({
+      defaults: { ease: "power2.out" },
+      onComplete: () => {
+        isFirstRender.current = false;
+      }
+    });
+
+    // 1. Frame fades in
+    tl.to(frameRef.current, {
+      opacity: 1,
+      duration: 0.6,
+      ease: "power2.out",
+    }, 0.1);
+
+    // 2. Portrait fades in with slight scale
+    tl.to(portraitRef.current, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.8,
+      ease: "power2.out",
+    }, 0.2);
+
+    // 3. Marquee fades in
+    tl.to(marqueeRef.current, {
+      opacity: 1,
+      duration: 0.6,
+      ease: "power2.out",
+    }, 0.3);
+
+    // NOTE: Signature is NOT animated here - it will be animated by scroll
+
+    // Cleanup
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
+  // Main scroll animation
   useEffect(() => {
     if (!scrollContainerRef.current || !frameRef.current) return;
 
@@ -182,7 +249,7 @@ export default function Hero() {
         gsap.set(marqueeRef.current, { opacity: 1 });
       }
 
-      // Initial state for ABOUT title
+      // Initial state for ABOUT title - hidden until end of scroll
       if (aboutTitleRef.current) {
         gsap.set(aboutTitleRef.current, {
           opacity: 0,
@@ -191,7 +258,7 @@ export default function Hero() {
         });
       }
 
-      // Initial state for signature paths
+      // Initial state for signature paths - hidden until scroll
       signaturePathsRef.current.forEach((path) => {
         if (path) {
           const length = path.getTotalLength ? path.getTotalLength() : 1200;
@@ -202,12 +269,13 @@ export default function Hero() {
         }
       });
 
-      // Initial state for signature container
+      // Initial state for signature container - completely hidden
       if (signatureContainerRef.current) {
         gsap.set(signatureContainerRef.current, {
           opacity: 0,
           scale: 0.85,
           y: 20,
+          visibility: 'hidden',
         });
       }
 
@@ -262,26 +330,22 @@ export default function Hero() {
         );
       }
 
-      // 4. Signature animation - centered with stroke drawing
+      // 4. Signature animation - appears and draws stroke during scroll
       if (signatureContainerRef.current) {
-        // Fade in signature container
-        tl.fromTo(
-          signatureContainerRef.current,
-          { opacity: 0, scale: 0.85, y: 15 },
-          {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            ease: "power2.out",
-            duration: 0.25,
-          },
-          0.38
-        );
+        // First make signature visible with fade and scale
+        tl.to(signatureContainerRef.current, {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          visibility: 'visible',
+          ease: "power2.out",
+          duration: 0.3,
+        }, 0.35);
 
         // Draw each path stroke
         signaturePathsRef.current.forEach((path, idx) => {
           if (path) {
-            const startOffset = 0.40 + idx * 0.04;
+            const startOffset = 0.38 + idx * 0.04;
             tl.to(
               path,
               {
@@ -295,7 +359,7 @@ export default function Hero() {
         });
       }
 
-      // 5. ABOUT title appears only at 100% zoomout (end of scroll)
+      // 5. ABOUT title appears ONLY at 100% zoomout (end of scroll)
       if (aboutTitleRef.current) {
         tl.fromTo(
           aboutTitleRef.current,
@@ -327,12 +391,13 @@ export default function Hero() {
         <section
           ref={frameRef}
           id="hero-zoom-frame"
-          className="relative flex justify-center items-center overflow-hidden text-zinc-900 will-change-[width,height,border-radius,background-color]"
+          className="relative flex justify-center items-center overflow-hidden text-zinc-900 will-change-[width,height,border-radius,background-color,opacity]"
           style={{
             margin: "auto",
             position: "relative",
             width: "100%",
             height: "100%",
+            opacity: 0,
           }}
         >
           {/* Marquee Background */}
@@ -340,6 +405,7 @@ export default function Hero() {
             ref={marqueeRef}
             className="absolute left-0 right-0 top-1/3 -translate-y-1/2 md:top-1/2 md:-translate-y-1/2 z-0 flex flex-col pointer-events-none will-change-[opacity]"
             aria-hidden="true"
+            style={{ opacity: 0 }}
           >
             <MarqueeRow />
             <MarqueeRow reverse />
@@ -348,7 +414,8 @@ export default function Hero() {
           {/* Portrait Image */}
           <div
             ref={portraitRef}
-            className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter]"
+            className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter,opacity]"
+            style={{ opacity: 0 }}
           >
             <div className="relative w-full h-full overflow-hidden">
               <Image
@@ -370,6 +437,10 @@ export default function Hero() {
           <div
             ref={signatureContainerRef}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none flex flex-col items-center justify-center w-[88%] max-w-[340px] sm:max-w-[440px] md:max-w-[540px] px-2"
+            style={{ 
+              opacity: 0,
+              visibility: 'hidden' 
+            }}
           >
             <svg
               viewBox="0 0 1000 950"
@@ -440,10 +511,11 @@ export default function Hero() {
           </div>
         </section>
 
-        {/* ABOUT Title - Outside the frame, at the bottom, larger size */}
+        {/* ABOUT Title - Outside the frame, at the bottom - ONLY appears at end of scroll */}
         <div
           ref={aboutTitleRef}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+          style={{ opacity: 0 }}
         >
           <span className="font-display text-lg sm:text-xl md:text-2xl lg:text-3xl uppercase tracking-[0.3em] text-white/60">
             ABOUT
