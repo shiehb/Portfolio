@@ -108,14 +108,18 @@ function AnimatedParagraph({ text, className = "" }: { text: string; className?:
         const start = Math.max(0, wordProgress - 0.15);
         const end = Math.min(1, wordProgress + 0.1);
 
+        // FIX: Convert calculated numbers to percentage strings correctly for TypeScript
+        const startPercent = 85 - (start * 60);
+        const endPercent = 85 - (end * 60);
+
         // Create a separate tween for each word that responds to scroll
         gsap.to(word, {
           opacity: 1,
           duration: 0.5,
           scrollTrigger: {
             trigger: paragraphRef.current,
-            start: `top ${85 - (start * 60)}%`,
-            end: `top ${85 - (end * 60)}%`,
+            start: `top ${startPercent}%`,
+            end: `top ${endPercent}%`,
             scrub: 1.5,
           },
         });
