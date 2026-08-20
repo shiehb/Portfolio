@@ -141,12 +141,12 @@ export default function Footer() {
       className="w-full min-h-[500px] md:min-h-screen text-white font-display flex flex-col justify-between bg-[#222222] relative z-10"
     >
       {/* Main Content - Top */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-10 md:pb-14">
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-10 sm:pt-16 md:pt-24 pb-8 sm:pb-10 md:pb-14">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16 w-full">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10 md:gap-16 w-full">
             {/* Column 1: Navigation */}
-            <div ref={col1Ref} className="md:col-span-1 opacity-100">
-              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-4 font-semibold">
+            <div ref={col1Ref} className="order-1 md:order-none col-span-1 opacity-100">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-3 sm:mb-4 font-semibold">
                 Navigation
               </span>
               <div className="flex flex-col items-start gap-2.5">
@@ -165,8 +165,8 @@ export default function Footer() {
             </div>
 
             {/* Column 2: Contact */}
-            <div ref={col2Ref} className="md:col-span-1 opacity-100">
-              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-4 font-semibold">
+            <div ref={col2Ref} className="order-3 md:order-none col-span-2 md:col-span-1 opacity-100">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-3 sm:mb-4 font-semibold">
                 Contact
               </span>
               <div className="flex flex-col items-start gap-4">
@@ -233,8 +233,8 @@ export default function Footer() {
             </div>
 
             {/* Column 3: Location & Time Zone */}
-            <div ref={col3Ref} className="md:col-span-1 opacity-100">
-              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-4 font-semibold">
+            <div ref={col3Ref} className="order-2 md:order-none col-span-1 opacity-100">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-3 sm:mb-4 font-semibold">
                 Location & Timezone
               </span>
               <div className="flex flex-col items-start gap-4">
@@ -251,7 +251,7 @@ export default function Footer() {
                 <div className="flex items-start gap-2.5 text-white">
                   <Clock className="w-4 h-4 text-[#fd551d] mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-sm sm:text-base font-mono font-medium text-white">
+                    <p className="text-xs sm:text-sm md:text-base font-mono font-medium text-white break-words">
                       {currentTime || "GMT+8 (PHT)"}
                     </p>
                     <p className="text-xs text-white/70">Philippine Standard Time (GMT+8)</p>
@@ -264,7 +264,7 @@ export default function Footer() {
       </div>
 
       {/* Socials and Copyright - Center */}
-      <div ref={socialRef} className="w-full px-4 sm:px-6 lg:px-8 py-6 flex justify-center items-center opacity-100">
+      <div ref={socialRef} className="w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-6 flex justify-center items-center opacity-100">
         <div className="text-center space-y-4">
           {/* Social Links */}
           <div className="flex justify-center items-center gap-4 sm:gap-8 flex-wrap">
@@ -301,7 +301,7 @@ export default function Footer() {
       >
         <svg
           viewBox="0 0 1000 140"
-          className="w-full max-h-[140px] fill-[#fd551d]"
+          className="w-full max-h-[70px] xs:max-h-[85px] sm:max-h-[105px] md:max-h-[140px] fill-[#fd551d]"
           role="presentation"
           aria-hidden="true"
         >
