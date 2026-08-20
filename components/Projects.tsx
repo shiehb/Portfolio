@@ -4,8 +4,10 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useLoading } from '@/lib/LoadingContext';
 import { triggerPageTransition } from '@/lib/transitionEvents';
+import { getProjects, getCachedProjects, ProjectItem } from '@/lib/projectsData';
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Loader2, Grid3x3, ArrowRight } from "lucide-react";
@@ -14,19 +16,14 @@ if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
 }
 
-interface ProjectItem {
-    id: string | number;
-    image: string;
-    category: string;
-    width?: number;
-    height?: number;
-    aspectRatio?: number;
-}
-
 export default function Projects() {
-    const { incrementLoaded } = useLoading();
-    const [projects, setProjects] = useState<ProjectItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
+    const { incrementLoaded, hasInitialLoaded } = useLoading();
+    const [projects, setProjects] = useState<ProjectItem[]>(() => {
+        const cached = getCachedProjects();
+        return cached ? cached.slice(0, 12) : [];
+    });
+    const [isLoading, setIsLoading] = useState(() => !getCachedProjects() || getCachedProjects()?.length === 0);
     const [error, setError] = useState<string | null>(null);
 
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -38,48 +35,46 @@ export default function Projects() {
     const handleViewAllClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
         triggerPageTransition(() => {
-            window.location.href = '/projects';
-        });
+            router.push('/projects');
+        }, '/projects', 'PROJECTS');
+    };
+
+    const handleProjectCardClick = (e: React.MouseEvent, category?: string) => {
+        e.preventDefault();
+        triggerPageTransition(() => {
+            router.push('/projects');
+        }, '/projects', category ? `${category.toUpperCase()}` : 'PROJECTS');
     };
 
     useEffect(() => {
-        async function fetchDriveProjects() {
-            setIsLoading(true);
-            setError(null);
+        async function loadDriveProjects() {
             try {
-                const res = await fetch("/api/drive");
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error || "Failed to load projects");
+                const cached = getCachedProjects();
+                if (cached && cached.length > 0) {
+                    setProjects(cached.slice(0, 12));
+                    setIsLoading(false);
+                    return;
                 }
 
-                const fetchedProjects: ProjectItem[] = (data.projects || [])
-                    .filter((project: ProjectItem) => {
-                        const hasValidId = project.id !== undefined && project.id !== null && project.id !== '';
-                        const hasValidImage = project.image && project.image.trim() !== '';
-                        const hasValidCategory = project.category && project.category.trim() !== '';
-                        return hasValidId && hasValidImage && hasValidCategory;
-                    });
-
-                // Select 12 projects on initial load
-                const selectedProjects = fetchedProjects.slice(0, 12);
-                setProjects(selectedProjects);
+                setIsLoading(true);
+                setError(null);
+                const allProjects = await getProjects();
+                setProjects(allProjects.slice(0, 12));
             } catch (err: unknown) {
                 console.error("Error fetching projects:", err);
                 const message = err instanceof Error ? err.message : "Failed to load projects from Google Drive.";
                 setError(message);
             } finally {
                 setIsLoading(false);
-                if (!hasIncremented.current) {
+                if (!hasIncremented.current && !hasInitialLoaded) {
                     hasIncremented.current = true;
                     incrementLoaded();
                 }
             }
         }
 
-        fetchDriveProjects();
-    }, [incrementLoaded]);
+        loadDriveProjects();
+    }, [incrementLoaded, hasInitialLoaded]);
 
     // Run animations when projects load
     useEffect(() => {
@@ -200,7 +195,15 @@ export default function Projects() {
                         return (
                             <div
                                 key={project.id}
-                                className="batch-image w-full relative overflow-hidden will-change-transform shadow-sm group rounded-sm bg-zinc-100 break-inside-avoid"
+                                onClick={(e) => handleProjectCardClick(e, project.category)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        handleProjectCardClick(e as unknown as React.MouseEvent, project.category);
+                                    }
+                                }}
+                                className="batch-image w-full relative overflow-hidden will-change-transform shadow-sm group rounded-sm bg-zinc-100 break-inside-avoid cursor-pointer"
                             >
                                 <div
                                     className="project-img-inner w-full relative overflow-hidden transition-transform duration-500 ease-out group-hover:scale-105"

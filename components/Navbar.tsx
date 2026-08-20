@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { triggerPageTransition } from '@/lib/transitionEvents';
+import { useLoading } from '@/lib/LoadingContext';
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -21,6 +22,7 @@ const navItems = [
 ];
 
 export default function Navbar() {
+  const { isTransitioning } = useLoading();
   const [navState, setNavState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -163,17 +165,19 @@ export default function Navbar() {
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     
-    // Immediately close menu without animation (hide it instantly)
-    setNavState('closed');
-    
-    // Small delay to ensure menu is hidden before transition starts
-    setTimeout(() => {
-      // Trigger page transition with zoom-in effect
-      triggerPageTransition(() => {
-        // After transition animation completes, navigate
-        router.push(href);
-      });
-    }, 50);
+    // If clicking same page, close menu normally and scroll top
+    if (pathname === href) {
+      setNavState('closing');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Trigger page transition immediately without sliding menu up first
+    triggerPageTransition(() => {
+      // Runs once transition overlay has zoomed in to fully cover the screen
+      setNavState('closed');
+      router.push(href);
+    }, href);
   };
 
   // Animate menu icon when state changes
@@ -321,7 +325,12 @@ export default function Navbar() {
         ref={headerRef}
         className="fixed top-0 left-0 w-full h-[70px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center z-30 bg-transparent pointer-events-none"
       >
-        <Link href="/" aria-label="Go to home page" className="pointer-events-auto flex items-center">
+        <Link
+          href="/"
+          aria-label="Go to home page"
+          className="pointer-events-auto flex items-center cursor-pointer"
+          onClick={(e) => handleLinkClick(e, '/')}
+        >
           <div ref={logoRef} className="flex items-center">
             <Image
               src="/img/logo.png"
@@ -366,9 +375,9 @@ export default function Navbar() {
       </header>
 
       <nav
-        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 text-white transform transition-transform duration-500 ease-in-out z-20 flex items-center justify-center ${
-          isOverlayDown ? "translate-y-0" : "-translate-y-full"
-        }`}
+        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 text-white transform z-20 flex items-center justify-center ${
+          isOverlayDown ? "translate-y-0 pointer-events-auto" : "-translate-y-full pointer-events-none"
+        } ${isTransitioning ? "transition-none" : "transition-transform duration-500 ease-in-out"}`}
         id="nav-menu"
         aria-label="Main navigation"
       >

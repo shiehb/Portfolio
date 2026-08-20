@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useLoading } from '@/lib/LoadingContext';
+import { triggerPageTransition } from '@/lib/transitionEvents';
+import { getProjects, getCachedProjects, ProjectItem } from '@/lib/projectsData';
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Loader2, ArrowLeft } from "lucide-react";
@@ -12,20 +15,12 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-interface ProjectItem {
-  id: string | number;
-  image: string;
-  category: string;
-  width?: number;
-  height?: number;
-  aspectRatio?: number;
-}
-
 export default function ProjectsPage() {
-  const { incrementLoaded, resetLoading, setTotalItems } = useLoading();
-  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const router = useRouter();
+  const { incrementLoaded, hasInitialLoaded } = useLoading();
+  const [projects, setProjects] = useState<ProjectItem[]>(() => getCachedProjects() || []);
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !getCachedProjects() || getCachedProjects()?.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [filterKey, setFilterKey] = useState(0);
 
@@ -35,45 +30,42 @@ export default function ProjectsPage() {
   const animationsInitializedRef = useRef(false);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const handleBackClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    triggerPageTransition(() => {
+      router.push('/');
+    }, '/', 'HOME');
+  };
+
   useEffect(() => {
-    resetLoading();
-    setTotalItems(1);
-
-    async function fetchDriveProjects() {
-      setIsLoading(true);
-      setError(null);
+    async function loadProjects() {
       try {
-        const res = await fetch("/api/drive");
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || "Failed to load projects");
+        const cached = getCachedProjects();
+        if (cached && cached.length > 0) {
+          setProjects(cached);
+          setIsLoading(false);
+          return;
         }
 
-        const fetchedProjects: ProjectItem[] = (data.projects || [])
-          .filter((project: ProjectItem) => {
-            const hasValidId = project.id !== undefined && project.id !== null && project.id !== '';
-            const hasValidImage = project.image && project.image.trim() !== '';
-            const hasValidCategory = project.category && project.category.trim() !== '';
-            return hasValidId && hasValidImage && hasValidCategory;
-          });
-
-        setProjects(fetchedProjects || []);
+        setIsLoading(true);
+        setError(null);
+        const data = await getProjects();
+        setProjects(data);
       } catch (err: unknown) {
         console.error("Error fetching projects:", err);
         const message = err instanceof Error ? err.message : "Failed to load projects from Google Drive.";
         setError(message);
       } finally {
         setIsLoading(false);
-        if (!hasIncremented.current) {
+        if (!hasIncremented.current && !hasInitialLoaded) {
           hasIncremented.current = true;
           incrementLoaded();
         }
       }
     }
 
-    fetchDriveProjects();
-  }, [setTotalItems, incrementLoaded, resetLoading]);
+    loadProjects();
+  }, [incrementLoaded, hasInitialLoaded]);
 
   // Run animations when projects load or filter changes
   useEffect(() => {
@@ -224,7 +216,8 @@ export default function ProjectsPage() {
       <div className="max-w-[1280px] mx-auto mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-wider text-zinc-400 hover:text-white transition-colors duration-300 group"
+          onClick={handleBackClick}
+          className="inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-wider text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
           <span>Back to Home</span>

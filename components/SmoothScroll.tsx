@@ -16,7 +16,7 @@ if (typeof window !== 'undefined') {
 }
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
-    const { isLoading } = useLoading();
+    const { isLoading, isTransitioning } = useLoading();
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -37,7 +37,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     }, []);
 
     useEffect(() => {
-        if (isLoading) return;
+        if (isLoading || isTransitioning) return;
 
         // Ensure window scroll is at top before Lenis and ScrollTrigger engage
         window.scrollTo(0, 0);
@@ -69,7 +69,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
             gsap.ticker.remove(updateTicker);
             lenis.destroy();
         };
-    }, [isLoading]);
+    }, [isLoading, isTransitioning]);
 
     return <>{children}</>;
 }

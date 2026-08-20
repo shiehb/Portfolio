@@ -10,14 +10,11 @@ import SmoothScrollWrapper from "@/components/SmoothScrollWrapper";
 import { useLoading } from "@/lib/LoadingContext";
 
 export default function Home() {
-  const { setTotalItems, incrementLoaded, resetLoading } = useLoading();
+  const { setTotalItems, incrementLoaded, hasInitialLoaded } = useLoading();
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    // Reset loading state when component mounts
-    resetLoading();
-
-    if (hasInitialized.current) return;
+    if (hasInitialized.current || hasInitialLoaded) return;
     hasInitialized.current = true;
 
     setTotalItems(2);
@@ -54,7 +51,7 @@ export default function Home() {
     return () => {
       clearTimeout(timer);
     };
-  }, [setTotalItems, incrementLoaded, resetLoading]);
+  }, [setTotalItems, incrementLoaded, hasInitialLoaded]);
 
   return (
     <SmoothScrollWrapper>

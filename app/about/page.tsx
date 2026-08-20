@@ -3,8 +3,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLoading } from "@/lib/LoadingContext";
+import { triggerPageTransition } from "@/lib/transitionEvents";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -89,7 +91,8 @@ const testimonials = [
 ];
 
 export default function AboutPage() {
-    const { setTotalItems, incrementLoaded, resetLoading } = useLoading();
+    const router = useRouter();
+    const { incrementLoaded, hasInitialLoaded } = useLoading();
     const hasIncremented = useRef(false);
     const [activeSection, setActiveSection] = useState("skills");
     
@@ -100,15 +103,19 @@ export default function AboutPage() {
     const philosophyRef = useRef<HTMLDivElement>(null);
     const profileImageRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        resetLoading();
-        setTotalItems(1);
+    const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, href: string, title?: string) => {
+        e.preventDefault();
+        triggerPageTransition(() => {
+            router.push(href);
+        }, href, title);
+    };
 
-        if (!hasIncremented.current) {
+    useEffect(() => {
+        if (!hasIncremented.current && !hasInitialLoaded) {
             hasIncremented.current = true;
             incrementLoaded();
         }
-    }, [setTotalItems, incrementLoaded, resetLoading]);
+    }, [incrementLoaded, hasInitialLoaded]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -338,13 +345,15 @@ export default function AboutPage() {
                         <div className="mt-6 flex flex-wrap gap-4">
                             <Link
                                 href="/projects"
-                                className="px-6 py-2.5 bg-[#fd551d] text-white rounded-full text-sm font-semibold hover:bg-[#e04815] transition-all shadow-md shadow-[#fd551d]/20 hover:scale-105 active:scale-95"
+                                onClick={(e) => handleNavigate(e, '/projects', 'PROJECTS')}
+                                className="px-6 py-2.5 bg-[#fd551d] text-white rounded-full text-sm font-semibold hover:bg-[#e04815] transition-all shadow-md shadow-[#fd551d]/20 hover:scale-105 active:scale-95 cursor-pointer"
                             >
                                 View My Work
                             </Link>
                             <Link
                                 href="/contact"
-                                className="px-6 py-2.5 bg-white/80 border border-zinc-300 text-zinc-800 rounded-full text-sm font-semibold hover:bg-zinc-100 transition-all shadow-sm hover:scale-105 active:scale-95"
+                                onClick={(e) => handleNavigate(e, '/contact', 'CONTACT')}
+                                className="px-6 py-2.5 bg-white/80 border border-zinc-300 text-zinc-800 rounded-full text-sm font-semibold hover:bg-zinc-100 transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
                             >
                                 Get in Touch
                             </Link>

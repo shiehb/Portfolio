@@ -5,6 +5,7 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback,
 
 type LoadingContextType = {
   isLoading: boolean;
+  hasInitialLoaded: boolean;
   setLoading: (loading: boolean) => void;
   incrementLoaded: () => void;
   totalItems: number;
@@ -20,20 +21,24 @@ const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export function LoadingProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
+  const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
   const [totalItems, setTotalItems] = useState(1);
   const [progress, setProgress] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  
   const hasLoadedRef = useRef(false);
+  const hasInitialLoadedRef = useRef(false);
   const isMountedRef = useRef(true);
 
   const incrementLoaded = useCallback(() => {
-    if (hasLoadedRef.current || isTransitioning) return;
+    if (hasLoadedRef.current || isTransitioning || hasInitialLoadedRef.current) return;
     setLoadedCount(prev => prev + 1);
   }, [isTransitioning]);
 
   const resetLoading = useCallback(() => {
-    if (isTransitioning) return;
+    // If the initial site load is already done or we're navigating, never show loader again
+    if (isTransitioning || hasInitialLoadedRef.current) return;
     hasLoadedRef.current = false;
     setLoadedCount(0);
     setProgress(0);
@@ -42,23 +47,20 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
 
   const startTransition = useCallback(() => {
     setIsTransitioning(true);
-    // Force hide loader immediately
+    // Ensure loader is completely disabled and marked as initially loaded
     setIsLoading(false);
     hasLoadedRef.current = true;
+    hasInitialLoadedRef.current = true;
+    setHasInitialLoaded(true);
   }, []);
 
   const endTransition = useCallback(() => {
     setIsTransitioning(false);
-    // Reset loading state for next page load
-    hasLoadedRef.current = false;
-    setLoadedCount(0);
-    setProgress(0);
-    setIsLoading(true);
   }, []);
 
-  // Smooth progress animation from 0 to 100
+  // Smooth progress animation from 0 to 100 on initial site entry
   useEffect(() => {
-    if (!isLoading || isTransitioning) return;
+    if (!isLoading || isTransitioning || hasInitialLoadedRef.current) return;
 
     const interval = setInterval(() => {
       setProgress(prev => {
@@ -68,56 +70,72 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
         }
         return prev;
       });
-    }, 40);
+    }, 35);
 
     return () => clearInterval(interval);
   }, [isLoading, loadedCount, totalItems, isTransitioning]);
 
   useEffect(() => {
-    // Skip loading if transitioning
-    if (isTransitioning) {
-      setIsLoading(false);
+    if (isTransitioning || hasInitialLoadedRef.current) {
       return;
     }
 
-    // Graceful timer to complete loading if assets take time
+    const completeInitialLoad = () => {
+      hasLoadedRef.current = true;
+      hasInitialLoadedRef.current = true;
+      setProgress(100);
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          setIsLoading(false);
+          setHasInitialLoaded(true);
+        }
+      }, 200);
+    };
+
+    // Safety fallback timer for initial site load
     const forceTimer = setTimeout(() => {
-      if (isLoading && !hasLoadedRef.current && !isTransitioning) {
-        hasLoadedRef.current = true;
-        setProgress(100);
-        setTimeout(() => {
-          if (isMountedRef.current && !isTransitioning) {
-            setIsLoading(false);
-          }
-        }, 200);
+      if (isLoading && !hasLoadedRef.current && !isTransitioning && !hasInitialLoadedRef.current) {
+        completeInitialLoad();
       }
-    }, 900);
+    }, 850);
 
     if (loadedCount >= totalItems && totalItems > 0 && !hasLoadedRef.current && !isTransitioning) {
-      hasLoadedRef.current = true;
-      setProgress(100);
-      const timer = setTimeout(() => {
-        if (isMountedRef.current && !isTransitioning) {
-          setIsLoading(false);
-        }
-      }, 250);
-      return () => clearTimeout(timer);
+      completeInitialLoad();
+      return () => clearTimeout(forceTimer);
     }
 
     return () => clearTimeout(forceTimer);
   }, [loadedCount, totalItems, isLoading, isTransitioning]);
+
+  // Lock scroll during initial loader or page transitions to prevent double loading scroll
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const isLocked = isLoading || isTransitioning;
+    if (isLocked) {
+      document.documentElement.classList.add('is-locked');
+      document.body.classList.add('is-locked');
+    } else {
+      document.documentElement.classList.remove('is-locked');
+      document.body.classList.remove('is-locked');
+    }
+  }, [isLoading, isTransitioning]);
 
   // Cleanup
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.remove('is-locked');
+        document.body.classList.remove('is-locked');
+      }
     };
   }, []);
 
   return (
     <LoadingContext.Provider value={{
       isLoading,
+      hasInitialLoaded,
       setLoading: setIsLoading,
       incrementLoaded,
       totalItems,

@@ -2,6 +2,7 @@
 'use client';
 
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Copy, Check, Clock, MapPin, ArrowUpRight } from "lucide-react";
 import { triggerPageTransition } from '@/lib/transitionEvents';
@@ -30,6 +31,8 @@ const EMAIL = "jerichourbano.01.01.04@gmail.com";
 const PHONE = "+63 956 698 6556";
 
 export default function Footer() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [currentYear] = useState(() => new Date().getFullYear());
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
@@ -42,9 +45,13 @@ export default function Footer() {
 
   const handleFooterLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    if (pathname === href) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     triggerPageTransition(() => {
-      window.location.href = href;
-    });
+      router.push(href);
+    }, href);
   };
 
   useEffect(() => {

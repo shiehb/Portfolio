@@ -128,11 +128,7 @@ export default function RootLayout({ children }: LayoutProps) {
           <div className="relative z-10 flex flex-col min-h-full">
             <Navbar />
             <main className="flex-1">
-              <Suspense fallback={
-                <div className="flex items-center justify-center min-h-[50vh]">
-                  <div className="w-8 h-8 border-2 border-[#fd551d] border-t-transparent rounded-full animate-spin" />
-                </div>
-              }>
+              <Suspense fallback={null}>
                 {children}
               </Suspense>
             </main>

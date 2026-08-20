@@ -6,19 +6,16 @@ import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 
 export default function ContactPage() {
-  const { setTotalItems, incrementLoaded, resetLoading } = useLoading();
+  const { incrementLoaded, hasInitialLoaded } = useLoading();
   const hasIncremented = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    resetLoading();
-    setTotalItems(1);
-
-    if (!hasIncremented.current) {
+    if (!hasIncremented.current && !hasInitialLoaded) {
       hasIncremented.current = true;
       incrementLoaded();
     }
-  }, [setTotalItems, incrementLoaded, resetLoading]);
+  }, [incrementLoaded, hasInitialLoaded]);
 
   useEffect(() => {
     if (!containerRef.current) return;
