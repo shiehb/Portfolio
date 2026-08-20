@@ -91,6 +91,44 @@ function MarqueeRow({ reverse = false }: { reverse?: boolean }) {
   );
 }
 
+// export function get3x2TargetDimensions() {
+//   if (typeof window === "undefined") {
+//     return { targetWidth: 900, targetHeight: 600, borderRadius: "24px" };
+//   }
+
+//   const vw = window.innerWidth;
+//   const vh = window.innerHeight;
+//   const isMobile = vw < 768;
+
+//   let targetWidth: number;
+//   let targetHeight: number;
+//   let borderRadius = "24px";
+
+//   if (isMobile) {
+//     targetWidth = Math.min(vw * 0.76, (vh * 0.46) / 1.25, 290);
+//     targetHeight = Math.round(targetWidth * 1.28);
+//     targetWidth = Math.round(targetWidth);
+//     borderRadius = "16px";
+//   } else {
+//     if (vw < 1024) {
+//       targetWidth = Math.min(vw * 0.75, (vh * 0.65) * 1.5, 620);
+//       borderRadius = "20px";
+//     } else if (vw < 1280) {
+//       targetWidth = Math.min(vw * 0.60, (vh * 0.70) * 1.5, 780);
+//       borderRadius = "24px";
+//     } else if (vw < 2560) {
+//       targetWidth = Math.min(vw * 0.32, (vh * 0.52) * 1.5, 960);
+//       borderRadius = "24px";
+//     } else {
+//       targetWidth = Math.min(vw * 0.45, (vh * 0.75) * 1.5, 1440);
+//       borderRadius = "28px";
+//     }
+//     targetHeight = Math.round(targetWidth / 1.5);
+//     targetWidth = Math.round(targetWidth);
+//   }
+
+//   return { targetWidth, targetHeight, borderRadius };
+// }
 export function get3x2TargetDimensions() {
   if (typeof window === "undefined") {
     return { targetWidth: 900, targetHeight: 600, borderRadius: "24px" };
@@ -114,13 +152,16 @@ export function get3x2TargetDimensions() {
       targetWidth = Math.min(vw * 0.75, (vh * 0.65) * 1.5, 620);
       borderRadius = "20px";
     } else if (vw < 1280) {
-      targetWidth = Math.min(vw * 0.60, (vh * 0.70) * 1.5, 780);
+      // Decrease from 0.60 to 0.45 and cap max width (e.g., 600px)
+      targetWidth = Math.min(vw * 0.45, (vh * 0.60) * 1.5, 600);
       borderRadius = "24px";
     } else if (vw < 2560) {
-      targetWidth = Math.min(vw * 0.52, (vh * 0.72) * 1.5, 960);
+      // Decrease percentage from 0.52 to 0.38 and max width from 960 to 700
+      targetWidth = Math.min(vw * 0.38, (vh * 0.60) * 1.5, 700);
       borderRadius = "24px";
     } else {
-      targetWidth = Math.min(vw * 0.45, (vh * 0.75) * 1.5, 1440);
+      // Ultra-wide screens: Decrease max width from 1440 to 900
+      targetWidth = Math.min(vw * 0.35, (vh * 0.65) * 1.5, 900);
       borderRadius = "28px";
     }
     targetHeight = Math.round(targetWidth / 1.5);
@@ -510,7 +551,7 @@ export default function Hero() {
         {/* ABOUT Title - Outside the frame, at the bottom - ONLY appears at end of scroll */}
         <div
           ref={aboutTitleRef}
-          className="absolute bottom-3 sm:bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+          className="absolute bottom-10 sm:bottom-12 md:bottom-16 lg:bottom-20 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
           style={{ opacity: 0 }}
         >
           <span className="font-display text-base sm:text-xl md:text-2xl lg:text-3xl uppercase tracking-[0.3em] text-white font-bold">
