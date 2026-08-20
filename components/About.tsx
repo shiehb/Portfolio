@@ -50,7 +50,7 @@ function WordsPullUpMultiStyle({
         opacity: 1,
         duration: 0.5,
         stagger: 0.08,
-        ease: [0.33, 1, 0.68, 1],
+        ease: "power2.out",
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 85%",
@@ -86,21 +86,10 @@ function AnimatedParagraph({ text, className = "" }: { text: string; className?:
       const words = paragraphRef.current?.querySelectorAll(".word-span");
       if (!words || words.length === 0) return;
 
-      // Get the total number of words for progress calculation
       const totalWords = words.length;
 
       // Set initial opacity
       gsap.set(words, { opacity: 0.25 });
-
-      // Create a timeline that triggers on scroll
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: paragraphRef.current,
-          start: "top 85%",
-          end: "bottom 25%",
-          scrub: 1.5,
-        },
-      });
 
       // Animate each word based on scroll progress
       words.forEach((word, index) => {
@@ -108,11 +97,9 @@ function AnimatedParagraph({ text, className = "" }: { text: string; className?:
         const start = Math.max(0, wordProgress - 0.15);
         const end = Math.min(1, wordProgress + 0.1);
 
-        // FIX: Explicitly cast numbers to strings so TypeScript stops failing on Vercel
-        const startPercent = (85 - (start * 60)).toString();
-        const endPercent = (85 - (end * 60)).toString();
+        const startPercent = (85 - (start * 60)).toFixed(2);
+        const endPercent = (85 - (end * 60)).toFixed(2);
 
-        // Create a separate tween for each word that responds to scroll
         gsap.to(word, {
           opacity: 1,
           duration: 0.5,
