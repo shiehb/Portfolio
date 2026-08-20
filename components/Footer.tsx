@@ -321,7 +321,7 @@ export default function Footer() {
             fontFamily="var(--font-display)"
             letterSpacing="-0.02em"
           >
-            @echo_ng
+            @echo_.ng
           </text>
         </svg>
       </div>

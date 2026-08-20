@@ -112,8 +112,8 @@ export default function RootLayout({ children }: LayoutProps) {
           .page-transition-overlay {
             position: fixed;
             inset: 0;
-            z-index: 9999;
-            background-color: #222222;
+            z-index: 99999;
+            background-color: transparent !important;
             pointer-events: none;
             opacity: 0;
             display: none;

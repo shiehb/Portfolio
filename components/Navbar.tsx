@@ -24,7 +24,6 @@ const navItems = [
 export default function Navbar() {
   const { isTransitioning } = useLoading();
   const [navState, setNavState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
-  const [pendingHref, setPendingHref] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
@@ -186,13 +185,6 @@ export default function Navbar() {
 
     const isOpen = navState === 'opening' || navState === 'open';
     
-    // Animate the icon container rotation
-    gsap.to(menuIconRef.current, {
-      rotate: 0,
-      duration: 0.4,
-      ease: "power2.inOut",
-    });
-
     // Get all lines
     const lines = menuIconRef.current.querySelectorAll('line');
     const topLine = lines[0];
@@ -202,39 +194,39 @@ export default function Navbar() {
     if (!topLine || !middleLine || !bottomLine) return;
 
     if (isOpen) {
-      // Transform to "X" - use proper coordinates
+      // Transform to "X"
       gsap.to(topLine, {
         attr: { x1: 4, y1: 4, x2: 20, y2: 20 },
-        duration: 0.4,
+        duration: 0.35,
         ease: "power2.inOut",
       });
       gsap.to(middleLine, {
         opacity: 0,
         scaleX: 0,
-        duration: 0.3,
+        duration: 0.25,
         ease: "power2.inOut",
       });
       gsap.to(bottomLine, {
         attr: { x1: 4, y1: 20, x2: 20, y2: 4 },
-        duration: 0.4,
+        duration: 0.35,
         ease: "power2.inOut",
       });
     } else {
       // Transform back to hamburger
       gsap.to(topLine, {
         attr: { x1: 4, y1: 7, x2: 20, y2: 7 },
-        duration: 0.4,
+        duration: 0.35,
         ease: "power2.inOut",
       });
       gsap.to(middleLine, {
         opacity: 1,
         scaleX: 1,
-        duration: 0.3,
+        duration: 0.25,
         ease: "power2.inOut",
       });
       gsap.to(bottomLine, {
         attr: { x1: 4, y1: 17, x2: 20, y2: 17 },
-        duration: 0.4,
+        duration: 0.35,
         ease: "power2.inOut",
       });
     }
@@ -246,22 +238,20 @@ export default function Navbar() {
       // Animate links with stagger
       navLinksRef.current.forEach((link, index) => {
         if (link) {
-          // Set initial state
           gsap.set(link, { 
             opacity: 0, 
             y: 30,
-            scale: 0.8,
+            scale: 0.85,
             rotateX: 15,
           });
           
-          // Animate in with delay
           gsap.to(link, {
             opacity: 1,
             y: 0,
             scale: 1,
             rotateX: 0,
-            duration: 0.6,
-            delay: 0.2 + index * 0.08,
+            duration: 0.55,
+            delay: 0.18 + index * 0.08,
             ease: "back.out(1.4)",
           });
         }
@@ -274,13 +264,20 @@ export default function Navbar() {
           const reverseIndex = visibleLinks.length - 1 - index;
           gsap.to(link, {
             opacity: 0,
-            y: -30,
-            scale: 0.7,
+            y: -25,
+            scale: 0.8,
             rotateX: -15,
-            duration: 0.3,
-            delay: reverseIndex * 0.05,
+            duration: 0.25,
+            delay: reverseIndex * 0.04,
             ease: "power2.in",
           });
+        }
+      });
+    } else if (navState === 'closed') {
+      // Reset links to hidden state cleanly when closed
+      navLinksRef.current.forEach((link) => {
+        if (link) {
+          gsap.set(link, { opacity: 0 });
         }
       });
     }
@@ -297,15 +294,11 @@ export default function Navbar() {
     } else if (navState === 'closing') {
       timer = setTimeout(() => {
         setNavState('closed');
-        if (pendingHref) {
-          router.push(pendingHref);
-          setPendingHref(null);
-        }
       }, 400);
     }
 
     return () => clearTimeout(timer);
-  }, [navState, pendingHref, router]);
+  }, [navState]);
 
   useEffect(() => {
     document.body.style.overflow = isOverlayDown ? 'hidden' : '';

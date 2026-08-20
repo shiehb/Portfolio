@@ -1,115 +1,183 @@
 // components/PageTransition.tsx
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { useLoading } from '@/lib/LoadingContext';
 import { PageTransitionDetail } from '@/lib/transitionEvents';
+import { FilledPixelSmiley, CutoutPixelSmiley } from '@/components/TransitionShapes';
 import gsap from 'gsap';
 
 export default function PageTransition() {
   const pathname = usePathname();
   const overlayRef = useRef<HTMLDivElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLSpanElement>(null);
+  const solidBgRef = useRef<HTMLDivElement>(null);
+  const introShapeRef = useRef<HTMLDivElement>(null);
+  const outroCutoutRef = useRef<HTMLDivElement>(null);
+  const brandTextRef = useRef<HTMLDivElement>(null);
+
   const isFirstLoad = useRef(true);
   const currentPath = useRef(pathname);
   const isTransitioningRef = useRef(false);
-  const [destTitle, setDestTitle] = useState<string>("PORTFOLIO");
+  const pendingOutroRef = useRef(false);
+  const outroTriggeredRef = useRef(false);
+  const safetyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const { startTransition, endTransition } = useLoading();
 
-  const getPageTitle = (path?: string) => {
-    if (!path) return "PORTFOLIO";
-    if (path === "/" || path === "") return "HOME";
-    if (path.includes("/about")) return "ABOUT";
-    if (path.includes("/projects")) return "PROJECTS";
-    if (path.includes("/contact")) return "CONTACT";
-    return path.replace("/", "").toUpperCase();
-  };
+  // Execute Outro: Inverted Pixel Smiley Transparency Mask zooms in to reveal the loaded page
+  const playOutroAnimation = useCallback(() => {
+    if (!overlayRef.current || outroTriggeredRef.current) return;
+    outroTriggeredRef.current = true;
+    pendingOutroRef.current = false;
 
-  // Handle manual transitions from navbar, footer, or project cards
+    if (safetyTimeoutRef.current) {
+      clearTimeout(safetyTimeoutRef.current);
+      safetyTimeoutRef.current = null;
+    }
+
+    const overlay = overlayRef.current;
+    const solidBg = solidBgRef.current;
+    const outroCutout = outroCutoutRef.current;
+    const brandText = brandTextRef.current;
+    const introShape = introShapeRef.current;
+
+    if (introShape) gsap.set(introShape, { display: 'none' });
+
+    // Scroll to top immediately when new page is mounted
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        isTransitioningRef.current = false;
+        outroTriggeredRef.current = false;
+        gsap.set(overlay, { display: 'none', pointerEvents: 'none' });
+        endTransition();
+      },
+    });
+
+    // 1. Fade out brand text
+    if (brandText) {
+      tl.to(brandText, {
+        opacity: 0,
+        scale: 0.9,
+        duration: 0.16,
+        ease: 'power2.in',
+      });
+    }
+
+    // 2. Activate cutout shape mask
+    // Cutout mask provides the outer #fd551d orange backdrop,
+    // and the center pixel smiley is a true 100% transparent hole revealing the new destination page.
+    tl.add(() => {
+      if (solidBg) gsap.set(solidBg, { opacity: 0 });
+      if (outroCutout) gsap.set(outroCutout, { opacity: 1, scale: 0.85 });
+    });
+
+    // 3. Zoom in the inverted pixel smiley cutout mask - transparent hole expands outward to reveal page
+    if (outroCutout) {
+      tl.to(outroCutout, {
+        scale: 45,
+        duration: 0.62,
+        ease: 'power3.inOut',
+      });
+    }
+
+    // 4. Clean fade out of overlay container at the very end
+    tl.to(
+      overlay,
+      {
+        opacity: 0,
+        duration: 0.08,
+      },
+      '>-0.06'
+    );
+  }, [endTransition]);
+
+  // Handle explicit transitions from navbar, footer, project cards, TransitionLink, etc.
   useEffect(() => {
     const handlePageTransition = (e: CustomEvent<PageTransitionDetail>) => {
       if (!overlayRef.current || isTransitioningRef.current) return;
 
       const overlay = overlayRef.current;
       const callback = e.detail?.callback;
-      const targetHref = e.detail?.targetHref;
-      const customTitle = e.detail?.title || getPageTitle(targetHref);
 
-      setDestTitle(customTitle);
       isTransitioningRef.current = true;
-      
-      // Tell context we're transitioning - guarantees GlobalLoader is permanently suppressed
+      pendingOutroRef.current = true;
+      outroTriggeredRef.current = false;
+
       startTransition();
 
-      // Reset overlay state - start slightly scaled down and transparent
-      gsap.killTweensOf(overlay);
-      gsap.set(overlay, {
-        scale: 0.88,
-        opacity: 0,
-        filter: 'blur(4px)',
-        display: 'flex',
-        pointerEvents: 'auto',
-      });
+      // Elements
+      const solidBg = solidBgRef.current;
+      const introShape = introShapeRef.current;
+      const outroCutout = outroCutoutRef.current;
+      const brandText = brandTextRef.current;
 
-      if (barRef.current) {
-        gsap.set(barRef.current, { scaleX: 0, transformOrigin: 'left center' });
+      // Kill any running animations
+      gsap.killTweensOf([overlay, solidBg, introShape, outroCutout, brandText]);
+
+      // Reset initial states
+      gsap.set(overlay, { display: 'flex', pointerEvents: 'auto', opacity: 1 });
+      if (solidBg) gsap.set(solidBg, { opacity: 0 });
+      if (introShape) gsap.set(introShape, { scale: 0.1, opacity: 1, display: 'flex' });
+      if (outroCutout) gsap.set(outroCutout, { scale: 0.85, opacity: 0, display: 'flex' });
+      if (brandText) gsap.set(brandText, { opacity: 0, scale: 0.85 });
+
+      const tl = gsap.timeline();
+
+      // --- 1. INTRO: Filled Pixel Smiley zooms in to cover the screen in #fd551d orange ---
+      if (introShape) {
+        tl.to(introShape, {
+          scale: 36,
+          duration: 0.4,
+          ease: 'power3.in',
+        });
       }
 
-      const tl = gsap.timeline({
-        defaults: { ease: 'power3.out' },
-        onComplete: () => {
-          isTransitioningRef.current = false;
-          gsap.set(overlay, { display: 'none', pointerEvents: 'none' });
-          endTransition();
-        }
-      });
+      // Switch to solid background once shape covers viewport
+      if (solidBg) {
+        tl.set(solidBg, { opacity: 1 });
+      }
+      if (introShape) {
+        tl.set(introShape, { display: 'none' });
+      }
 
-      // 1. Zoom in to cover the entire screen
-      tl.to(overlay, {
-        scale: 1,
-        opacity: 1,
-        filter: 'blur(0px)',
-        duration: 0.32,
-        ease: 'power3.out',
-      });
-
-      if (barRef.current) {
-        tl.to(barRef.current, {
-          scaleX: 1,
-          duration: 0.28,
+      // --- 2. HOLD & ROUTER TRIGGER: Display @echo_.ng in crisp white text ---
+      if (brandText) {
+        tl.to(brandText, {
+          opacity: 1,
+          scale: 1,
+          duration: 0.2,
           ease: 'power2.out',
-        }, '<0.05');
+        });
       }
 
-      // 2. Perform route transition & scroll reset while screen is covered
+      // Trigger Next.js router navigation while screen is fully covered in solid orange
       tl.add(() => {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
         if (callback) {
           callback();
         }
-      });
 
-      // 3. Short hold so target page DOM hydrates smoothly
-      tl.to({}, { duration: 0.12 });
-
-      // 4. Fullscreen zoom-in reveal animation
-      tl.to(overlay, {
-        scale: 1.35,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power3.inOut',
+        // Safety fallback timer: in case pathname doesn't update (e.g. same page or network delay),
+        // trigger outro automatically after 450ms
+        if (safetyTimeoutRef.current) clearTimeout(safetyTimeoutRef.current);
+        safetyTimeoutRef.current = setTimeout(() => {
+          if (pendingOutroRef.current) {
+            playOutroAnimation();
+          }
+        }, 450);
       });
     };
 
     window.addEventListener('pageTransition', handlePageTransition as EventListener);
     return () => window.removeEventListener('pageTransition', handlePageTransition as EventListener);
-  }, [startTransition, endTransition]);
+  }, [startTransition, playOutroAnimation]);
 
-  // Fallback for browser back/forward buttons or direct router navigation
+  // Route change observer: When Next.js finishes navigating and updates pathname to new route,
+  // trigger the transparent pixel smiley outro mask immediately
   useEffect(() => {
-    // Skip initial site boot since GlobalLoader handles first visit
+    // Skip initial site entry (handled by GlobalLoader)
     if (isFirstLoad.current) {
       isFirstLoad.current = false;
       currentPath.current = pathname;
@@ -119,71 +187,104 @@ export default function PageTransition() {
     if (currentPath.current === pathname) return;
     currentPath.current = pathname;
 
-    // If manual transition is already active, it will handle it
-    if (isTransitioningRef.current || !overlayRef.current) return;
+    // If an explicit navigation transition is in progress and waiting for new page to mount:
+    if (isTransitioningRef.current && pendingOutroRef.current) {
+      // New route DOM has mounted! Play transparent cutout outro to reveal new page!
+      playOutroAnimation();
+      return;
+    }
+
+    // Fallback for browser Back/Forward native history navigation
+    if (!overlayRef.current || isTransitioningRef.current) return;
 
     const overlay = overlayRef.current;
-    setDestTitle(getPageTitle(pathname));
+    const solidBg = solidBgRef.current;
+    const outroCutout = outroCutoutRef.current;
+    const brandText = brandTextRef.current;
 
+    isTransitioningRef.current = true;
     startTransition();
 
-    gsap.killTweensOf(overlay);
-    gsap.set(overlay, {
-      scale: 1,
-      opacity: 1,
-      display: 'flex',
-      pointerEvents: 'auto',
-    });
+    gsap.killTweensOf([overlay, solidBg, outroCutout, brandText]);
+    gsap.set(overlay, { display: 'flex', pointerEvents: 'auto', opacity: 1 });
+    if (solidBg) gsap.set(solidBg, { opacity: 1 });
+    if (brandText) gsap.set(brandText, { opacity: 1, scale: 1 });
+    if (outroCutout) gsap.set(outroCutout, { scale: 0.85, opacity: 0, display: 'flex' });
+
+    // Scroll to top
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
 
     const tl = gsap.timeline({
-      defaults: { ease: 'power3.inOut' },
       onComplete: () => {
+        isTransitioningRef.current = false;
         gsap.set(overlay, { display: 'none', pointerEvents: 'none' });
         endTransition();
-      }
+      },
     });
 
-    tl.to(overlay, {
-      scale: 1.35,
-      opacity: 0,
-      duration: 0.45,
-      ease: 'power3.inOut',
-    });
+    tl.to({}, { duration: 0.1 });
 
-    return () => {
-      tl.kill();
-      endTransition();
-    };
-  }, [pathname, startTransition, endTransition]);
+    if (brandText) {
+      tl.to(brandText, { opacity: 0, scale: 0.9, duration: 0.14 });
+    }
+
+    if (outroCutout) {
+      tl.add(() => {
+        if (solidBg) gsap.set(solidBg, { opacity: 0 });
+        gsap.set(outroCutout, { opacity: 1, scale: 0.85 });
+      });
+
+      tl.to(outroCutout, {
+        scale: 45,
+        duration: 0.58,
+        ease: 'power3.inOut',
+      });
+    }
+
+    tl.to(overlay, { opacity: 0, duration: 0.08 }, '>-0.06');
+  }, [pathname, startTransition, endTransition, playOutroAnimation]);
 
   return (
     <div
       ref={overlayRef}
       id="page-transition-overlay"
-      className="page-transition-overlay fixed inset-0 z-[99999] hidden flex-col items-center justify-center bg-[#181818] text-white pointer-events-none will-change-[transform,opacity,filter] select-none"
+      className="page-transition-overlay fixed inset-0 z-[99999] hidden flex-col items-center justify-center bg-transparent pointer-events-none select-none overflow-hidden will-change-transform"
       style={{ transformOrigin: 'center center' }}
     >
-      <div className="flex flex-col items-center justify-center gap-5 px-4 text-center">
-        {/* Brand & Subtitle */}
-        <div className="flex flex-col items-center gap-1.5">
-          <span className="font-display tracking-[0.28em] text-sm sm:text-base font-bold uppercase text-white">
-            JERICHO URBANO
-          </span>
-          <span
-            ref={titleRef}
-            className="text-[10px] sm:text-[11px] tracking-[0.25em] text-[#fd551d] uppercase font-mono font-semibold"
-          >
-            {destTitle}
-          </span>
-        </div>
+      {/* Background layer for holding state */}
+      <div
+        ref={solidBgRef}
+        className="absolute inset-0 bg-[#fd551d] opacity-0"
+      />
 
-        {/* Minimal Progress Line */}
-        <div className="w-36 sm:w-48 h-[2px] bg-white/10 rounded-full overflow-hidden">
-          <div 
-            ref={barRef}
-            className="h-full w-full bg-[#fd551d]"
-          />
+      {/* Intro Shape Layer: Filled Pixel Smiley in Orange */}
+      <div
+        ref={introShapeRef}
+        className="absolute inset-0 flex items-center justify-center pointer-events-none will-change-transform"
+        style={{ transformOrigin: 'center center' }}
+      >
+        <FilledPixelSmiley color="#fd551d" />
+      </div>
+
+      {/* Outro Cutout Layer: Solid orange outer frame with transparent pixel smiley mask hole */}
+      <div
+        ref={outroCutoutRef}
+        className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 will-change-transform"
+        style={{ transformOrigin: 'center center' }}
+      >
+        <div className="w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
+          <CutoutPixelSmiley color="#fd551d" />
         </div>
+      </div>
+
+      {/* Brand Text: @echo_.ng in white with crisp contrast */}
+      <div
+        ref={brandTextRef}
+        className="relative z-10 flex flex-col items-center justify-center gap-2 px-4 text-center opacity-0"
+      >
+        <span className="font-display tracking-[0.24em] text-xl sm:text-2xl font-bold uppercase text-white drop-shadow-md">
+          @echo_.ng
+        </span>
       </div>
     </div>
   );
