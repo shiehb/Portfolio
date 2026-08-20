@@ -137,7 +137,7 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 w-full">
             {/* Column 1: Navigation */}
             <div ref={col1Ref} className="md:col-span-1">
-              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] mb-4">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-4 font-semibold">
                 Navigation
               </span>
               <div className="flex flex-col items-start gap-2.5">
@@ -145,7 +145,7 @@ export default function Footer() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="group inline-flex items-center gap-1.5 text-sm sm:text-base text-zinc-300 hover:text-[#fd551d] transition-colors py-1 w-fit"
+                    className="group inline-flex items-center gap-1.5 text-sm sm:text-base text-white/90 hover:text-[#fd551d] transition-colors py-1 w-fit font-medium"
                   >
                     <span>{link.label}</span>
                     <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 translate-y-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-200 text-[#fd551d]" />
@@ -156,17 +156,17 @@ export default function Footer() {
 
             {/* Column 2: Contact */}
             <div ref={col2Ref} className="md:col-span-1">
-              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] mb-4">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-4 font-semibold">
                 Contact
               </span>
               <div className="flex flex-col items-start gap-4">
                 {/* Email with Quick Copy */}
                 <div className="flex flex-col items-start gap-1 w-full max-w-sm">
-                  <span className="text-xs text-zinc-400 uppercase tracking-wider">Email</span>
+                  <span className="text-xs text-white/70 uppercase tracking-wider">Email</span>
                   <div className="flex items-center gap-2 flex-wrap">
                     <a
                       href={`mailto:${EMAIL}`}
-                      className="text-sm sm:text-base text-zinc-300 hover:text-[#fd551d] transition-colors break-all"
+                      className="text-sm sm:text-base text-white hover:text-[#fd551d] transition-colors break-all font-medium"
                     >
                       {EMAIL}
                     </a>
@@ -174,7 +174,7 @@ export default function Footer() {
                       onClick={handleCopyEmail}
                       type="button"
                       aria-label="Copy Email"
-                      className="relative p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer inline-flex items-center justify-center border border-white/10"
+                      className="relative p-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer inline-flex items-center justify-center border border-white/20"
                     >
                       {copiedEmail ? (
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -192,11 +192,11 @@ export default function Footer() {
 
                 {/* Phone with Quick Copy */}
                 <div className="flex flex-col items-start gap-1 w-full max-w-sm">
-                  <span className="text-xs text-zinc-400 uppercase tracking-wider">Phone</span>
+                  <span className="text-xs text-white/70 uppercase tracking-wider">Phone</span>
                   <div className="flex items-center gap-2 flex-wrap">
                     <a
                       href={`tel:${PHONE.replace(/\s+/g, '')}`}
-                      className="text-sm sm:text-base text-zinc-300 hover:text-[#fd551d] transition-colors"
+                      className="text-sm sm:text-base text-white hover:text-[#fd551d] transition-colors font-medium"
                     >
                       {PHONE}
                     </a>
@@ -204,7 +204,7 @@ export default function Footer() {
                       onClick={handleCopyPhone}
                       type="button"
                       aria-label="Copy Phone"
-                      className="relative p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer inline-flex items-center justify-center border border-white/10"
+                      className="relative p-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer inline-flex items-center justify-center border border-white/20"
                     >
                       {copiedPhone ? (
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -224,27 +224,27 @@ export default function Footer() {
 
             {/* Column 3: Location & Time Zone */}
             <div ref={col3Ref} className="md:col-span-1">
-              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c0c0c0] mb-4">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-4 font-semibold">
                 Location & Timezone
               </span>
               <div className="flex flex-col items-start gap-4">
                 {/* Location */}
-                <div className="flex items-start gap-2.5 text-zinc-300">
+                <div className="flex items-start gap-2.5 text-white">
                   <MapPin className="w-4 h-4 text-[#fd551d] mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm sm:text-base font-medium text-white">Philippines</p>
-                    <p className="text-xs text-zinc-400">Available Worldwide (Remote)</p>
+                    <p className="text-xs text-white/70">Available Worldwide (Remote)</p>
                   </div>
                 </div>
 
                 {/* Live Time */}
-                <div className="flex items-start gap-2.5 text-zinc-300">
+                <div className="flex items-start gap-2.5 text-white">
                   <Clock className="w-4 h-4 text-[#fd551d] mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm sm:text-base font-mono font-medium text-white">
                       {currentTime || "GMT+8 (PHT)"}
                     </p>
-                    <p className="text-xs text-zinc-400">Philippine Standard Time (GMT+8)</p>
+                    <p className="text-xs text-white/70">Philippine Standard Time (GMT+8)</p>
                   </div>
                 </div>
               </div>
@@ -264,7 +264,7 @@ export default function Footer() {
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs sm:text-sm text-zinc-400 hover:text-[#fd551d] transition-colors uppercase tracking-wider"
+                className="text-xs sm:text-sm text-white hover:text-[#fd551d] transition-colors uppercase tracking-wider font-medium"
               >
                 {link.label}
               </Link>
@@ -272,11 +272,11 @@ export default function Footer() {
           </div>
 
           {/* Divider */}
-          <div className="w-12 h-px bg-white/10 mx-auto" />
+          <div className="w-12 h-px bg-white/20 mx-auto" />
 
           {/* Copyright */}
           <div>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-white font-medium">
               © {currentYear} Jericho Urbano. All rights reserved.
             </p>
           </div>

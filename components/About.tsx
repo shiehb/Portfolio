@@ -160,7 +160,7 @@ export default function About() {
           />
 
           <AnimatedParagraph
-            className="mx-auto mt-4 md:mt-10 max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-[#c0c0c0] font-display"
+            className="mx-auto mt-4 md:mt-10 max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-white/90 font-display"
             text="Crafting high-impact interactive web applications, cinematic narratives, and brand identities with seamless motion physics, minimalist spatial layouts, and precision color science."
           />
         </div>

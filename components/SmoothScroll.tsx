@@ -1,7 +1,7 @@
 // components/SmoothScroll.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useLoading } from '@/lib/LoadingContext';
 import Lenis from 'lenis';
 import gsap from 'gsap';
@@ -13,7 +13,6 @@ if (typeof window !== 'undefined') {
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
     const { isLoading } = useLoading();
-    const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
         if (isLoading) return;
@@ -37,18 +36,11 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
         gsap.ticker.add(updateTicker);
         gsap.ticker.lagSmoothing(0);
 
-        setIsReady(true);
-
         return () => {
             gsap.ticker.remove(updateTicker);
             lenis.destroy();
         };
     }, [isLoading]);
-
-    // Don't render anything until Lenis is ready and loading is complete
-    if (!isReady || isLoading) {
-        return null;
-    }
 
     return <>{children}</>;
 }

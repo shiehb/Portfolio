@@ -97,17 +97,17 @@ export function get3x2TargetDimensions() {
 
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const isMobile = vw < 640;
+  const isMobile = vw < 768;
 
   let targetWidth: number;
   let targetHeight: number;
   let borderRadius = "24px";
 
   if (isMobile) {
-    targetWidth = Math.min(vw * 0.82, (vh * 0.70) / 1.5, 340);
-    targetHeight = Math.round(targetWidth * 1.5);
+    targetWidth = Math.min(vw * 0.76, (vh * 0.46) / 1.25, 290);
+    targetHeight = Math.round(targetWidth * 1.28);
     targetWidth = Math.round(targetWidth);
-    borderRadius = "20px";
+    borderRadius = "16px";
   } else {
     if (vw < 1024) {
       targetWidth = Math.min(vw * 0.75, (vh * 0.65) * 1.5, 620);
@@ -296,6 +296,7 @@ export default function Hero() {
         {
           width: () => `${get3x2TargetDimensions().targetWidth}px`,
           height: () => `${get3x2TargetDimensions().targetHeight}px`,
+          y: () => (window.innerWidth < 768 ? "-54px" : "0px"),
           borderRadius: () => get3x2TargetDimensions().borderRadius,
           backgroundColor: "#c0c0c0",
           boxShadow:
@@ -318,17 +319,7 @@ export default function Hero() {
         );
       }
 
-      // 3. Marquee fades out
-      if (marqueeRef.current) {
-        tl.to(
-          marqueeRef.current,
-          {
-            opacity: 0,
-            ease: "power1.out",
-          },
-          0
-        );
-      }
+      // Note: Marquee in background does NOT fade out on zoom out - stays fully visible
 
       // 4. Signature animation - appears and draws stroke during scroll
       if (signatureContainerRef.current) {
@@ -388,10 +379,21 @@ export default function Hero() {
       aria-label="Hero section"
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
+        {/* Marquee Background in the back - On mobile, positioned below hero crop and above ABOUT title */}
+        <div
+          ref={marqueeRef}
+          className="absolute inset-x-0 bottom-24 sm:bottom-28 md:top-1/2 md:bottom-auto md:-translate-y-1/2 z-0 flex flex-col pointer-events-none will-change-[transform] select-none"
+          aria-hidden="true"
+          style={{ opacity: 1 }}
+        >
+          <MarqueeRow />
+          <MarqueeRow reverse />
+        </div>
+
         <section
           ref={frameRef}
           id="hero-zoom-frame"
-          className="relative flex justify-center items-center overflow-hidden text-zinc-900 will-change-[width,height,border-radius,background-color,opacity]"
+          className="relative z-10 flex justify-center items-center overflow-hidden text-zinc-900 will-change-[width,height,border-radius,background-color,opacity]"
           style={{
             margin: "auto",
             position: "relative",
@@ -400,17 +402,6 @@ export default function Hero() {
             opacity: 0,
           }}
         >
-          {/* Marquee Background */}
-          <div
-            ref={marqueeRef}
-            className="absolute left-0 right-0 top-1/3 -translate-y-1/2 md:top-1/2 md:-translate-y-1/2 z-0 flex flex-col pointer-events-none will-change-[opacity]"
-            aria-hidden="true"
-            style={{ opacity: 0 }}
-          >
-            <MarqueeRow />
-            <MarqueeRow reverse />
-          </div>
-
           {/* Portrait Image */}
           <div
             ref={portraitRef}
@@ -514,10 +505,10 @@ export default function Hero() {
         {/* ABOUT Title - Outside the frame, at the bottom - ONLY appears at end of scroll */}
         <div
           ref={aboutTitleRef}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+          className="absolute bottom-3 sm:bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
           style={{ opacity: 0 }}
         >
-          <span className="font-display text-lg sm:text-xl md:text-2xl lg:text-3xl uppercase tracking-[0.3em] text-white/60">
+          <span className="font-display text-base sm:text-xl md:text-2xl lg:text-3xl uppercase tracking-[0.3em] text-white font-bold">
             ABOUT
           </span>
         </div>

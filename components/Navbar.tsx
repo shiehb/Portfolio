@@ -34,7 +34,6 @@ export default function Navbar() {
 
   const isMenuOpen = navState === 'opening' || navState === 'open';
   const isOverlayDown = navState === 'opening' || navState === 'open' || navState === 'closing';
-  const isTextVisible = navState === 'open';
 
   // Apply direct inversion filter: 0 = Original Black, 1 = Inverted White
   const applyInvert = useCallback((val: number) => {

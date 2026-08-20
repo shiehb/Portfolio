@@ -132,23 +132,25 @@
 
   .marquee-text {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 8vw, 8rem);
-    margin-right: clamp(1.5rem, 4vw, 4rem);
-    @apply font-black uppercase leading-[0.85] flex-shrink-0 inline-block;
+    font-size: clamp(1.4rem, 6vw, 2.2rem);
+    margin-right: clamp(1rem, 3.5vw, 4rem);
+    @apply font-black uppercase leading-[0.9] flex-shrink-0 inline-block;
   }
 
   @media (min-width: 768px) {
     .marquee-text {
       font-size: clamp(2.5rem, 8.5vw, 8.5rem);
+      margin-right: clamp(1.5rem, 4vw, 4rem);
+      line-height: 0.85;
     }
   }
 
   .marquee-text-light {
-    @apply text-black/14;
+    @apply text-white;
   }
 
   .marquee-text-dark {
-    @apply text-black;
+    @apply text-[#fd551d];
   }
 }
 

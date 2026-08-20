@@ -1,0 +1,6 @@
+{
+  "name": "Jericho Urbano Portfolio",
+  "description": "Portfolio of Jericho Urbano - Visual Artist & Web Developer specializing in immersive digital experiences, interactive web applications, videography, and narrative aesthetics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
