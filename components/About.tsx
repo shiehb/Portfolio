@@ -108,9 +108,9 @@ function AnimatedParagraph({ text, className = "" }: { text: string; className?:
         const start = Math.max(0, wordProgress - 0.15);
         const end = Math.min(1, wordProgress + 0.1);
 
-        // FIX: Convert calculated numbers to percentage strings correctly for TypeScript
-        const startPercent = 85 - (start * 60);
-        const endPercent = 85 - (end * 60);
+        // FIX: Explicitly cast numbers to strings so TypeScript stops failing on Vercel
+        const startPercent = (85 - (start * 60)).toString();
+        const endPercent = (85 - (end * 60)).toString();
 
         // Create a separate tween for each word that responds to scroll
         gsap.to(word, {
