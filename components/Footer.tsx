@@ -291,7 +291,7 @@ export default function Footer() {
       >
         <svg
           viewBox="0 0 1000 140"
-          className="w-full max-h-[140px] opacity-[0.03] fill-white"
+          className="w-full max-h-[140px] fill-[#fd551d]"
           role="presentation"
           aria-hidden="true"
         >

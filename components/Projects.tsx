@@ -161,7 +161,7 @@ export default function Projects() {
         <section
             id="projects"
             ref={sectionRef}
-            className="relative z-10 py-12 px-3 sm:px-6 bg-white min-h-screen text-zinc-900 font-display"
+            className="relative z-10 py-12 px-3 sm:px-6 bg-transparent min-h-screen text-zinc-900 font-display"
         >
             <div ref={headerRef} className="text-center max-w-[560px] mx-auto mb-8">
                 <h2 className="font-normal text-[clamp(1.5rem,4vw,2.2rem)] mb-2 tracking-[0.05em] uppercase text-zinc-900 font-display">

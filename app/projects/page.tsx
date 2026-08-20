@@ -218,7 +218,7 @@ export default function ProjectsPage() {
     <section
       id="projects"
       ref={sectionRef}
-      className="relative z-10 py-12 px-3 sm:px-6 bg-[#222222] min-h-screen text-white font-display pt-24"
+      className="relative z-10 py-12 px-3 sm:px-6 bg-transparent min-h-screen text-white font-display pt-24"
     >
       {/* Back to Home Button */}
       <div className="max-w-[1280px] mx-auto mb-6">

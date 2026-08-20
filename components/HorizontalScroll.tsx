@@ -131,7 +131,6 @@ export default function GallerySection({
     const triggerRef = useRef<HTMLDivElement>(null);
     const outerTrackRef = useRef<HTMLDivElement>(null);
     const innerTrackRef = useRef<HTMLDivElement>(null);
-    const bgOverlayRef = useRef<HTMLDivElement>(null);
 
     // Track image loading
     useEffect(() => {
@@ -142,16 +141,15 @@ export default function GallerySection({
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            if (!triggerRef.current || !outerTrackRef.current || !innerTrackRef.current || !bgOverlayRef.current) return;
+            if (!triggerRef.current || !outerTrackRef.current || !innerTrackRef.current) return;
 
             const trigger = triggerRef.current;
             const outer = outerTrackRef.current;
             const inner = innerTrackRef.current;
-            const bgOverlay = bgOverlayRef.current;
 
             const mm = gsap.matchMedia();
 
-            // Desktop View (Pinned Horizontal Scroll + Transition to Solid White)
+            // Desktop View (Pinned Horizontal Scroll + Global Shader Color Scrubbing)
             mm.add('(min-width: 768px)', () => {
                 // Entrance Motion
                 gsap.fromTo(
@@ -182,30 +180,35 @@ export default function GallerySection({
                         pin: true,
                         scrub: true,
                         invalidateOnRefresh: true,
+                        onUpdate: (self) => {
+                            window.dispatchEvent(
+                                new CustomEvent('shader-scroll-progress', {
+                                    detail: { progress: self.progress },
+                                })
+                            );
+                        },
                     },
                 });
 
                 tl.fromTo(inner, { x: 0 }, { x: getScrollAmount, ease: 'none' }, 0);
-                tl.fromTo(bgOverlay, { opacity: 0 }, { opacity: 1, ease: 'none' }, 0);
             });
 
-            // Mobile View (Vertical Scroll + Solid White Transition)
+            // Mobile View (Vertical Scroll + Global Shader Color Scrubbing)
             mm.add('(max-width: 767px)', () => {
-                gsap.fromTo(
-                    bgOverlay,
-                    { opacity: 0 },
-                    {
-                        opacity: 1,
-                        ease: 'none',
-                        scrollTrigger: {
-                            trigger: trigger,
-                            start: 'top 50%',
-                            end: 'bottom bottom',
-                            scrub: true,
-                            invalidateOnRefresh: true,
-                        },
-                    }
-                );
+                ScrollTrigger.create({
+                    trigger: trigger,
+                    start: 'top 50%',
+                    end: 'bottom bottom',
+                    scrub: true,
+                    invalidateOnRefresh: true,
+                    onUpdate: (self) => {
+                        window.dispatchEvent(
+                            new CustomEvent('shader-scroll-progress', {
+                                detail: { progress: self.progress },
+                            })
+                        );
+                    },
+                });
             });
         }, triggerRef);
 
@@ -223,14 +226,6 @@ export default function GallerySection({
             ref={triggerRef}
             className="relative overflow-hidden bg-transparent text-neutral-100 border-none outline-none shadow-none"
         >
-            {/* Background Overlay Layer */}
-            <div
-                id="white-bg-layer"
-                ref={bgOverlayRef}
-                className="absolute inset-0 bg-white pointer-events-none z-0 border-none outline-none"
-                style={{ opacity: 0 }}
-            />
-
             {/* Container */}
             <div className="relative z-10 min-h-screen md:h-screen w-full flex items-center overflow-hidden py-10 md:py-0 border-none outline-none">
                 <div ref={outerTrackRef} className="w-full will-change-transform">
