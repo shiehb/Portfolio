@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SectionVignette from "@/components/SectionVignette";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -239,6 +240,9 @@ export default function AboutPage() {
                     </div>
                 </div>
             </section>
+
+            {/* Vignette fader before footer */}
+            <SectionVignette />
         </div>
     );
 }

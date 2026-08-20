@@ -6,6 +6,7 @@ import About from "../components/About";
 import HorizontalScroll from "../components/HorizontalScroll";
 import Projects from "../components/Projects";
 import SmoothScrollWrapper from "@/components/SmoothScrollWrapper";
+import SectionVignette from "@/components/SectionVignette";
 
 export default function Home() {
   return (
@@ -17,6 +18,8 @@ export default function Home() {
           <HorizontalScroll />
           <Projects />
         </div>
+        {/* Vignette fader at the bottom before footer */}
+        <SectionVignette />
       </main>
     </SmoothScrollWrapper>
   );

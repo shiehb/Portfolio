@@ -136,7 +136,7 @@ export default function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="w-full min-h-[500px] text-white font-display flex flex-col justify-between bg-[#222222] relative z-10"
+      className="w-full min-h-[500px] md:min-h-screen text-white font-display flex flex-col justify-between bg-[#222222] relative z-10"
     >
       {/* Main Content - Top */}
       <div className="w-full px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-10 md:pb-14">

@@ -1,3 +1,4 @@
+// app/projects/page.tsx
 'use client';
 
 import { useEffect, useRef, useState, useMemo } from 'react';
@@ -6,6 +7,7 @@ import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Loader2 } from "lucide-react";
+import SectionVignette from "@/components/SectionVignette";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -189,93 +191,98 @@ export default function ProjectsPage() {
   };
 
   return (
-    <section
-      id="projects"
-      ref={sectionRef}
-      className="relative z-10 py-12 px-3 sm:px-6 bg-transparent min-h-screen text-white font-display pt-24"
-    >
-      <div ref={headerRef} className="text-center max-w-[560px] mx-auto mb-8">
-        <h1 className="font-normal text-[clamp(1.5rem,4vw,2.2rem)] mb-2 tracking-[0.05em] uppercase text-white font-display">
-          PROJECTS
-        </h1>
-        <p className="text-sm text-[#fd551d] leading-relaxed font-display">
-          Explore my web design, media, and visual projects
-        </p>
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-4xl mx-auto">
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => handleFilterChange(cat.id)}
-            className={`px-4 py-2 rounded-full text-xs uppercase tracking-wider transition-all duration-300 ${selectedCategory === cat.id
-              ? "bg-[#fd551d] text-white"
-              : "bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700"
-              }`}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
-
-      {isLoading && (
-        <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
-          <Loader2 className="w-8 h-8 animate-spin text-[#fd551d] mb-3" />
-          <p className="text-xs uppercase tracking-widest">Loading Projects...</p>
+    <>
+      <section
+        id="projects"
+        ref={sectionRef}
+        className="relative z-10 py-12 px-3 sm:px-6 bg-transparent min-h-screen text-white font-display pt-24"
+      >
+        <div ref={headerRef} className="text-center max-w-[560px] mx-auto mb-8">
+          <h1 className="font-normal text-[clamp(1.5rem,4vw,2.2rem)] mb-2 tracking-[0.05em] uppercase text-white font-display">
+            PROJECTS
+          </h1>
+          <p className="text-sm text-[#fd551d] leading-relaxed font-display">
+            Explore my web design, media, and visual projects
+          </p>
         </div>
-      )}
 
-      {error && !isLoading && (
-        <div className="max-w-md mx-auto my-10 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center rounded-xl">
-          {error}
-        </div>
-      )}
-
-      {!isLoading && !error && (
-        <>
-          {filteredProjects.length > 0 ? (
-            <div
-              key={filterKey}
-              className="max-w-[1280px] mx-auto w-full columns-2 md:columns-3 lg:columns-4 gap-2.5 sm:gap-4 [&>div]:mb-2.5 sm:[&>div]:mb-4"
+        <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-4xl mx-auto">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => handleFilterChange(cat.id)}
+              className={`px-4 py-2 rounded-full text-xs uppercase tracking-wider transition-all duration-300 ${selectedCategory === cat.id
+                ? "bg-[#fd551d] text-white"
+                : "bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                }`}
             >
-              {filteredProjects.map((project, index) => (
-                <div
-                  key={project.id}
-                  className="batch-image opacity-0 invisible w-full relative overflow-hidden will-change-transform shadow-sm group rounded-sm bg-zinc-900 break-inside-avoid"
-                >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
+            <Loader2 className="w-8 h-8 animate-spin text-[#fd551d] mb-3" />
+            <p className="text-xs uppercase tracking-widest">Loading Projects...</p>
+          </div>
+        )}
+
+        {error && !isLoading && (
+          <div className="max-w-md mx-auto my-10 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center rounded-xl">
+            {error}
+          </div>
+        )}
+
+        {!isLoading && !error && (
+          <>
+            {filteredProjects.length > 0 ? (
+              <div
+                key={filterKey}
+                className="max-w-[1280px] mx-auto w-full columns-2 md:columns-3 lg:columns-4 gap-2.5 sm:gap-4 [&>div]:mb-2.5 sm:[&>div]:mb-4"
+              >
+                {filteredProjects.map((project, index) => (
                   <div
-                    className="project-img-inner w-full relative overflow-hidden transition-transform duration-500 ease-out group-hover:scale-105"
-                    style={{
-                      paddingBottom: getPaddingBottom(index),
-                      height: 0
-                    }}
+                    key={project.id}
+                    className="batch-image opacity-0 invisible w-full relative overflow-hidden will-change-transform shadow-sm group rounded-sm bg-zinc-900 break-inside-avoid"
                   >
-                    <Image
-                      src={project.image}
-                      alt={project.category ? `${project.category} visual project by Jericho Urbano` : "Jericho Urbano design and web project"}
-                      fill
-                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className="object-cover absolute inset-0 w-full h-full"
-                      style={{ objectFit: 'cover' }}
-                      loading="lazy"
-                      onError={(e) => {
-                        const parent = e.currentTarget.closest('.batch-image');
-                        if (parent) {
-                          (parent as HTMLElement).style.display = 'none';
-                        }
+                    <div
+                      className="project-img-inner w-full relative overflow-hidden transition-transform duration-500 ease-out group-hover:scale-105"
+                      style={{
+                        paddingBottom: getPaddingBottom(index),
+                        height: 0
                       }}
-                    />
+                    >
+                      <Image
+                        src={project.image}
+                        alt={project.category ? `${project.category} visual project by Jericho Urbano` : "Jericho Urbano design and web project"}
+                        fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover absolute inset-0 w-full h-full"
+                        style={{ objectFit: 'cover' }}
+                        loading="lazy"
+                        onError={(e) => {
+                          const parent = e.currentTarget.closest('.batch-image');
+                          if (parent) {
+                            (parent as HTMLElement).style.display = 'none';
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="max-w-[1280px] mx-auto text-center py-20 text-zinc-400">
-              <p className="text-sm">No projects found in this category</p>
-            </div>
-          )}
-        </>
-      )}
-    </section>
+                ))}
+              </div>
+            ) : (
+              <div className="max-w-[1280px] mx-auto text-center py-20 text-zinc-400">
+                <p className="text-sm">No projects found in this category</p>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {/* Vignette fader before footer */}
+      <SectionVignette />
+    </>
   );
 }
