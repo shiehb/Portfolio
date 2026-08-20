@@ -1,21 +1,17 @@
 'use client';
 
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { triggerPageTransition } from '@/lib/transitionEvents';
 import { getProjects, getCachedProjects, ProjectItem } from '@/lib/projectsData';
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
 export default function ProjectsPage() {
-  const router = useRouter();
   const [projects, setProjects] = useState<ProjectItem[]>(() => getCachedProjects() || []);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(() => !getCachedProjects() || getCachedProjects()?.length === 0);
@@ -26,13 +22,6 @@ export default function ProjectsPage() {
   const headerRef = useRef<HTMLDivElement>(null);
   const animationsInitializedRef = useRef(false);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleBackClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    triggerPageTransition(() => {
-      router.push('/');
-    }, '/', 'HOME');
-  };
 
   useEffect(() => {
     async function loadProjects() {
@@ -205,18 +194,6 @@ export default function ProjectsPage() {
       ref={sectionRef}
       className="relative z-10 py-12 px-3 sm:px-6 bg-transparent min-h-screen text-white font-display pt-24"
     >
-      {/* Back to Home Button */}
-      <div className="max-w-[1280px] mx-auto mb-6">
-        <Link
-          href="/"
-          onClick={handleBackClick}
-          className="inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-wider text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
-          <span>Back to Home</span>
-        </Link>
-      </div>
-
       <div ref={headerRef} className="text-center max-w-[560px] mx-auto mb-8">
         <h1 className="font-normal text-[clamp(1.5rem,4vw,2.2rem)] mb-2 tracking-[0.05em] uppercase text-white font-display">
           PROJECTS

@@ -1,7 +1,7 @@
 // app/about/page.tsx
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { triggerPageTransition } from "@/lib/transitionEvents";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,27 +12,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
-
-const skills = {
-    design: [
-        { name: "UI/UX Design", level: 90, icon: "🎨" },
-        { name: "Graphic Design", level: 85, icon: "✏️" },
-        { name: "Brand Identity", level: 80, icon: "🏷️" },
-        { name: "Typography", level: 75, icon: "🔤" },
-    ],
-    development: [
-        { name: "React / Next.js", level: 92, icon: "⚛️" },
-        { name: "TypeScript", level: 88, icon: "📘" },
-        { name: "Node.js", level: 82, icon: "🟢" },
-        { name: "Tailwind CSS", level: 90, icon: "🎨" },
-    ],
-    media: [
-        { name: "Videography", level: 85, icon: "🎥" },
-        { name: "Photography", level: 80, icon: "📷" },
-        { name: "Editing", level: 88, icon: "✂️" },
-        { name: "Color Grading", level: 78, icon: "🎬" },
-    ],
-};
 
 const experiences = [
     {
@@ -65,39 +44,11 @@ const experiences = [
     },
 ];
 
-const testimonials = [
-    {
-        id: 1,
-        name: "Sarah Johnson",
-        role: "CEO, Creative Agency",
-        quote: "Jericho's work is exceptional. He brought our vision to life with stunning design and flawless execution.",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
-    },
-    {
-        id: 2,
-        name: "Michael Chen",
-        role: "Product Manager",
-        quote: "A true professional who delivers high-quality work on time. His attention to detail is remarkable.",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop",
-    },
-    {
-        id: 3,
-        name: "Emily Rodriguez",
-        role: "Brand Director",
-        quote: "Working with Jericho was a game-changer for our brand. His creative vision transformed our digital presence.",
-        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop",
-    },
-];
-
 export default function AboutPage() {
     const router = useRouter();
-    const [activeSection, setActiveSection] = useState("skills");
     
     const headerRef = useRef<HTMLDivElement>(null);
-    const skillsRef = useRef<HTMLDivElement>(null);
     const experienceRef = useRef<HTMLDivElement>(null);
-    const testimonialsRef = useRef<HTMLDivElement>(null);
-    const philosophyRef = useRef<HTMLDivElement>(null);
     const profileImageRef = useRef<HTMLDivElement>(null);
 
     const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, href: string, title?: string) => {
@@ -106,21 +57,6 @@ export default function AboutPage() {
             router.push(href);
         }, href, title);
     };
-
-    useEffect(() => {
-        const handleScroll = () => {
-            const sections = document.querySelectorAll(".section-anchor");
-            sections.forEach((section) => {
-                const rect = section.getBoundingClientRect();
-                if (rect.top <= 100 && rect.bottom >= 100) {
-                    setActiveSection(section.id);
-                }
-            });
-        };
-
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -160,48 +96,6 @@ export default function AboutPage() {
                 );
             }
 
-            // Skills section
-            if (skillsRef.current) {
-                const skillCards = skillsRef.current.querySelectorAll(".skill-card");
-                skillCards.forEach((card, index) => {
-                    gsap.fromTo(card,
-                        { opacity: 0, y: 20 },
-                        {
-                            opacity: 1,
-                            y: 0,
-                            duration: 0.4,
-                            delay: index * 0.1,
-                            ease: "power2.out",
-                            scrollTrigger: {
-                                trigger: card,
-                                start: "top 90%",
-                                toggleActions: "play none none reverse",
-                            },
-                        }
-                    );
-                });
-
-                // Skill bars
-                const bars = skillsRef.current.querySelectorAll(".skill-bar");
-                bars.forEach((bar) => {
-                    const targetWidth = bar.getAttribute("data-width") || "0%";
-                    gsap.fromTo(bar,
-                        { width: "0%" },
-                        {
-                            width: targetWidth,
-                            duration: 1,
-                            delay: 0.2,
-                            ease: "power2.out",
-                            scrollTrigger: {
-                                trigger: bar,
-                                start: "top 90%",
-                                toggleActions: "play none none reverse",
-                            },
-                        }
-                    );
-                });
-            }
-
             // Experience section
             if (experienceRef.current) {
                 const expItems = experienceRef.current.querySelectorAll(".exp-item");
@@ -222,46 +116,6 @@ export default function AboutPage() {
                         }
                     );
                 });
-            }
-
-            // Testimonials section
-            if (testimonialsRef.current) {
-                const testimonialCards = testimonialsRef.current.querySelectorAll(".testimonial-card");
-                testimonialCards.forEach((card, index) => {
-                    gsap.fromTo(card,
-                        { opacity: 0, scale: 0.95 },
-                        {
-                            opacity: 1,
-                            scale: 1,
-                            duration: 0.4,
-                            delay: index * 0.1,
-                            ease: "power2.out",
-                            scrollTrigger: {
-                                trigger: card,
-                                start: "top 90%",
-                                toggleActions: "play none none reverse",
-                            },
-                        }
-                    );
-                });
-            }
-
-            // Philosophy section
-            if (philosophyRef.current) {
-                gsap.fromTo(philosophyRef.current,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: philosophyRef.current,
-                            start: "top 85%",
-                            toggleActions: "play none none reverse",
-                        },
-                    }
-                );
             }
         });
 
@@ -286,27 +140,6 @@ export default function AboutPage() {
                         cinematic narratives, and meaningful brand identities.
                     </p>
                 </div>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-2 px-4 pb-8">
-                {[
-                    { id: "skills", label: "Skills" },
-                    { id: "experience", label: "Experience" },
-                    { id: "testimonials", label: "Testimonials" },
-                    { id: "philosophy", label: "Philosophy" },
-                ].map((item) => (
-                    <a
-                        key={item.id}
-                        href={`#${item.id}`}
-                        className={`px-4 py-2 rounded-full text-xs uppercase tracking-[0.1em] transition-all duration-300 ${
-                            activeSection === item.id
-                                ? "bg-[#fd551d] text-white shadow-md shadow-[#fd551d]/30 font-medium"
-                                : "bg-white/80 border border-zinc-200 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 shadow-sm"
-                        }`}
-                    >
-                        {item.label}
-                    </a>
-                ))}
             </div>
 
             <section className="max-w-6xl mx-auto px-4 pb-20">
@@ -366,47 +199,6 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            <section id="skills" className="section-anchor max-w-6xl mx-auto px-4 pb-20">
-                <div ref={skillsRef}>
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center text-zinc-900">
-                        Skills & <span className="text-[#fd551d]">Expertise</span>
-                    </h2>
-
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {Object.entries(skills).map(([category, skillList]) => (
-                            <div
-                                key={category}
-                                className="skill-card bg-white/85 backdrop-blur-sm border border-zinc-200/90 rounded-xl p-6 shadow-sm hover:border-[#fd551d]/40 transition-all duration-300"
-                            >
-                                <h3 className="text-sm uppercase tracking-[0.15em] text-[#fd551d] font-bold mb-4">
-                                    {category}
-                                </h3>
-                                <div className="space-y-4">
-                                    {skillList.map((skill) => (
-                                        <div key={skill.name}>
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="text-sm text-zinc-800 font-medium flex items-center gap-2">
-                                                    <span>{skill.icon}</span>
-                                                    {skill.name}
-                                                </span>
-                                                <span className="text-xs text-zinc-500 font-mono">{skill.level}%</span>
-                                            </div>
-                                            <div className="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden border border-zinc-200/50">
-                                                <div
-                                                    className="skill-bar h-full bg-gradient-to-r from-[#fd551d] to-orange-500 rounded-full"
-                                                    data-width={`${skill.level}%`}
-                                                    style={{ width: "0%" }}
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
             <section id="experience" className="section-anchor max-w-6xl mx-auto px-4 pb-20">
                 <div ref={experienceRef}>
                     <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center text-zinc-900">
@@ -443,78 +235,6 @@ export default function AboutPage() {
                                     </div>
                                 </div>
                             ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="testimonials" className="section-anchor max-w-6xl mx-auto px-4 pb-20">
-                <div ref={testimonialsRef}>
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center text-zinc-900">
-                        Testimonials & <span className="text-[#fd551d]">Feedback</span>
-                    </h2>
-
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {testimonials.map((testimonial) => (
-                            <div
-                                key={testimonial.id}
-                                className="testimonial-card bg-white/85 backdrop-blur-sm border border-zinc-200/90 rounded-xl p-6 shadow-sm hover:border-[#fd551d]/40 transition-all duration-300"
-                            >
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#fd551d]/40 shadow-sm">
-                                        <Image
-                                            src={testimonial.avatar}
-                                            alt={testimonial.name}
-                                            width={48}
-                                            height={48}
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-bold text-zinc-900">{testimonial.name}</h4>
-                                        <p className="text-xs text-zinc-500">{testimonial.role}</p>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-zinc-600 italic leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
-                                <div className="mt-3 text-[#fd551d] text-xs">★★★★★</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section id="philosophy" className="section-anchor max-w-6xl mx-auto px-4 pb-20">
-                <div ref={philosophyRef} className="relative bg-white/90 backdrop-blur-sm border border-zinc-200/90 rounded-2xl p-8 md:p-12 shadow-sm overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#fd551d]/5 to-transparent pointer-events-none" />
-                    <div className="relative z-10">
-                        <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-zinc-900">
-                            Design <span className="text-[#fd551d]">Philosophy</span>
-                        </h2>
-                        <div className="grid md:grid-cols-3 gap-6">
-                            <div className="text-center">
-                                <div className="text-4xl mb-3">🎯</div>
-                                <h3 className="text-sm font-bold text-zinc-900 mb-2">Purpose-Driven</h3>
-                                <p className="text-xs text-zinc-600 leading-relaxed">
-                                    Every design serves a purpose. I create with intention, ensuring
-                                    each element contributes to the overall narrative.
-                                </p>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-4xl mb-3">✨</div>
-                                <h3 className="text-sm font-bold text-zinc-900 mb-2">Aesthetic Excellence</h3>
-                                <p className="text-xs text-zinc-600 leading-relaxed">
-                                    Beauty and functionality aren&apos;t mutually exclusive. I believe in
-                                    creating experiences that are both visually stunning and usable.
-                                </p>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-4xl mb-3">🔮</div>
-                                <h3 className="text-sm font-bold text-zinc-900 mb-2">Future-Forward</h3>
-                                <p className="text-xs text-zinc-600 leading-relaxed">
-                                    I embrace emerging technologies and trends, ensuring my work
-                                    remains relevant and innovative for years to come.
-                                </p>
-                            </div>
                         </div>
                     </div>
                 </div>

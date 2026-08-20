@@ -38,6 +38,7 @@ export default function Footer() {
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>("");
   
+  const footerRef = useRef<HTMLElement>(null);
   const col1Ref = useRef<HTMLDivElement>(null);
   const col2Ref = useRef<HTMLDivElement>(null);
   const col3Ref = useRef<HTMLDivElement>(null);
@@ -76,57 +77,45 @@ export default function Footer() {
     return () => clearInterval(interval);
   }, []);
 
+  // Safe animation with guaranteed visibility fallback
   useEffect(() => {
-    // Small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      const ctx = gsap.context(() => {
-        // Animate columns
-        const columns = [col1Ref.current, col2Ref.current, col3Ref.current];
-        
-        columns.forEach((col, index) => {
-          if (!col) return;
-          
-          // Set initial state
-          gsap.set(col, { opacity: 0, y: 20 });
-          
-          // Animate in
-          gsap.to(col, {
+    const columns = [col1Ref.current, col2Ref.current, col3Ref.current, socialRef.current].filter(Boolean);
+    
+    // Ensure all elements are visible immediately in case animation fails or is skipped
+    columns.forEach(col => {
+      if (col) {
+        col.style.opacity = "1";
+        col.style.transform = "none";
+      }
+    });
+
+    const ctx = gsap.context(() => {
+      if (footerRef.current) {
+        gsap.fromTo(
+          columns,
+          { opacity: 0, y: 24 },
+          {
             opacity: 1,
             y: 0,
             duration: 0.6,
-            delay: index * 0.12,
+            stagger: 0.1,
             ease: "power2.out",
             scrollTrigger: {
-              trigger: col,
-              start: "top 90%",
+              trigger: footerRef.current,
+              start: "top 95%",
               toggleActions: "play none none none",
+              once: true,
             },
-          });
-        });
+          }
+        );
+      }
+    }, footerRef);
 
-        // Animate social section
-        if (socialRef.current) {
-          gsap.set(socialRef.current, { opacity: 0, y: 20 });
-          gsap.to(socialRef.current, {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            delay: 0.3,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: socialRef.current,
-              start: "top 90%",
-              toggleActions: "play none none none",
-            },
-          });
-        }
-      });
+    // Refresh triggers when route changes
+    ScrollTrigger.refresh();
 
-      return () => ctx.revert();
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []);
+    return () => ctx.revert();
+  }, [pathname]);
 
   const handleCopyEmail = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -145,13 +134,16 @@ export default function Footer() {
   };
 
   return (
-    <footer className="w-full min-h-screen text-white font-display flex flex-col justify-between bg-[#222222]">
+    <footer
+      ref={footerRef}
+      className="w-full min-h-[500px] text-white font-display flex flex-col justify-between bg-[#222222] relative z-10"
+    >
       {/* Main Content - Top */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 pt-20 md:pt-28 pb-12 md:pb-16">
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-16 md:pt-24 pb-10 md:pb-14">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16 w-full">
             {/* Column 1: Navigation */}
-            <div ref={col1Ref} className="md:col-span-1">
+            <div ref={col1Ref} className="md:col-span-1 opacity-100">
               <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-4 font-semibold">
                 Navigation
               </span>
@@ -171,7 +163,7 @@ export default function Footer() {
             </div>
 
             {/* Column 2: Contact */}
-            <div ref={col2Ref} className="md:col-span-1">
+            <div ref={col2Ref} className="md:col-span-1 opacity-100">
               <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-4 font-semibold">
                 Contact
               </span>
@@ -239,7 +231,7 @@ export default function Footer() {
             </div>
 
             {/* Column 3: Location & Time Zone */}
-            <div ref={col3Ref} className="md:col-span-1">
+            <div ref={col3Ref} className="md:col-span-1 opacity-100">
               <span className="block text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/90 mb-4 font-semibold">
                 Location & Timezone
               </span>
@@ -270,7 +262,7 @@ export default function Footer() {
       </div>
 
       {/* Socials and Copyright - Center */}
-      <div ref={socialRef} className="w-full px-4 sm:px-6 lg:px-8 py-8 flex justify-center items-center">
+      <div ref={socialRef} className="w-full px-4 sm:px-6 lg:px-8 py-6 flex justify-center items-center opacity-100">
         <div className="text-center space-y-4">
           {/* Social Links */}
           <div className="flex justify-center items-center gap-4 sm:gap-8 flex-wrap">

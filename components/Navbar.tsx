@@ -24,12 +24,12 @@ const navItems = [
 export default function Navbar() {
   const { isTransitioning } = useLoading();
   const [navState, setNavState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed');
+  const [isWhiteBg, setIsWhiteBg] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const navLinksRef = useRef<(HTMLLIElement | null)[]>([]);
   const menuIconRef = useRef<HTMLDivElement>(null);
-  const currentInvertVal = useRef<number>(0);
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === "/";
@@ -37,51 +37,42 @@ export default function Navbar() {
   const isMenuOpen = navState === 'opening' || navState === 'open';
   const isOverlayDown = navState === 'opening' || navState === 'open' || navState === 'closing';
 
-  // Apply direct inversion filter: 0 = Original Black, 1 = Inverted White
-  const applyInvert = useCallback((val: number) => {
-    const clamped = Math.max(0, Math.min(1, val));
-    currentInvertVal.current = clamped;
-
-    if (logoRef.current) {
-      logoRef.current.style.filter = `invert(${clamped})`;
-    }
-    if (menuBtnRef.current) {
-      menuBtnRef.current.style.filter = `invert(${clamped})`;
-    }
-  }, []);
-
   const updateHeaderColor = useCallback(() => {
     if (isMenuOpen) {
       if (logoRef.current) logoRef.current.style.filter = "invert(1)";
-      if (menuBtnRef.current) menuBtnRef.current.style.filter = "invert(1)";
+      setIsWhiteBg(false);
       return;
     }
 
     const headerY = 35;
     const footerEl = document.querySelector("footer");
 
-    // Check if scrolled into footer on ANY page (footer is dark #222222 -> white logo invert(1))
+    // Check if scrolled into footer on ANY page (footer is dark #222222 -> white logo, dark bg)
     if (footerEl) {
       const rect = footerEl.getBoundingClientRect();
       if (rect.top <= headerY) {
-        applyInvert(1);
+        if (logoRef.current) logoRef.current.style.filter = "invert(1)";
+        setIsWhiteBg(false);
         return;
       }
     }
 
-    // On the About page, the content background is white -> black logo & menu button (invert 0)
+    // On the About page, the content background is white -> black logo & orange/black menu button
     if (pathname === "/about") {
-      applyInvert(0);
+      if (logoRef.current) logoRef.current.style.filter = "invert(0)";
+      setIsWhiteBg(true);
       return;
     }
 
     if (pathname === "/projects" || pathname === "/contact") {
-      applyInvert(1);
+      if (logoRef.current) logoRef.current.style.filter = "invert(1)";
+      setIsWhiteBg(false);
       return;
     }
 
     if (!isHome) {
-      applyInvert(1);
+      if (logoRef.current) logoRef.current.style.filter = "invert(1)";
+      setIsWhiteBg(false);
       return;
     }
 
@@ -94,7 +85,8 @@ export default function Navbar() {
     if (projectsEl) {
       const rect = projectsEl.getBoundingClientRect();
       if (rect.top <= headerY && rect.bottom > headerY) {
-        applyInvert(0);
+        if (logoRef.current) logoRef.current.style.filter = "invert(0)";
+        setIsWhiteBg(true);
         return;
       }
     }
@@ -104,7 +96,9 @@ export default function Navbar() {
       if (rect.top <= headerY && rect.bottom > headerY) {
         const scrollableDist = rect.height - window.innerHeight;
         const progress = scrollableDist > 0 ? Math.max(0, Math.min(1, -rect.top / scrollableDist)) : 0;
-        applyInvert(1 - progress);
+        const isWhite = progress > 0.5;
+        if (logoRef.current) logoRef.current.style.filter = `invert(${isWhite ? 0 : 1})`;
+        setIsWhiteBg(isWhite);
         return;
       }
     }
@@ -112,7 +106,8 @@ export default function Navbar() {
     if (aboutEl) {
       const rect = aboutEl.getBoundingClientRect();
       if (rect.top <= headerY && rect.bottom > headerY) {
-        applyInvert(1);
+        if (logoRef.current) logoRef.current.style.filter = "invert(1)";
+        setIsWhiteBg(false);
         return;
       }
     }
@@ -124,24 +119,25 @@ export default function Navbar() {
           const frameRect = heroFrameEl.getBoundingClientRect();
           if (frameRect.top <= headerY && frameRect.bottom >= headerY) {
             const shrinkProgress = Math.max(0, Math.min(1, -rect.top / (window.innerHeight * 0.7)));
-            applyInvert(shrinkProgress);
+            if (logoRef.current) logoRef.current.style.filter = `invert(${shrinkProgress})`;
+            setIsWhiteBg(false);
           } else {
-            applyInvert(1);
+            if (logoRef.current) logoRef.current.style.filter = "invert(1)";
+            setIsWhiteBg(false);
           }
         } else {
-          const shrinkProgress = Math.max(0, Math.min(1, -rect.top / (window.innerHeight * 0.7)));
-          applyInvert(shrinkProgress);
+          if (logoRef.current) logoRef.current.style.filter = "invert(1)";
+          setIsWhiteBg(false);
         }
         return;
       }
     }
 
-    applyInvert(1);
-  }, [isMenuOpen, isHome, pathname, applyInvert]);
+    if (logoRef.current) logoRef.current.style.filter = "invert(1)";
+    setIsWhiteBg(false);
+  }, [isMenuOpen, isHome, pathname]);
 
   useEffect(() => {
-    updateHeaderColor();
-
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -153,10 +149,15 @@ export default function Navbar() {
       }
     };
 
+    const rafId = window.requestAnimationFrame(() => {
+      updateHeaderColor();
+    });
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll, { passive: true });
 
     return () => {
+      window.cancelAnimationFrame(rafId);
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
@@ -349,14 +350,26 @@ export default function Navbar() {
           <button
             ref={menuBtnRef}
             type="button"
-            className="menu-btn outline-none bg-transparent flex items-center justify-center w-10 h-10 text-black border-2 border-black rounded-md p-1.5 hover:opacity-80 cursor-pointer transition-[filter] duration-200"
+            className={`menu-btn relative overflow-hidden outline-none flex items-center justify-center w-10 h-10 rounded-md p-1.5 cursor-pointer bg-transparent border-2 transition-all duration-300 group shadow-sm ${
+              isWhiteBg && !isMenuOpen
+                ? "border-black text-black"
+                : "border-white text-white"
+            }`}
             aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMenuOpen}
             onClick={handleToggle}
           >
-            <div ref={menuIconRef} className="w-full h-full flex items-center justify-center">
+            {/* Sliding orange background: slides down on hover, slides up when not hovering */}
+            <span
+              className="absolute inset-0 w-full h-full bg-[#fd551d] transform -translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out pointer-events-none"
+            />
+            <div ref={menuIconRef} className="relative z-10 w-full h-full flex items-center justify-center pointer-events-none">
               <svg
-                className="w-full h-full stroke-current"
+                className={`w-full h-full stroke-current transition-colors duration-300 ${
+                  isWhiteBg && !isMenuOpen
+                    ? "text-black group-hover:text-white"
+                    : "text-white group-hover:text-white"
+                }`}
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="2.5"
