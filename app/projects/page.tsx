@@ -170,7 +170,7 @@ export default function ProjectsPage() {
       <section
         id="projects"
         ref={sectionRef}
-        className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-transparent min-h-screen text-white font-display pt-24"
+        className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 mx-auto bg-transparent min-h-screen text-white font-display pt-24"
       >
         <div ref={headerRef} className="text-center max-w-[560px] mx-auto mb-8">
           <h1 className="font-normal text-[clamp(1.5rem,4vw,2.2rem)] mb-2 tracking-[0.05em] uppercase text-white font-display">
@@ -188,8 +188,8 @@ export default function ProjectsPage() {
               key={cat.id}
               onClick={() => handleFilterChange(cat.id)}
               className={`px-4 py-2 rounded-full text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer font-bold ${selectedCategory === cat.id
-                  ? 'bg-[#fd551d] text-zinc-950 shadow-md shadow-[#fd551d]/40'
-                  : 'bg-zinc-800/80 text-zinc-300 hover:text-white hover:bg-zinc-700/80 border border-zinc-700/50'
+                ? 'bg-[#fd551d] text-zinc-950 shadow-md shadow-[#fd551d]/40'
+                : 'bg-zinc-800/80 text-zinc-300 hover:text-white hover:bg-zinc-700/80 border border-zinc-700/50'
                 }`}
             >
               {cat.label}
