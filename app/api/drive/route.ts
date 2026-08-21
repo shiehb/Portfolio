@@ -144,15 +144,14 @@ export async function GET() {
 
                 return (data.files || []).map((file: DriveFile) => {
                     const isVideo = category === 'video' || (file.mimeType && file.mimeType.startsWith('video/'));
-                    const videoUrl = isVideo ? `https://drive.google.com/file/d/${file.id}/preview` : undefined;
+                    const videoUrl = isVideo ? `https://drive.google.com/uc?export=download&id=${file.id}` : undefined;
+                    const imageUrl = `https://lh3.googleusercontent.com/d/${file.id}=s1600`;
 
                     return {
                         id: file.id,
                         name: file.name || '',
                         mimeType: file.mimeType,
-                        image: file.thumbnailLink
-                            ? file.thumbnailLink.replace(/=s\d+/, "=s1600")
-                            : "/placeholder.jpg",
+                        image: imageUrl,
                         category: category,
                         isVideo: Boolean(isVideo),
                         videoUrl: videoUrl,

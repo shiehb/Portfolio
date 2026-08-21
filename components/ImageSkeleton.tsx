@@ -24,18 +24,22 @@ export default function ImageSkeleton({
 
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-2xl ${
-        isLightContext ? 'bg-zinc-200/70' : 'bg-zinc-800/60'
-      } ${heightClass} ${className}`}
+      className={`relative w-full overflow-hidden rounded-2xl border ${isLightContext
+          ? 'bg-zinc-200/80 border-black/5'
+          : 'bg-zinc-800/80 border-white/5'
+        } ${heightClass} ${className} animate-pulse`}
       style={combinedStyle}
       aria-hidden="true"
       {...props}
     >
-      {/* Base shimmer background */}
-      <div className={`absolute inset-0 ${isLightContext ? 'bg-zinc-200/50' : 'bg-zinc-800/50'}`} />
-      
-      {/* Pure clean animated shimmering light sweep */}
-      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+      {/* Base background tone */}
+      <div
+        className={`absolute inset-0 ${isLightContext ? 'bg-zinc-300/40' : 'bg-zinc-900/40'
+          }`}
+      />
+
+      {/* Sweeping shimmer light sweep animation overlay */}
+      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
     </div>
   );
 }
