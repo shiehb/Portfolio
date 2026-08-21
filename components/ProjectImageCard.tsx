@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useSyncExternalStore } from 'react';
+import React, { useState, useEffect, useRef, useSyncExternalStore, memo } from 'react';
 import Image from 'next/image';
 import { ProjectItem } from '@/lib/projectsData';
 import ImageSkeleton from './ImageSkeleton';
@@ -16,7 +16,7 @@ function useIsMounted() {
   );
 }
 
-interface ProjectImageCardProps {
+export interface ProjectImageCardProps {
   project: ProjectItem;
   className?: string;
   isLightContext?: boolean;
@@ -38,7 +38,7 @@ const DYNAMIC_ASPECT_RATIOS = [
   'aspect-[4/5]',
 ];
 
-export default function ProjectImageCard({
+function ProjectImageCard({
   project,
   className = '',
   isLightContext = false,
@@ -350,3 +350,24 @@ export default function ProjectImageCard({
   );
 }
 
+/**
+ * Prop equality comparator for React.memo to eliminate redundant card re-renders.
+ */
+function arePropsEqual(prev: ProjectImageCardProps, next: ProjectImageCardProps): boolean {
+  return (
+    prev.project.id === next.project.id &&
+    prev.project.image === next.project.image &&
+    prev.project.videoUrl === next.project.videoUrl &&
+    prev.project.category === next.project.category &&
+    prev.project.title === next.project.title &&
+    prev.index === next.index &&
+    prev.priority === next.priority &&
+    prev.isLightContext === next.isLightContext &&
+    prev.className === next.className &&
+    prev.aspectRatioClass === next.aspectRatioClass &&
+    prev.currentProjectIndex === next.currentProjectIndex &&
+    (prev.projectsList === next.projectsList || prev.projectsList?.length === next.projectsList?.length)
+  );
+}
+
+export default memo(ProjectImageCard, arePropsEqual);

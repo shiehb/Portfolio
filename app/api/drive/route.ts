@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+// Cache route output on CDN/Vercel Edge for 10 minutes (600 seconds)
+export const revalidate = 600;
+
 // Category Folder Mapping
 const CATEGORY_FOLDERS: Record<string, string> = {
     graphics: "1BdHXZtv7ZB3MLm3-w0hqRautdcJ2nSeH",
@@ -8,8 +11,14 @@ const CATEGORY_FOLDERS: Record<string, string> = {
     website: "1aOWMBHdYlGcg_7_ZyKq0Q-gWiRlnkary",
 };
 
-// Fallback high-resolution projects for Jericho Urbano portfolio when Drive API key is pending
-// Includes grouped image sets (with _1, _2, etc.) and playable videos
+// Edge / CDN caching headers
+const CACHE_HEADERS: Record<string, string> = {
+    "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400",
+    "CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400",
+    "Vercel-CDN-Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400",
+};
+
+// Fallback high-resolution projects for portfolio when Drive API key is pending or empty
 const FALLBACK_PROJECTS = [
     // Graphics Series (Grouped Stack)
     {
@@ -121,11 +130,11 @@ export async function GET() {
     const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
 
     if (!apiKey) {
-        return NextResponse.json({ projects: FALLBACK_PROJECTS });
+        return NextResponse.json({ projects: FALLBACK_PROJECTS }, { headers: CACHE_HEADERS });
     }
 
     try {
-        // Fetch files from each subfolder concurrently
+        // Fetch files from each subfolder concurrently with Next.js Data Cache tags & revalidation
         const fetchPromises = Object.entries(CATEGORY_FOLDERS).map(
             async ([category, folderId]) => {
                 const query = `'${folderId}' in parents and mimeType != 'application/vnd.google-apps.folder' and trashed = false`;
@@ -134,7 +143,12 @@ export async function GET() {
                     query
                 )}&fields=${encodeURIComponent(fields)}&key=${apiKey}`;
 
-                const res = await fetch(url, { next: { revalidate: 10 } });
+                const res = await fetch(url, {
+                    next: {
+                        revalidate: 600,
+                        tags: ["drive-projects", `drive-${category}`],
+                    },
+                });
                 const data = await res.json();
 
                 if (!res.ok) {
@@ -143,7 +157,7 @@ export async function GET() {
                 }
 
                 return (data.files || []).map((file: DriveFile) => {
-                    const isVideo = category === 'video' || (file.mimeType && file.mimeType.startsWith('video/'));
+                    const isVideo = category === 'video' || Boolean(file.mimeType && file.mimeType.startsWith('video/'));
                     const videoUrl = isVideo ? `https://drive.google.com/uc?export=download&id=${file.id}` : undefined;
                     const imageUrl = `https://lh3.googleusercontent.com/d/${file.id}=s1600`;
 
@@ -166,20 +180,20 @@ export async function GET() {
         if (projects.length === 0) {
             return NextResponse.json(
                 { projects: FALLBACK_PROJECTS },
-                { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } }
+                { headers: CACHE_HEADERS }
             );
         }
 
         return NextResponse.json(
             { projects },
-            { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } }
+            { headers: CACHE_HEADERS }
         );
     } catch (error: unknown) {
         const errorMsg = error instanceof Error ? error.message : "Unknown error";
         console.error("Drive fetch error:", errorMsg);
         return NextResponse.json(
             { projects: FALLBACK_PROJECTS },
-            { headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600' } }
+            { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
         );
     }
 }

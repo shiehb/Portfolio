@@ -1,7 +1,7 @@
 // app/projects/page.tsx
 'use client';
 
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { getProjects, getCachedProjects, ProjectItem } from '@/lib/projectsData';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -143,19 +143,19 @@ export default function ProjectsPage() {
     return filteredProjects.slice(0, visibleCount);
   }, [filteredProjects, visibleCount]);
 
-  // Handle filter change
-  const handleFilterChange = (categoryId: string) => {
+  // Handle filter change with memoized callback
+  const handleFilterChange = useCallback((categoryId: string) => {
     setSelectedCategory(categoryId);
     setFilterKey((prev) => prev + 1);
     setVisibleCount(INITIAL_VISIBLE_COUNT);
     prevVisibleCountRef.current = 0;
-  };
+  }, []);
 
-  // Handle load more
-  const handleLoadMore = () => {
+  // Handle load more with memoized callback
+  const handleLoadMore = useCallback(() => {
     prevVisibleCountRef.current = visibleCount;
     setVisibleCount((prev) => prev + PAGE_SIZE);
-  };
+  }, [visibleCount]);
 
   const categories = [
     { id: 'all', label: 'All Projects' },
