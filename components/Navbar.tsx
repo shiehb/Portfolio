@@ -173,7 +173,7 @@ export default function Navbar() {
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    
+
     // If clicking same page, close menu normally and scroll top
     if (pathname === href) {
       setNavState('closing');
@@ -194,7 +194,7 @@ export default function Navbar() {
     if (!menuIconRef.current) return;
 
     const isOpen = navState === 'opening' || navState === 'open';
-    
+
     // Get all lines
     const lines = menuIconRef.current.querySelectorAll('line');
     const topLine = lines[0];
@@ -248,13 +248,13 @@ export default function Navbar() {
       // Animate links with stagger
       navLinksRef.current.forEach((link, index) => {
         if (link) {
-          gsap.set(link, { 
-            opacity: 0, 
+          gsap.set(link, {
+            opacity: 0,
             y: 30,
             scale: 0.85,
             rotateX: 15,
           });
-          
+
           gsap.to(link, {
             opacity: 1,
             y: 0,
@@ -336,7 +336,7 @@ export default function Navbar() {
         >
           <div ref={logoRef} className="flex items-center transition-[filter] duration-200">
             <Image
-              src="/img/logo.png"
+              src="/img/logo.webp"
               alt="Jericho Urbano Logo"
               width={120}
               height={48}
@@ -350,11 +350,10 @@ export default function Navbar() {
           <button
             ref={menuBtnRef}
             type="button"
-            className={`menu-btn relative overflow-hidden outline-none flex items-center justify-center w-10 h-10 rounded-md p-1.5 cursor-pointer bg-transparent border-2 transition-all duration-300 group shadow-sm ${
-              isWhiteBg && !isMenuOpen
+            className={`menu-btn relative overflow-hidden outline-none flex items-center justify-center w-10 h-10 rounded-md p-1.5 cursor-pointer bg-transparent border-2 transition-all duration-300 group shadow-sm ${isWhiteBg && !isMenuOpen
                 ? "border-black text-black"
                 : "border-white text-white"
-            }`}
+              }`}
             aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMenuOpen}
             onClick={handleToggle}
@@ -365,11 +364,10 @@ export default function Navbar() {
             />
             <div ref={menuIconRef} className="relative z-10 w-full h-full flex items-center justify-center pointer-events-none">
               <svg
-                className={`w-full h-full stroke-current transition-colors duration-300 ${
-                  isWhiteBg && !isMenuOpen
+                className={`w-full h-full stroke-current transition-colors duration-300 ${isWhiteBg && !isMenuOpen
                     ? "text-black"
                     : "text-white group-hover:text-white"
-                }`}
+                  }`}
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="2.5"
@@ -390,9 +388,8 @@ export default function Navbar() {
       </header>
 
       <nav
-        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 text-white transform z-20 flex items-center justify-center ${
-          isOverlayDown ? "translate-y-0 pointer-events-auto" : "-translate-y-full pointer-events-none"
-        } ${isTransitioning ? "transition-none" : "transition-transform duration-500 ease-in-out"}`}
+        className={`fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 to-zinc-800 text-white transform z-20 flex items-center justify-center ${isOverlayDown ? "translate-y-0 pointer-events-auto" : "-translate-y-full pointer-events-none"
+          } ${isTransitioning ? "transition-none" : "transition-transform duration-500 ease-in-out"}`}
         id="nav-menu"
         aria-label="Main navigation"
       >
@@ -408,11 +405,10 @@ export default function Navbar() {
               <Link
                 href={item.href}
                 prefetch={true}
-                className={`nav-menu-link transition-colors text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black uppercase tracking-wider ${
-                  isActive(item.href)
+                className={`nav-menu-link transition-colors text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black uppercase tracking-wider ${isActive(item.href)
                     ? "text-[#fd551d]"
                     : "text-white hover:text-zinc-300"
-                }`}
+                  }`}
                 onClick={(e) => handleLinkClick(e, item.href)}
               >
                 {item.label}

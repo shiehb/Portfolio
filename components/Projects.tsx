@@ -200,7 +200,7 @@ export default function Projects() {
                 {/* Top Center Brand Logo */}
                 <div className="relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center">
                     <Image
-                        src="/img/logo.png"
+                        src="/img/logo.webp"
                         alt="Brand Logo"
                         width={56}
                         height={56}
