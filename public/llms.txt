@@ -1,12 +1,25 @@
-# Portfolio & Creative Engineering Showcase
+# Jericho Urbano
 
-> A modern, high-performance portfolio showcasing full-stack web applications, graphics, photography, and video productions.
+> Jericho Urbano is a Visual Artist and Web Developer specializing in immersive digital experiences, videography, interactive web applications, and narrative aesthetics.
 
-## Overview
-This website highlights creative projects, case studies, and engineering capabilities with responsive masonry grids, video streaming, interactive shaders, and smooth transitions.
+Crafting high-impact interactive web applications, cinematic narratives, and brand identities with seamless motion physics, minimalist spatial layouts, and precision color science.
 
-## Key Sections
-- **Projects (/projects)**: Interactive gallery of graphic designs, web applications, media productions, and photography.
-- **About**: Profile, background experience, and creative design philosophy.
-- **Experience**: Timeline of roles, technical skills, design toolsets, and milestones.
-- **Contact**: Reach out for collaborations, freelance work, and engineering inquiries.
+## Core Information
+- Website: [Jericho Urbano Portfolio](https://portfolio-jerichourbano.vercel.app/)
+- Email: [jerichourbano.01.01.04@gmail.com](mailto:jerichourbano.01.01.04@gmail.com)
+- Location: Philippines (Available Worldwide / Remote)
+- Timezone: Philippine Standard Time (GMT+8)
+
+## Key Projects
+- [Aero Carbon](https://portfolio-jerichourbano.vercel.app/projects): Interactive web application showcase.
+- [Monster Camo](https://portfolio-jerichourbano.vercel.app/projects): Visual branding and cinematic media showcase.
+- [Spectrum Shift](https://portfolio-jerichourbano.vercel.app/projects): Interactive motion design project.
+- [Neon Matrix](https://portfolio-jerichourbano.vercel.app/projects): High-impact digital art installation.
+- [Porcelain Flora](https://portfolio-jerichourbano.vercel.app/projects): Minimalist spatial layout design.
+- [Obsidian Stealth](https://portfolio-jerichourbano.vercel.app/projects): Color-grade and branding showcase.
+
+## Social & Professional Links
+- [GitHub](https://github.com)
+- [LinkedIn](https://linkedin.com)
+- [Instagram](https://instagram.com)
+- [Facebook](https://facebook.com)
