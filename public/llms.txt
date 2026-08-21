@@ -1,0 +1,12 @@
+# Portfolio & Creative Engineering Showcase
+
+> A modern, high-performance portfolio showcasing full-stack web applications, graphics, photography, and video productions.
+
+## Overview
+This website highlights creative projects, case studies, and engineering capabilities with responsive masonry grids, video streaming, interactive shaders, and smooth transitions.
+
+## Key Sections
+- **Projects (/projects)**: Interactive gallery of graphic designs, web applications, media productions, and photography.
+- **About**: Profile, background experience, and creative design philosophy.
+- **Experience**: Timeline of roles, technical skills, design toolsets, and milestones.
+- **Contact**: Reach out for collaborations, freelance work, and engineering inquiries.
