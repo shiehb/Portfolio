@@ -28,7 +28,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
   const [totalItems, setTotalItems] = useState(1);
   const [progress, setProgress] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  
+
   const hasLoadedRef = useRef(false);
   const hasInitialLoadedRef = useRef(false);
   const isMountedRef = useRef(true);
@@ -94,7 +94,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
       // 4. Preload critical site images
       const criticalImages = [
         '/img/hero.webp',
-        '/img/logo.png',
+        '/img/logo.webp',
       ];
 
       const imagePreloadPromises = criticalImages.map(src => {
