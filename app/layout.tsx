@@ -8,7 +8,7 @@ import GlobalLoader from "@/components/GlobalLoader";
 import PaperShaderWrapper from "@/components/PaperShaderWrapper";
 import PageTransition from "@/components/PageTransition";
 import { Suspense } from "react";
-import { siteMetadata, viewportConfig } from "@/lib/metadata";
+import { siteMetadata, viewportConfig } from "@/app/metadata";
 
 const departureMono = localFont({
   src: "../public/font/departure-mono.otf",
