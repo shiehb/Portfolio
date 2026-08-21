@@ -3,7 +3,7 @@
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { X, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ProjectItem } from '@/lib/projectsData';
 
 interface MediaModalProps {
@@ -27,6 +27,21 @@ export default function MediaModal({
   currentProjectIndex,
   onNavigateProject,
 }: MediaModalProps) {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  // Programmatic muted play trigger for modal video element
+  useEffect(() => {
+    if (isOpen && videoRef.current) {
+      videoRef.current.muted = true; // Essential for browser approval
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.warn("Autoplay auto-started with fallback:", error);
+        });
+      }
+    }
+  }, [isOpen, project, activeImageIndex]);
+
   const images = useMemo(() => {
     return project?.images && project.images.length > 0 ? project.images : (project ? [project.image] : []);
   }, [project]);
@@ -134,19 +149,36 @@ export default function MediaModal({
   const title = project.title || project.name?.replace(/\.[a-zA-Z0-9]+$/, '') || 'Project';
 
   let modalVideoSrc: string | null = null;
-  if (project.videoUrl && !project.videoUrl.includes('drive.google.com/file')) {
+  let drivePreviewUrl: string | null = null;
+
+  const driveIdMatch =
+    (typeof project.id === 'string' && project.id.length > 20 ? project.id : null) ||
+    project.videoUrl?.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1] ||
+    project.videoUrl?.match(/id=([a-zA-Z0-9_-]+)/)?.[1] ||
+    project.image?.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1] ||
+    project.image?.match(/id=([a-zA-Z0-9_-]+)/)?.[1];
+
+  if (driveIdMatch) {
+    drivePreviewUrl = `https://drive.google.com/file/d/${driveIdMatch}/preview?autoplay=1&mute=1`;
+  }
+
+  let driveEmbedSrc: string | null = null;
+  if (drivePreviewUrl) {
+    driveEmbedSrc = drivePreviewUrl;
+  } else if (project.videoUrl?.includes('drive.google.com')) {
+    if (project.videoUrl.includes('autoplay=1')) {
+      driveEmbedSrc = project.videoUrl;
+    } else {
+      const sep = project.videoUrl.includes('?') ? '&' : '?';
+      driveEmbedSrc = `${project.videoUrl}${sep}autoplay=1&mute=1`;
+    }
+  }
+
+  // If project has direct non-drive mp4 URL
+  if (project.videoUrl && !project.videoUrl.includes('drive.google.com') && project.videoUrl.match(/\.(mp4|webm|mov|ogg)($|\?)/i)) {
     modalVideoSrc = project.videoUrl;
   } else if (project.image?.match(/\.(mp4|webm|mov|ogg)($|\?)/i)) {
     modalVideoSrc = project.image;
-  } else if (project.videoUrl && project.videoUrl.includes('drive.google.com/file')) {
-    const match = project.videoUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (match) {
-      modalVideoSrc = `https://drive.google.com/uc?export=download&id=${match[1]}`;
-    } else {
-      modalVideoSrc = project.videoUrl;
-    }
-  } else if (isVideo) {
-    modalVideoSrc = project.videoUrl || (typeof project.id === 'string' ? `https://drive.google.com/uc?export=download&id=${project.id}` : null);
   }
 
   const modalContent = (
@@ -175,31 +207,48 @@ export default function MediaModal({
         {isVideo ? (
           /* Video Viewer */
           <div className="w-full aspect-video max-h-[80vh] rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl relative flex items-center justify-center">
-            {modalVideoSrc ? (
+            {/* Background / Buffering static poster thumbnail */}
+            <Image
+              src={project.thumbnail || project.image}
+              alt={title}
+              fill
+              sizes="(max-width: 1200px) 100vw, 1200px"
+              className="w-full h-full object-cover rounded-2xl"
+              priority
+            />
+
+            {driveEmbedSrc ? (
+              <iframe
+                src={driveEmbedSrc}
+                title={title}
+                className="absolute inset-0 w-full h-full border-0 rounded-2xl"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
+            ) : modalVideoSrc ? (
               <video
+                ref={videoRef}
                 src={modalVideoSrc}
-                poster={project.image}
-                controls
+                poster={project.thumbnail || project.image}
                 autoPlay
+                muted
+                loop
                 playsInline
-                className="w-full h-full object-contain"
+                preload="auto"
+                onCanPlay={(e) => {
+                  e.currentTarget.muted = true;
+                  const playPromise = e.currentTarget.play();
+                  if (playPromise !== undefined) {
+                    playPromise.catch((error) => {
+                      console.warn("Autoplay auto-started with fallback:", error);
+                    });
+                  }
+                }}
+                className="absolute inset-0 w-full h-full object-cover rounded-2xl"
               >
                 Your browser does not support the video tag.
               </video>
-            ) : project.videoUrl?.includes('drive.google.com') ? (
-              <iframe
-                src={project.videoUrl}
-                title={title}
-                className="w-full h-full border-0"
-                allow="autoplay; fullscreen"
-                allowFullScreen
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-center p-6 text-white/70">
-                <Play className="w-12 h-12 text-[#fd551d] mb-3" />
-                <p className="text-sm">Video stream preview unavailable</p>
-              </div>
-            )}
+            ) : null}
           </div>
         ) : (
           /* Image Gallery Viewer */

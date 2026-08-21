@@ -241,6 +241,7 @@ export default function ProjectsPage() {
                       <ProjectImageCard
                         project={project}
                         index={idx}
+                        priority={idx === 0}
                         isLightContext={false}
                         projectsList={filteredProjects}
                         currentProjectIndex={idx}

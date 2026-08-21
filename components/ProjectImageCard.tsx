@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { ProjectItem } from '@/lib/projectsData';
 import ImageSkeleton from './ImageSkeleton';
 import MediaModal from './MediaModal';
-import { Play } from 'lucide-react';
 
 const emptySubscribe = () => () => { };
 
@@ -25,6 +24,7 @@ interface ProjectImageCardProps {
   aspectRatioClass?: string;
   projectsList?: ProjectItem[];
   currentProjectIndex?: number;
+  priority?: boolean;
 }
 
 const DYNAMIC_ASPECT_RATIOS = [
@@ -46,15 +46,17 @@ export default function ProjectImageCard({
   aspectRatioClass,
   projectsList,
   currentProjectIndex,
+  priority = false,
 }: ProjectImageCardProps) {
-  const mounted = useIsMounted();
+  const isMounted = useIsMounted();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const isLcpCandidate = index < 2 || priority;
+  const [isVisible, setIsVisible] = useState(isLcpCandidate);
   const [modalProjectIndex, setModalProjectIndex] = useState<number | null>(null);
 
-  // IntersectionObserver to defer media loading until near viewport
+  // IntersectionObserver to defer media loading until near viewport for non-LCP items
   useEffect(() => {
-    if (!mounted || isVisible) return;
+    if (!isMounted || isVisible) return;
     const element = containerRef.current;
     if (!element || typeof IntersectionObserver === 'undefined') {
       setIsVisible(true);
@@ -69,7 +71,7 @@ export default function ProjectImageCard({
           observer.disconnect();
         }
       },
-      { rootMargin: '200px 0px', threshold: 0.01 }
+      { rootMargin: '250px 0px', threshold: 0.01 }
     );
 
     observer.observe(element);
@@ -77,7 +79,7 @@ export default function ProjectImageCard({
     return () => {
       observer.disconnect();
     };
-  }, [mounted, isVisible]);
+  }, [isMounted, isVisible]);
 
   const images =
     project.images && project.images.length > 0 ? project.images : [project.image];
@@ -110,36 +112,50 @@ export default function ProjectImageCard({
     return () => clearInterval(timer);
   }, [isVisible, hasMultipleImages, isVideo, images.length]);
 
+  // Programmatic muted play trigger for video element
+  useEffect(() => {
+    if (isHovered && videoRef.current) {
+      videoRef.current.muted = true; // Essential for browser approval
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.warn("Autoplay auto-started with fallback:", error);
+        });
+      }
+    }
+  }, [isHovered]);
+
   if (hasError || (!project.image && !project.videoUrl)) {
     return null;
   }
 
-  // Resolve playable direct video URL & poster thumbnail
-  let videoSource: string | null = null;
-  if (project.videoUrl && !project.videoUrl.includes('drive.google.com/file')) {
-    videoSource = project.videoUrl;
-  } else if (project.image?.match(/\.(mp4|webm|mov|ogg)($|\?)/i)) {
-    videoSource = project.image;
-  } else if (project.videoUrl && project.videoUrl.includes('drive.google.com/file')) {
-    const match = project.videoUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (match) {
-      videoSource = `https://drive.google.com/uc?export=download&id=${match[1]}`;
-    } else {
-      videoSource = project.videoUrl;
-    }
-  } else if (isVideo) {
-    videoSource = project.videoUrl || (typeof project.id === 'string' ? `https://drive.google.com/uc?export=download&id=${project.id}` : null);
-  }
+  // Extract Drive ID for clean iframe preview embed or direct streaming
+  const driveIdMatch =
+    (typeof project.id === 'string' && project.id.length > 20 ? project.id : null) ||
+    project.videoUrl?.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1] ||
+    project.videoUrl?.match(/id=([a-zA-Z0-9_-]+)/)?.[1] ||
+    project.image?.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1] ||
+    project.image?.match(/id=([a-zA-Z0-9_-]+)/)?.[1];
+
+  const drivePreviewEmbed = driveIdMatch ? `https://drive.google.com/file/d/${driveIdMatch}/preview?autoplay=1&mute=1` : null;
+  const isDirectVideo = Boolean(
+    (project.videoUrl && !project.videoUrl.includes('drive.google.com') && project.videoUrl.match(/\.(mp4|webm|mov|ogg)($|\?)/i)) ||
+    project.image?.match(/\.(mp4|webm|mov|ogg)($|\?)/i)
+  );
+  const directVideoSrc = isDirectVideo
+    ? (project.videoUrl?.match(/\.(mp4|webm|mov|ogg)($|\?)/i) ? project.videoUrl : project.image)
+    : null;
 
   const posterImage = project.image || (typeof project.id === 'string' ? `https://lh3.googleusercontent.com/d/${project.id}=s1600` : '');
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    if (isVideo && videoRef.current) {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Playback gracefully handled
+        playPromise.catch((error) => {
+          console.warn("Autoplay auto-started with fallback:", error);
         });
       }
     }
@@ -147,8 +163,12 @@ export default function ProjectImageCard({
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    if (isVideo && videoRef.current) {
-      videoRef.current.pause();
+    if (videoRef.current) {
+      try {
+        videoRef.current.pause();
+      } catch {
+        // Safe pause catch
+      }
     }
   };
 
@@ -212,7 +232,7 @@ export default function ProjectImageCard({
             }`}
         >
           {/* Skeleton display before media loads or before scrolling into viewport */}
-          {(!mounted || !isVisible || !isMediaLoaded) && (
+          {(!isMounted || !isVisible || !isMediaLoaded) && (
             <div className="absolute inset-0 w-full h-full z-0">
               <ImageSkeleton
                 heightClass="h-full w-full"
@@ -222,54 +242,63 @@ export default function ProjectImageCard({
           )}
 
           {/* Media Presentation Area - mounted only when client mounted and isVisible is triggered */}
-          {mounted && isVisible && (
+          {isMounted && isVisible && (
             <div
               className={`relative w-full h-full overflow-hidden rounded-2xl ${!isMediaLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
                 } transition-opacity duration-300`}
             >
               {isVideo ? (
-                /* Video Container with Instant Poster & Hover-Triggered Lazy Playback */
+                /* Video Container with custom poster thumbnail & optional clean hover iframe preview */
                 <div className="relative w-full h-full bg-black overflow-hidden rounded-2xl">
-                  {videoSource ? (
+                  {/* Base static poster thumbnail rendered prior to video load / during buffering */}
+                  <Image
+                    src={project.thumbnail || posterImage || project.image}
+                    alt={project.title || project.name || "Video thumbnail"}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+                    className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
+                    priority={isLcpCandidate}
+                    loading={isLcpCandidate ? "eager" : undefined}
+                    onLoad={() => setIsMediaLoaded(true)}
+                    onError={() => setHasError(true)}
+                  />
+
+                  {directVideoSrc ? (
                     <video
                       ref={videoRef}
-                      src={isHovered ? videoSource : (videoSource || undefined)}
-                      poster={posterImage}
+                      src={directVideoSrc}
+                      poster={project.thumbnail || posterImage || project.image}
+                      autoPlay
                       muted
                       loop
                       playsInline
-                      preload="metadata"
+                      preload="auto"
                       aria-label="Project video preview"
                       onLoadedMetadata={() => setIsMediaLoaded(true)}
                       onLoadedData={() => setIsMediaLoaded(true)}
-                      onCanPlay={() => setIsMediaLoaded(true)}
-                      onError={() => {
-                        // Fallback to thumbnail image if video fails
+                      onCanPlay={(e) => {
                         setIsMediaLoaded(true);
+                        e.currentTarget.muted = true;
+                        const p = e.currentTarget.play();
+                        if (p !== undefined) {
+                          p.catch((err) => {
+                            console.warn("Autoplay auto-started with fallback:", err);
+                          });
+                        }
                       }}
-                      className="w-full h-full object-cover block rounded-2xl select-none"
+                      className="absolute inset-0 w-full h-full object-cover block rounded-2xl select-none"
                     >
                       <track kind="captions" srcLang="en" label="English captions" />
                     </video>
-                  ) : (
-                    <Image
-                      src={posterImage || project.image}
-                      alt={project.title || "Video thumbnail"}
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-                      className="object-cover rounded-2xl"
+                  ) : isHovered && drivePreviewEmbed ? (
+                    <iframe
+                      src={drivePreviewEmbed}
+                      title={project.title || "Video preview"}
+                      className="absolute inset-0 w-full h-full border-0 pointer-events-none rounded-2xl"
+                      allow="autoplay; encrypted-media; picture-in-picture"
                       onLoad={() => setIsMediaLoaded(true)}
-                      onError={() => setHasError(true)}
                     />
-                  )}
-
-                  {/* Center Video Play Icon (visible when not playing or on subtle hover state) */}
-                  <div className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${isHovered ? 'opacity-0' : 'opacity-85 group-hover:opacity-100'
-                    }`}>
-                    <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-[#fd551d] text-white flex items-center justify-center shadow-xl shadow-[#fd551d]/40 scale-90 group-hover:scale-100 group-active:scale-95 transition-transform duration-300">
-                      <Play className="w-5 h-5 sm:w-5.5 sm:h-5.5 fill-white translate-x-0.5" />
-                    </div>
-                  </div>
+                  ) : null}
                 </div>
               ) : (
                 /* Stacked Images with CSS Crossfade Transition */
@@ -288,7 +317,8 @@ export default function ProjectImageCard({
                         fill
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
                         className="w-full h-full block object-cover rounded-2xl select-none group-hover:scale-105 transition-transform duration-500"
-                        priority={idx === 0 && index < 4}
+                        priority={idx === 0 && isLcpCandidate}
+                        loading={idx === 0 && isLcpCandidate ? "eager" : undefined}
                         onLoad={() => {
                           if (idx === 0) setIsMediaLoaded(true);
                         }}
@@ -319,3 +349,4 @@ export default function ProjectImageCard({
     </>
   );
 }
+

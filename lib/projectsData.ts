@@ -5,6 +5,7 @@ export interface ProjectItem {
   name?: string;
   title?: string;
   image: string;
+  thumbnail?: string;
   images?: string[];
   category: string;
   mimeType?: string;
@@ -142,6 +143,10 @@ export function getGoogleDriveCdnUrl(fileId: string, size = 1600): string {
 
 export function getGoogleDriveVideoUrl(fileId: string): string {
   return `https://drive.google.com/uc?export=download&id=${fileId}`;
+}
+
+export function getGoogleDrivePreviewUrl(fileId: string): string {
+  return `https://drive.google.com/file/d/${fileId}/preview?autoplay=1&mute=1`;
 }
 
 export function transformDriveAssetUrl(urlOrId: string, isVideo = false): string {

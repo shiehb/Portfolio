@@ -4,10 +4,12 @@
 /* Remove the @font-face block - it's now handled by next/font/local */
 
 @keyframes blink {
+
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.2;
   }
@@ -17,6 +19,7 @@
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(100%);
   }
@@ -163,43 +166,53 @@
 
 /* Keep animations */
 @keyframes waveFloat {
+
   0%,
   100% {
     transform: translateY(0px) scaleY(1);
   }
+
   25% {
     transform: translateY(-10px) scaleY(1.05);
   }
+
   50% {
     transform: translateY(5px) scaleY(0.95);
   }
+
   75% {
     transform: translateY(-5px) scaleY(1.02);
   }
 }
 
 @keyframes waveDisrupt {
+
   0%,
   100% {
     transform: translateX(0) scaleX(1) skewX(0deg);
   }
+
   25% {
     transform: translateX(-20px) scaleX(1.02) skewX(1deg);
   }
+
   50% {
     transform: translateX(15px) scaleX(0.98) skewX(-1deg);
   }
+
   75% {
     transform: translateX(-10px) scaleX(1.01) skewX(0.5deg);
   }
 }
 
 @keyframes pulse-glow {
+
   0%,
   100% {
     transform: scale(1);
     opacity: 0.2;
   }
+
   50% {
     transform: scale(1.5);
     opacity: 0.3;
@@ -207,11 +220,13 @@
 }
 
 @keyframes pulse-glow-delayed {
+
   0%,
   100% {
     transform: scale(1);
     opacity: 0.1;
   }
+
   50% {
     transform: scale(1.5);
     opacity: 0.2;
@@ -371,6 +386,7 @@ body.transitioning {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -382,6 +398,7 @@ body.transitioning {
     opacity: 1;
     transform: translateY(0);
   }
+
   to {
     opacity: 0;
     transform: translateY(-10px);
@@ -493,6 +510,22 @@ body.transitioning {
 
 .hover-scale:hover {
   transform: scale(1.05);
+}
+
+/* ============================================
+   VIDEO CONTROLS STYLES
+   ============================================ */
+
+video::-webkit-media-controls {
+  display: none !important;
+}
+
+video::-webkit-media-controls-enclosure {
+  display: none !important;
+}
+
+video::-webkit-media-controls-panel {
+  display: none !important;
 }
 
 /* ============================================
