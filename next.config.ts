@@ -2,8 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: [
-    "ais-dev-pfjs22sj6qnnysmlx2vrkp-829392694658.asia-east1.run.app",
-    "ais-pre-pfjs22sj6qnnysmlx2vrkp-829392694658.asia-east1.run.app",
     "*.run.app",
     "localhost:3000",
   ],
@@ -13,12 +11,6 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.unsplash.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "assets.codepen.io",
         port: "",
         pathname: "/**",
       },
@@ -44,31 +36,16 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
-  compiler: {
-    // Remove console.log in production (optional)
-    // removeConsole: process.env.NODE_ENV === 'production' ? {
-    //   exclude: ['error', 'warn'],
-    // } : false,
-  },
-
   reactStrictMode: true,
   poweredByHeader: false,
 
   experimental: {
     optimizePackageImports: [
-      "framer-motion",
       "lucide-react",
       "@paper-design/shaders-react",
       "gsap",
       "lenis",
     ],
-  },
-
-  turbopack: {
-    resolveAlias: {},
-    resolveExtensions: [".tsx", ".ts", ".jsx", ".js", ".mjs", ".json"],
-    debugIds: process.env.NODE_ENV === "development",
-    rules: {},
   },
 
   async headers() {
