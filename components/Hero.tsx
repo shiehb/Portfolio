@@ -91,47 +91,15 @@ function MarqueeRow({ reverse = false }: { reverse?: boolean }) {
   );
 }
 
-// export function get3x2TargetDimensions() {
-//   if (typeof window === "undefined") {
-//     return { targetWidth: 900, targetHeight: 600, borderRadius: "24px" };
-//   }
+const CROP_SCALE = 0.78;
 
-//   const vw = window.innerWidth;
-//   const vh = window.innerHeight;
-//   const isMobile = vw < 768;
-
-//   let targetWidth: number;
-//   let targetHeight: number;
-//   let borderRadius = "24px";
-
-//   if (isMobile) {
-//     targetWidth = Math.min(vw * 0.76, (vh * 0.46) / 1.25, 290);
-//     targetHeight = Math.round(targetWidth * 1.28);
-//     targetWidth = Math.round(targetWidth);
-//     borderRadius = "16px";
-//   } else {
-//     if (vw < 1024) {
-//       targetWidth = Math.min(vw * 0.75, (vh * 0.65) * 1.5, 620);
-//       borderRadius = "20px";
-//     } else if (vw < 1280) {
-//       targetWidth = Math.min(vw * 0.60, (vh * 0.70) * 1.5, 780);
-//       borderRadius = "24px";
-//     } else if (vw < 2560) {
-//       targetWidth = Math.min(vw * 0.32, (vh * 0.52) * 1.5, 960);
-//       borderRadius = "24px";
-//     } else {
-//       targetWidth = Math.min(vw * 0.45, (vh * 0.75) * 1.5, 1440);
-//       borderRadius = "28px";
-//     }
-//     targetHeight = Math.round(targetWidth / 1.5);
-//     targetWidth = Math.round(targetWidth);
-//   }
-
-//   return { targetWidth, targetHeight, borderRadius };
-// }
 export function get3x2TargetDimensions() {
   if (typeof window === "undefined") {
-    return { targetWidth: 900, targetHeight: 600, borderRadius: "24px" };
+    return {
+      targetWidth: Math.round(900 * CROP_SCALE),
+      targetHeight: Math.round(600 * CROP_SCALE),
+      borderRadius: "24px",
+    };
   }
 
   const vw = window.innerWidth;
@@ -144,29 +112,27 @@ export function get3x2TargetDimensions() {
 
   if (isMobile) {
     targetWidth = Math.min(vw * 0.76, (vh * 0.46) / 1.25, 290);
-    targetHeight = Math.round(targetWidth * 1.28);
-    targetWidth = Math.round(targetWidth);
+    targetHeight = targetWidth * 1.28;
     borderRadius = "16px";
   } else {
     if (vw < 1024) {
       targetWidth = Math.min(vw * 0.75, (vh * 0.65) * 1.5, 620);
       borderRadius = "20px";
     } else if (vw < 1280) {
-      // Decrease from 0.60 to 0.45 and cap max width (e.g., 600px)
       targetWidth = Math.min(vw * 0.45, (vh * 0.60) * 1.5, 600);
       borderRadius = "24px";
     } else if (vw < 2560) {
-      // Decrease percentage from 0.52 to 0.38 and max width from 960 to 700
       targetWidth = Math.min(vw * 0.38, (vh * 0.60) * 1.5, 700);
       borderRadius = "24px";
     } else {
-      // Ultra-wide screens: Decrease max width from 1440 to 900
       targetWidth = Math.min(vw * 0.35, (vh * 0.65) * 1.5, 900);
       borderRadius = "28px";
     }
-    targetHeight = Math.round(targetWidth / 1.5);
-    targetWidth = Math.round(targetWidth);
+    targetHeight = targetWidth / 1.5;
   }
+
+  targetWidth = Math.round(targetWidth * CROP_SCALE);
+  targetHeight = Math.round(targetHeight * CROP_SCALE);
 
   return { targetWidth, targetHeight, borderRadius };
 }
@@ -191,9 +157,7 @@ export default function Hero() {
     }
   }, [imageLoaded, incrementLoaded]);
 
-  // Initial entrance animation to prevent flash
   useEffect(() => {
-    // Set initial hidden states for all elements
     if (frameRef.current) {
       gsap.set(frameRef.current, { opacity: 0 });
     }
@@ -203,21 +167,18 @@ export default function Hero() {
     if (marqueeRef.current) {
       gsap.set(marqueeRef.current, { opacity: 0 });
     }
-    // Signature starts completely hidden - will be shown by scroll animation
     if (signatureContainerRef.current) {
       gsap.set(signatureContainerRef.current, { 
         opacity: 0, 
         scale: 0.85,
         y: 20,
-        visibility: 'hidden' // Ensure it's completely hidden
+        visibility: 'hidden'
       });
     }
-    // ABOUT title starts hidden
     if (aboutTitleRef.current) {
       gsap.set(aboutTitleRef.current, { opacity: 0, y: 30, scale: 0.9 });
     }
 
-    // Entrance animation timeline - ONLY for elements that should be visible initially
     const tl = gsap.timeline({
       defaults: { ease: "power2.out" },
       onComplete: () => {
@@ -225,14 +186,12 @@ export default function Hero() {
       }
     });
 
-    // 1. Frame fades in
     tl.to(frameRef.current, {
       opacity: 1,
       duration: 0.6,
       ease: "power2.out",
     }, 0.1);
 
-    // 2. Portrait fades in with slight scale
     tl.to(portraitRef.current, {
       opacity: 1,
       scale: 1,
@@ -240,20 +199,15 @@ export default function Hero() {
       ease: "power2.out",
     }, 0.2);
 
-    // NOTE: Marquee and Signature are NOT animated here - they are animated by scroll
-
-    // Cleanup
     return () => {
       tl.kill();
     };
   }, []);
 
-  // Main scroll animation
   useEffect(() => {
     if (!scrollContainerRef.current || !frameRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Initial state for the frame
       gsap.set(frameRef.current, {
         width: "100vw",
         height: "100vh",
@@ -269,7 +223,6 @@ export default function Hero() {
         top: "0",
       });
 
-      // Initial state for portrait
       if (portraitRef.current) {
         gsap.set(portraitRef.current, {
           scale: 1.0,
@@ -279,12 +232,10 @@ export default function Hero() {
         });
       }
 
-      // Initial state for marquee - hidden until scroll
       if (marqueeRef.current) {
         gsap.set(marqueeRef.current, { opacity: 0 });
       }
 
-      // Initial state for ABOUT title - hidden until end of scroll
       if (aboutTitleRef.current) {
         gsap.set(aboutTitleRef.current, {
           opacity: 0,
@@ -293,18 +244,18 @@ export default function Hero() {
         });
       }
 
-      // Initial state for signature paths - hidden until scroll
       signaturePathsRef.current.forEach((path) => {
         if (path) {
           const length = path.getTotalLength ? path.getTotalLength() : 1200;
+          const padded = length + 4;
           gsap.set(path, {
-            strokeDasharray: length,
-            strokeDashoffset: length,
+            strokeDasharray: `${length} ${padded}`,
+            strokeDashoffset: padded,
+            opacity: 0,
           });
         }
       });
 
-      // Initial state for signature container - completely hidden
       if (signatureContainerRef.current) {
         gsap.set(signatureContainerRef.current, {
           opacity: 0,
@@ -314,7 +265,6 @@ export default function Hero() {
         });
       }
 
-      // Main timeline with scroll trigger
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: scrollContainerRef.current,
@@ -325,7 +275,6 @@ export default function Hero() {
         },
       });
 
-      // 1. Frame zoom out animation
       tl.to(
         frameRef.current,
         {
@@ -341,7 +290,6 @@ export default function Hero() {
         0
       );
 
-      // 2. Portrait scale and grayscale
       if (portraitRef.current) {
         tl.to(
           portraitRef.current,
@@ -354,7 +302,6 @@ export default function Hero() {
         );
       }
 
-      // 3. Marquee in background - fades in only as user begins scrolling / zooming out
       if (marqueeRef.current) {
         tl.to(
           marqueeRef.current,
@@ -367,9 +314,7 @@ export default function Hero() {
         );
       }
 
-      // 4. Signature animation - appears and draws stroke during scroll
       if (signatureContainerRef.current) {
-        // First make signature visible with fade and scale
         tl.to(signatureContainerRef.current, {
           opacity: 1,
           scale: 1,
@@ -379,24 +324,37 @@ export default function Hero() {
           duration: 0.3,
         }, 0.35);
 
-        // Draw each path stroke
+        const strokeSequence = [
+          { duration: 0.32, ease: "power1.inOut" },
+          { duration: 0.3, ease: "power1.inOut" },
+          { duration: 0.12, ease: "power2.out" },
+          { duration: 0.1, ease: "expo.out" },
+          { duration: 0.13, ease: "power2.out" },
+          { duration: 0.05, ease: "back.out(3)" },
+        ];
+
+        let strokeCursor = 0.38;
         signaturePathsRef.current.forEach((path, idx) => {
-          if (path) {
-            const startOffset = 0.38 + idx * 0.04;
-            tl.to(
-              path,
-              {
-                strokeDashoffset: 0,
-                ease: "power1.inOut",
-                duration: 0.24,
-              },
-              startOffset
-            );
-          }
+          if (!path) return;
+          const { duration, ease } =
+            strokeSequence[idx] ?? { duration: 0.15, ease: "power1.inOut" };
+
+          tl.set(path, { opacity: 1 }, strokeCursor);
+
+          tl.to(
+            path,
+            {
+              strokeDashoffset: 0,
+              ease,
+              duration,
+            },
+            strokeCursor
+          );
+
+          strokeCursor += duration;
         });
       }
 
-      // 5. ABOUT title appears ONLY at 100% zoomout (end of scroll)
       if (aboutTitleRef.current) {
         tl.fromTo(
           aboutTitleRef.current,
@@ -425,7 +383,6 @@ export default function Hero() {
       aria-label="Hero section"
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-transparent">
-        {/* Marquee Background in the back - On mobile, positioned below hero crop and above ABOUT title */}
         <div
           ref={marqueeRef}
           className="absolute inset-x-0 bottom-24 sm:bottom-28 md:top-1/2 md:bottom-auto md:-translate-y-1/2 z-0 flex flex-col pointer-events-none will-change-[transform,opacity] select-none"
@@ -448,7 +405,6 @@ export default function Hero() {
             opacity: 0,
           }}
         >
-          {/* Portrait Image */}
           <div
             ref={portraitRef}
             className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter,opacity]"
@@ -469,86 +425,96 @@ export default function Hero() {
               />
             </div>
           </div>
-
-          {/* Signature - Centered */}
-          <div
-            ref={signatureContainerRef}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none flex flex-col items-center justify-center w-[88%] max-w-[340px] sm:max-w-[440px] md:max-w-[540px] px-2"
-            style={{ 
-              opacity: 0,
-              visibility: 'hidden' 
-            }}
-          >
-            <svg
-              viewBox="0 0 1000 950"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-full h-auto drop-shadow-[0_10px_30px_rgba(253,85,29,0.45)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
-            >
-              {/* 1. Main Iconic Elongated Left Loop */}
-              <path
-                ref={(el) => {
-                  signaturePathsRef.current[0] = el;
-                }}
-                d="M 390 490 C 330 630, 220 760, 150 760 C 110 760, 125 680, 175 560 C 265 310, 395 185, 475 185 C 510 185, 505 245, 460 370 C 395 550, 305 735, 270 855 C 310 750, 355 625, 395 490"
-                stroke="#fd551d"
-                strokeWidth="16"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* 2. Cursive baseline scribble */}
-              <path
-                ref={(el) => {
-                  signaturePathsRef.current[1] = el;
-                }}
-                d="M 450 515 C 475 510, 485 480, 505 480 C 520 480, 530 525, 550 500 C 565 480, 575 480, 595 515 C 610 535, 630 490, 645 515"
-                stroke="#fd551d"
-                strokeWidth="14"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* 3. Top-Right Monogram Flourish Loop */}
-              <path
-                ref={(el) => {
-                  signaturePathsRef.current[2] = el;
-                }}
-                d="M 610 380 C 590 310, 630 215, 690 215 C 750 215, 755 315, 695 400 C 645 460, 595 435, 605 370 C 615 300, 670 270, 675 350 C 680 410, 635 445, 620 445"
-                stroke="#fd551d"
-                strokeWidth="15"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* 4. Sharp Dynamic Horizontal Piercing Slash */}
-              <path
-                ref={(el) => {
-                  signaturePathsRef.current[3] = el;
-                }}
-                d="M 480 435 L 860 290"
-                stroke="#fd551d"
-                strokeWidth="17"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* 5. Far-Right Accent Dot */}
-              <path
-                ref={(el) => {
-                  signaturePathsRef.current[4] = el;
-                }}
-                d="M 945 258 C 945 250, 955 250, 955 258 C 955 266, 945 266, 945 258 Z"
-                stroke="#fd551d"
-                strokeWidth="20"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
         </section>
 
-        {/* ABOUT Title - Outside the frame, at the bottom - ONLY appears at end of scroll */}
+        <div
+          ref={signatureContainerRef}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none flex flex-col items-center justify-center px-2 w-[75%] md:w-[55%]"
+          style={{
+            opacity: 0,
+            visibility: 'hidden',
+          }}
+        >
+          <svg
+            viewBox="50 0 520 532"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto drop-shadow-[0_10px_30px_rgba(253,85,29,0.45)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+          >
+            {/* 1. Main signature loop + descender tail */}
+            <path
+              ref={(el) => {
+                signaturePathsRef.current[0] = el;
+              }}
+              d="M233.6,264q-68.7,120.4-103,131.7C96.3,407,63.6,422.8,93,363.2s128.399999-216.300002,151.999999-237.200002s61.9-36.699999,49.7,16.100001-76.2,191.9-92.2,223.9q-16,32-16,32-26.4,54-23.5,58t13.9-4.4"
+              stroke="#fd551d"
+              strokeWidth="9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* 2. Cursive baseline scribble flowing into the monogram flourish loop */}
+            <path
+              ref={(el) => {
+                signaturePathsRef.current[1] = el;
+              }}
+              d="M270,269.6q11.5,3.2,30-8.4c18.5-11.6,35.7-41.5,23.5-25.2s-20.000001,24.399999-.000001,14.699999q20-9.7,34.599999-23.600001l-10.8,18.9l27-20.5l3.4,15.5q34.3-20.5,49.8-50.3c15.5-29.8,24.2-55.9,19-64.7s-22.4-10-31-2.3-35.6,34.999999-43.6,51.999999-12.6,39.499999-3.4,43.299999s25.8-2.700001,34.5-14.000001q8.7-11.3,8.7-11.3l18.7-32.2"
+              stroke="#fd551d"
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* 3. Inner flourish curl detail */}
+            <path
+              ref={(el) => {
+                signaturePathsRef.current[2] = el;
+              }}
+              d="M399.2,156.1Q387,173.1,387,181c0,7.9,7.3,13.8,16,7.7q8.7-6.1,19.4-16.9"
+              stroke="#fd551d"
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* 4. Small accent mark */}
+            <path
+              ref={(el) => {
+                signaturePathsRef.current[3] = el;
+              }}
+              d="M388.5,207.5l-16.6,4.4"
+              stroke="#fd551d"
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* 5. Diagonal piercing slash */}
+            <path
+              ref={(el) => {
+                signaturePathsRef.current[4] = el;
+              }}
+              d="M300,234.1q-21.9-4-1.7-10.7t206.226236-63.6"
+              stroke="#fd551d"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* 6. Far-right accent dot */}
+            <path
+              ref={(el) => {
+                signaturePathsRef.current[5] = el;
+              }}
+              d="M554.172373,149l6.967879-2.1"
+              stroke="#fd551d"
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+
         <div
           ref={aboutTitleRef}
           className="absolute bottom-10 sm:bottom-12 md:bottom-16 lg:bottom-20 left-1/2 -translate-x-1/2 z-30 pointer-events-none"

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SectionVignette from "@/components/SectionVignette";
+import { ClipboardList, Megaphone, Video, Camera, Film, FileText } from "lucide-react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -16,32 +17,39 @@ if (typeof window !== "undefined") {
 
 const experiences = [
     {
-        year: "2023 - Present",
-        title: "Senior Web Developer",
-        company: "Digital Agency Co.",
-        description: "Leading web development projects, creating immersive digital experiences, and mentoring junior developers.",
-        icon: "💻",
+        year: "Feb 2026 - May 2026",
+        title: "On-The-Job Trainee",
+        company: "Police Community Affairs And Development Unit (LUPPO)",
+        description: "Managed and audited digital logs, supported community affairs operations, and created tailored informational multimedia content.",
+        icon: ClipboardList,
     },
     {
-        year: "2022 - 2023",
-        title: "Visual Designer",
-        company: "Creative Studio",
-        description: "Designed and developed visual identities, websites, and marketing materials for various clients.",
-        icon: "🎨",
+        year: "2024 - Present",
+        title: "CIMO Contributor",
+        company: "College Information And Marketing Office (CIMO)",
+        description: "Designed digital/visual content for official promotions and documented high-profile institutional events for marketing channels.",
+        icon: Megaphone,
     },
     {
-        year: "2021 - 2022",
-        title: "Freelance Developer",
-        company: "Self-Employed",
-        description: "Worked on various projects including web development, photography, and videography for diverse clients.",
-        icon: "🚀",
+        year: "Aug 2024 - Jul 2026",
+        title: "Chief Multimedia Editor",
+        company: "The Louisian Torch",
+        description: "Led and mentored a multimedia team in planning, producing, and editing visual content while streamlining review workflows.",
+        icon: Video,
     },
     {
-        year: "2020 - 2021",
-        title: "Junior Developer",
-        company: "Tech Startup",
-        description: "Built responsive websites and web applications using modern JavaScript frameworks.",
-        icon: "🌟",
+        year: "Aug 2024 - Jul 2026",
+        title: "Photojournalist",
+        company: "The Louisian Torch",
+        description: "Captured and edited high-impact photographs for campus news, major events, and feature articles under tight deadlines.",
+        icon: Camera,
+    },
+    {
+        year: "Sep 2023 - Jul 2024",
+        title: "Multimedia Staffer",
+        company: "The Louisian Torch",
+        description: "Produced video content for campus news, event recaps, and digital feature stories in collaboration with editors and writers.",
+        icon: Film,
     },
 ];
 
@@ -137,8 +145,7 @@ export default function AboutPage() {
                         <span className="block text-[#fd551d]">Jericho Urbano</span>
                     </h1>
                     <p className="mx-auto mt-4 max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-zinc-600">
-                        Visual Artist & Web Developer crafting immersive digital experiences,
-                        cinematic narratives, and meaningful brand identities.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </p>
                 </div>
             </div>
@@ -147,23 +154,17 @@ export default function AboutPage() {
                 <div className="grid md:grid-cols-2 gap-12 items-start">
                     <div>
                         <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-zinc-900">
-                            Creative Technologist & Visual Artist
+                            Lorem Ipsum
                         </h2>
                         <div className="space-y-4 text-zinc-700 text-sm sm:text-base leading-relaxed">
                             <p>
-                                I am a visual artist and web developer based in the Philippines,
-                                specializing in immersive digital experiences, videography, and
-                                narrative aesthetics.
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                             </p>
                             <p>
-                                With a passion for blending technology and artistry, I create
-                                high-impact interactive web applications, cinematic narratives,
-                                and brand identities that resonate with audiences.
+                                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
                             </p>
                             <p>
-                                My approach combines seamless motion physics, minimalist spatial
-                                layouts, and precision color science to deliver experiences that
-                                are both visually stunning and functionally robust.
+                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                             </p>
                         </div>
                         <div className="mt-6 flex flex-wrap gap-4">
@@ -174,6 +175,15 @@ export default function AboutPage() {
                             >
                                 View My Work
                             </Link>
+                            <a
+                                href="https://shiehb.github.io/link.jerichourbano/files/resume.pdf"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-6 py-2.5 bg-zinc-900 text-white rounded-full text-sm font-semibold hover:bg-zinc-800 transition-all shadow-md hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2"
+                            >
+                                <FileText className="w-4 h-4" />
+                                View Resume
+                            </a>
                             <Link
                                 href="/contact"
                                 onClick={(e) => handleNavigate(e, '/contact', 'CONTACT')}
@@ -210,32 +220,35 @@ export default function AboutPage() {
                         <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-[#fd551d]/30 -translate-x-1/2" />
 
                         <div className="space-y-8">
-                            {experiences.map((exp, index) => (
-                                <div
-                                    key={index}
-                                    className={`exp-item relative flex flex-col md:flex-row items-start gap-6 ${
-                                        index % 2 === 0 ? "md:pr-[50%]" : "md:pl-[50%] md:flex-row-reverse"
-                                    }`}
-                                >
-                                    <div className="absolute left-4 md:left-1/2 top-2 w-4 h-4 bg-[#fd551d] rounded-full border-4 border-white shadow-sm -translate-x-1/2 z-10" />
+                            {experiences.map((exp, index) => {
+                                const IconComponent = exp.icon;
+                                return (
+                                    <div
+                                        key={index}
+                                        className={`exp-item relative flex flex-col md:flex-row items-start gap-6 ${
+                                            index % 2 === 0 ? "md:pr-[50%]" : "md:pl-[50%] md:flex-row-reverse"
+                                        }`}
+                                    >
+                                        <div className="absolute left-4 md:left-1/2 top-2 w-4 h-4 bg-[#fd551d] rounded-full border-4 border-white shadow-sm -translate-x-1/2 z-10" />
 
-                                    <div className={`pl-12 md:pl-0 w-full ${
-                                        index % 2 === 0 ? "md:text-right" : "md:text-left"
-                                    }`}>
-                                        <div className={`bg-white/85 backdrop-blur-sm border border-zinc-200/90 rounded-xl p-6 shadow-sm hover:border-[#fd551d]/40 transition-all duration-300 ${
-                                            index % 2 === 0 ? "md:mr-6" : "md:ml-6"
+                                        <div className={`pl-12 md:pl-0 w-full ${
+                                            index % 2 === 0 ? "md:text-right" : "md:text-left"
                                         }`}>
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <span className="text-2xl">{exp.icon}</span>
-                                                <span className="text-xs text-zinc-500 font-semibold tracking-wider">{exp.year}</span>
+                                            <div className={`bg-white/85 backdrop-blur-sm border border-zinc-200/90 rounded-xl p-6 shadow-sm hover:border-[#fd551d]/40 transition-all duration-300 ${
+                                                index % 2 === 0 ? "md:mr-6" : "md:ml-6"
+                                            }`}>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <IconComponent className="w-5 h-5 text-[#fd551d]" />
+                                                    <span className="text-xs text-zinc-500 font-semibold tracking-wider">{exp.year}</span>
+                                                </div>
+                                                <h3 className="text-lg font-bold text-zinc-900">{exp.title}</h3>
+                                                <p className="text-sm text-[#fd551d] font-medium mb-2">{exp.company}</p>
+                                                <p className="text-sm text-zinc-600 leading-relaxed">{exp.description}</p>
                                             </div>
-                                            <h3 className="text-lg font-bold text-zinc-900">{exp.title}</h3>
-                                            <p className="text-sm text-[#fd551d] font-medium mb-2">{exp.company}</p>
-                                            <p className="text-sm text-zinc-600 leading-relaxed">{exp.description}</p>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
