@@ -183,7 +183,7 @@ export default function Projects() {
                                         fill
                                         sizes="(max-width: 1024px) 50vw, 25vw"
                                         className="object-cover block select-none"
-                                        priority={colIdx < 2}
+                                        loading="lazy"
                                     />
                                 </div>
                             ))}

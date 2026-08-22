@@ -111,16 +111,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
         });
       });
 
-      // 5. Preload project items data from API
-      const projectsPromise = (async () => {
-        try {
-          await getProjects();
-        } catch {
-          // Non-blocking if API is offline
-        }
-      })();
-
-      // 6. Preload any images currently in DOM
+      // 5. Preload any images currently in DOM
       const domImagesPromise = new Promise<void>((resolve) => {
         if (typeof document === 'undefined') return resolve();
 
@@ -146,37 +137,44 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
           });
 
           // Fallback if image events are delayed
-          setTimeout(resolve, 1200);
+          setTimeout(resolve, 800);
         };
 
         if (document.readyState === 'complete') {
           checkDOMImages();
         } else {
           window.addEventListener('load', checkDOMImages, { once: true });
-          setTimeout(checkDOMImages, 400);
+          setTimeout(checkDOMImages, 300);
         }
       });
 
-      // 7. Window load state
+      // 6. Window load state
       const windowLoadPromise = new Promise<void>((resolve) => {
         if (typeof document === 'undefined' || document.readyState === 'complete') {
           resolve();
         } else {
           window.addEventListener('load', () => resolve(), { once: true });
-          setTimeout(resolve, 1500); // Safety fallback
+          setTimeout(resolve, 1000); // Safety fallback
         }
       });
 
-      // Wait for all preloads AND minimum time to complete
+      // Wait for critical hero assets and minimum time to complete
       await Promise.all([
         minTimerPromise,
         prefetchPagesPromise,
         fontsPromise,
         Promise.all(imagePreloadPromises),
-        projectsPromise,
         domImagesPromise,
         windowLoadPromise,
       ]);
+
+      // Warm projects cache non-blockingly after initial display
+      if (typeof window !== 'undefined') {
+        const scheduleIdle = window.requestIdleCallback || ((cb: () => void) => setTimeout(cb, 1000));
+        scheduleIdle(() => {
+          getProjects().catch(() => { });
+        });
+      }
 
       if (isCancelled || hasLoadedRef.current || hasInitialLoadedRef.current) return;
 

@@ -2,12 +2,25 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import FluidCursor from "@/components/FluidCursor";
-import Hero3DCanvas from "@/components/Hero3DCanvas";
-import PaperShader from "@/components/PaperShader";
+
+const FluidCursor = dynamic(() => import("@/components/FluidCursor"), {
+  ssr: false,
+  loading: () => null,
+});
+
+const Hero3DCanvas = dynamic(() => import("@/components/Hero3DCanvas"), {
+  ssr: false,
+  loading: () => null,
+});
+
+const PaperShader = dynamic(() => import("@/components/PaperShader"), {
+  ssr: false,
+  loading: () => null,
+});
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -20,15 +33,13 @@ const marqueeItems = [
   "Photographer",
 ];
 
-const PIXELS_PER_SECOND = 60;
-
-function MarqueeWords({ reverse }: { reverse: boolean }) {
+function MarqueeItemsGroup({ reverse }: { reverse: boolean }) {
   return (
     <div
       className={`flex items-center py-2 shrink-0 ${reverse ? "marquee-text-dark" : "marquee-text-light"
         }`}
     >
-      {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, index) => (
+      {marqueeItems.map((item, index) => (
         <span key={index} className="marquee-text shrink-0 px-6 select-none">
           {item}
         </span>
@@ -38,56 +49,14 @@ function MarqueeWords({ reverse }: { reverse: boolean }) {
 }
 
 function MarqueeRow({ reverse = false }: { reverse?: boolean }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [distance, setDistance] = useState(0);
-
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-
-    const measure = () => setDistance(el.scrollWidth);
-    measure();
-
-    const resizeObserver = new ResizeObserver(measure);
-    resizeObserver.observe(el);
-    document.fonts?.ready.then(measure);
-
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || distance <= 0) return;
-
-    let frame: number;
-    let startTime: number | null = null;
-
-    const tick = (time: number) => {
-      if (startTime === null) startTime = time;
-      const elapsedSeconds = (time - startTime) / 1000;
-      const traveled = (elapsedSeconds * PIXELS_PER_SECOND) % distance;
-      const offset = reverse ? -distance + traveled : -traveled;
-
-      container.style.transform = `translateX(${offset}px)`;
-      frame = requestAnimationFrame(tick);
-    };
-
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [distance, reverse]);
-
   return (
     <div className="relative overflow-hidden whitespace-nowrap w-full pointer-events-none">
-      <div ref={containerRef} className="flex will-change-transform">
-        <div ref={trackRef} className="flex shrink-0">
-          <MarqueeWords reverse={reverse} />
+      <div className={reverse ? "marquee-track-reverse" : "marquee-track-forward"}>
+        <div className="flex shrink-0">
+          <MarqueeItemsGroup reverse={reverse} />
         </div>
         <div className="flex shrink-0" aria-hidden="true">
-          <MarqueeWords reverse={reverse} />
-        </div>
-        <div className="flex shrink-0" aria-hidden="true">
-          <MarqueeWords reverse={reverse} />
+          <MarqueeItemsGroup reverse={reverse} />
         </div>
       </div>
     </div>

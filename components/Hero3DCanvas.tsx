@@ -101,6 +101,8 @@ export default function Hero3DCanvas({
 
         let animationFrameId: number;
         let isDisposed = false;
+        let isVisible = true;
+        let isRendering = false;
 
         // Scene & Camera setup
         const scene = new THREE.Scene();
@@ -110,7 +112,7 @@ export default function Hero3DCanvas({
         const renderer = new THREE.WebGLRenderer({
             canvas,
             alpha: true,
-            antialias: true,
+            antialias: false,
             powerPreference: 'high-performance',
             preserveDrawingBuffer: false,
         });
@@ -119,7 +121,8 @@ export default function Hero3DCanvas({
         // CSS handles display scaling smoothly without WebGL buffer reallocation during scroll
         const updateRendererResolution = () => {
             if (isDisposed) return;
-            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const isMobile = window.innerWidth < 768;
+            const dpr = isMobile ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 2);
             const targetW = Math.min(Math.round(window.innerWidth * dpr), 2560);
             const targetH = Math.round(targetW * (9 / 16));
             renderer.setPixelRatio(1);
@@ -157,6 +160,7 @@ export default function Hero3DCanvas({
         const currentMouse = { x: 0, y: 0 };
 
         const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+            if (!isVisible || isDisposed) return;
             let clientX = 0;
             let clientY = 0;
 
@@ -174,11 +178,13 @@ export default function Hero3DCanvas({
 
             targetMouse.x = Math.max(-1, Math.min(1, normX));
             targetMouse.y = Math.max(-1, Math.min(1, normY));
+            startLoop();
         };
 
         const handlePointerLeave = () => {
             targetMouse.x = 0;
             targetMouse.y = 0;
+            startLoop();
         };
 
         window.addEventListener('mousemove', handlePointerMove, { passive: true });
@@ -191,6 +197,7 @@ export default function Hero3DCanvas({
             if (resizeTimer) clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 updateRendererResolution();
+                startLoop();
             }, 150);
         };
         window.addEventListener('resize', handleWindowResize);
@@ -203,6 +210,7 @@ export default function Hero3DCanvas({
             loadedCount++;
             if (loadedCount >= 2 && !isDisposed) {
                 onLoaded?.();
+                startLoop();
             }
         };
 
@@ -271,27 +279,79 @@ export default function Hero3DCanvas({
             }
         );
 
-        // Animation Loop
+        // Animation Loop with visibility and resting state pause
         const render = () => {
-            if (isDisposed) return;
+            if (isDisposed || !isVisible || document.hidden) {
+                isRendering = false;
+                return;
+            }
 
             // Linear interpolation (lerp) for smooth mouse movement
             const lerpFactor = smoothing;
-            currentMouse.x += (targetMouse.x - currentMouse.x) * lerpFactor;
-            currentMouse.y += (targetMouse.y - currentMouse.y) * lerpFactor;
+            const dx = targetMouse.x - currentMouse.x;
+            const dy = targetMouse.y - currentMouse.y;
+
+            currentMouse.x += dx * lerpFactor;
+            currentMouse.y += dy * lerpFactor;
 
             uniforms.u_mouse.value.set(currentMouse.x, currentMouse.y);
-
             renderer.render(scene, camera);
-            animationFrameId = requestAnimationFrame(render);
+
+            // Keep rendering if still moving towards target
+            if (Math.abs(dx) > 0.0001 || Math.abs(dy) > 0.0001) {
+                animationFrameId = requestAnimationFrame(render);
+                isRendering = true;
+            } else {
+                isRendering = false;
+            }
         };
 
-        render();
+        function startLoop() {
+            if (!isRendering && !isDisposed && isVisible && !document.hidden) {
+                isRendering = true;
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = requestAnimationFrame(render);
+            }
+        }
+
+        startLoop();
+
+        // IntersectionObserver to pause rendering when canvas is out of view
+        let observer: IntersectionObserver | null = null;
+        if (containerRef.current && typeof IntersectionObserver !== 'undefined') {
+            observer = new IntersectionObserver(
+                ([entry]) => {
+                    isVisible = entry.isIntersecting;
+                    if (isVisible) {
+                        startLoop();
+                    } else {
+                        isRendering = false;
+                        cancelAnimationFrame(animationFrameId);
+                    }
+                },
+                { threshold: 0 }
+            );
+            observer.observe(containerRef.current);
+        }
+
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                isRendering = false;
+                cancelAnimationFrame(animationFrameId);
+            } else if (isVisible) {
+                startLoop();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         // Cleanup
         return () => {
             isDisposed = true;
+            isRendering = false;
             cancelAnimationFrame(animationFrameId);
+
+            if (observer) observer.disconnect();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
 
             if (resizeTimer) clearTimeout(resizeTimer);
             window.removeEventListener('mousemove', handlePointerMove);

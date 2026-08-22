@@ -1,6 +1,4 @@
 // app/page.tsx
-'use client';
-
 import Hero from "../components/Hero";
 import About from "../components/About";
 import HorizontalScroll from "../components/HorizontalScroll";

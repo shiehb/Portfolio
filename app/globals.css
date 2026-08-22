@@ -184,6 +184,48 @@
   .marquee-text-dark {
     @apply text-[#fd551d];
   }
+
+  .marquee-track-forward {
+    display: flex;
+    width: max-content;
+    animation: marquee-forward 24s linear infinite;
+    will-change: transform;
+  }
+
+  .marquee-track-reverse {
+    display: flex;
+    width: max-content;
+    animation: marquee-reverse 24s linear infinite;
+    will-change: transform;
+  }
+}
+
+@keyframes marquee-forward {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marquee-reverse {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .marquee-track-forward,
+  .marquee-track-reverse {
+    animation: none !important;
+  }
 }
 
 /* Keep animations */

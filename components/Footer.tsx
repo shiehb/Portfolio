@@ -37,7 +37,7 @@ export default function Footer() {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>("");
-  
+
   const footerRef = useRef<HTMLElement>(null);
   const col1Ref = useRef<HTMLDivElement>(null);
   const col2Ref = useRef<HTMLDivElement>(null);
@@ -77,44 +77,30 @@ export default function Footer() {
     return () => clearInterval(interval);
   }, []);
 
-  // Safe animation with guaranteed visibility fallback
+  // Safe animation with guaranteed cleanup
   useEffect(() => {
-    const columns = [col1Ref.current, col2Ref.current, col3Ref.current, socialRef.current].filter(Boolean);
-    
-    // Ensure all elements are visible immediately in case animation fails or is skipped
-    columns.forEach(col => {
-      if (col) {
-        col.style.opacity = "1";
-        col.style.transform = "none";
-      }
-    });
-
-    // Guard: don't create a GSAP context/scope before the footer element exists
-    // (e.g. mid page-transition), which is what triggers "Invalid scope" warnings.
     if (!footerRef.current) return;
+    const columns = [col1Ref.current, col2Ref.current, col3Ref.current, socialRef.current].filter(Boolean);
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
         columns,
-        { opacity: 0, y: 24 },
+        { opacity: 0, y: 20 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
-          stagger: 0.1,
+          duration: 0.5,
+          stagger: 0.08,
           ease: "power2.out",
           scrollTrigger: {
             trigger: footerRef.current,
-            start: "top 95%",
+            start: "top 90%",
             toggleActions: "play none none none",
             once: true,
           },
         }
       );
     }, footerRef);
-
-    // Refresh triggers when route changes
-    ScrollTrigger.refresh();
 
     return () => ctx.revert();
   }, [pathname]);
@@ -138,7 +124,7 @@ export default function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="w-full min-h-[500px] md:min-h-screen text-white font-display flex flex-col justify-between bg-[#222222] relative z-10"
+      className="w-full min-h-[480px] md:min-h-[560px] text-white font-display flex flex-col justify-between bg-[#222222] relative z-10"
     >
       {/* Main Content - Top */}
       <div className="w-full px-4 sm:px-6 lg:px-8 pt-10 sm:pt-16 md:pt-24 pb-8 sm:pb-10 md:pb-14">

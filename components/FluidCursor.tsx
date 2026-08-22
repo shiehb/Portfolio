@@ -755,8 +755,29 @@ export default function FluidCursor({
             blit(null, true);
         }
 
+        let isVisible = true;
+        let isLoopRunning = false;
+        let cachedRect = { left: 0, top: 0, width: window.innerWidth || 1, height: window.innerHeight || 1 };
+
+        function updateCachedRect() {
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width && rect.height) {
+                cachedRect = {
+                    left: rect.left,
+                    top: rect.top,
+                    width: rect.width,
+                    height: rect.height,
+                };
+            }
+        }
+
         function update() {
-            resizeCanvas();
+            if (!isVisible || document.hidden) {
+                isLoopRunning = false;
+                return;
+            }
+
             const now = Date.now();
             const dt = Math.min((now - lastUpdateTime) / 1000, 0.016);
             lastUpdateTime = now;
@@ -774,21 +795,47 @@ export default function FluidCursor({
             render();
 
             animationFrameId = requestAnimationFrame(update);
+            isLoopRunning = true;
         }
 
-        // Event handlers
+        function startFluidLoop() {
+            if (!isLoopRunning && isVisible && !document.hidden) {
+                isLoopRunning = true;
+                cancelAnimationFrame(animationFrameId);
+                lastUpdateTime = Date.now();
+                animationFrameId = requestAnimationFrame(update);
+            }
+        }
+
+        // IntersectionObserver to pause when canvas is scrolled off-screen
+        let observer: IntersectionObserver | null = null;
+        if (typeof IntersectionObserver !== 'undefined') {
+            observer = new IntersectionObserver(([entry]) => {
+                isVisible = entry.isIntersecting;
+                if (isVisible) {
+                    startFluidLoop();
+                } else {
+                    isLoopRunning = false;
+                    cancelAnimationFrame(animationFrameId);
+                }
+            }, { threshold: 0 });
+            observer.observe(canvas);
+        }
+
+        // Event handlers using cached rect
         function updatePointerMoveData(p: typeof pointer, posX: number, posY: number) {
-            if (!canvas) return;
-            const rect = canvas.getBoundingClientRect();
-            if (!rect.width || !rect.height) return;
-            const clientX = (posX - rect.left) / rect.width;
-            const clientY = 1.0 - (posY - rect.top) / rect.height;
+            if (!cachedRect.width || !cachedRect.height) return;
+            const clientX = (posX - cachedRect.left) / cachedRect.width;
+            const clientY = 1.0 - (posY - cachedRect.top) / cachedRect.height;
 
             p.dx = (clientX - p.x) * config.SPLAT_FORCE;
             p.dy = (clientY - p.y) * config.SPLAT_FORCE;
             p.x = clientX;
             p.y = clientY;
             p.moved = Math.abs(p.dx) > 0.1 || Math.abs(p.dy) > 0.1;
+            if (p.moved) {
+                startFluidLoop();
+            }
         }
 
         const handleMouseMove = (e: MouseEvent) => {
@@ -806,14 +853,22 @@ export default function FluidCursor({
             pointer.down = true;
             updatePointerMoveData(pointer, e.clientX, e.clientY);
             splat(pointer.x, pointer.y, (Math.random() - 0.5) * 500, (Math.random() - 0.5) * 500, config.DARK_INK_COLOR);
+            startFluidLoop();
         };
 
         const handleMouseUp = () => {
             pointer.down = false;
         };
 
+        const handleResize = () => {
+            resizeCanvas();
+            updateCachedRect();
+            startFluidLoop();
+        };
+
         // Sequential setup sequence with complete safety checks
         resizeCanvas();
+        updateCachedRect();
         initFramebuffers();
         if (buffers.velocity?.read && buffers.density?.read) {
             multipleSplats(Math.floor(Math.random() * 20) + 5);
@@ -823,17 +878,32 @@ export default function FluidCursor({
         window.addEventListener('touchmove', handleTouchMove, { passive: true });
         window.addEventListener('mousedown', handleMouseDown);
         window.addEventListener('mouseup', handleMouseUp);
-        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('scroll', updateCachedRect, { passive: true });
 
-        animationFrameId = requestAnimationFrame(update);
+        const handleVisibility = () => {
+            if (document.hidden) {
+                isLoopRunning = false;
+                cancelAnimationFrame(animationFrameId);
+            } else if (isVisible) {
+                startFluidLoop();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibility);
+
+        startFluidLoop();
 
         return () => {
+            isLoopRunning = false;
             cancelAnimationFrame(animationFrameId);
+            if (observer) observer.disconnect();
+            document.removeEventListener('visibilitychange', handleVisibility);
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('touchmove', handleTouchMove);
             window.removeEventListener('mousedown', handleMouseDown);
             window.removeEventListener('mouseup', handleMouseUp);
-            window.removeEventListener('resize', resizeCanvas);
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('scroll', updateCachedRect);
         };
     }, []);
 

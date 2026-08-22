@@ -37,6 +37,37 @@ export default function Navbar() {
   const isMenuOpen = navState === 'opening' || navState === 'open';
   const isOverlayDown = navState === 'opening' || navState === 'open' || navState === 'closing';
 
+  const elementsCacheRef = useRef<{
+    footer: HTMLElement | null;
+    projects: HTMLElement | null;
+    gallery: HTMLElement | null;
+    about: HTMLElement | null;
+    home: HTMLElement | null;
+    heroFrame: HTMLElement | null;
+  }>({
+    footer: null,
+    projects: null,
+    gallery: null,
+    about: null,
+    home: null,
+    heroFrame: null,
+  });
+
+  const refreshElementsCache = useCallback(() => {
+    elementsCacheRef.current = {
+      footer: document.querySelector("footer"),
+      projects: document.querySelector("#projects"),
+      gallery: document.querySelector("#gallery"),
+      about: document.querySelector("#about"),
+      home: document.querySelector("#home"),
+      heroFrame: document.querySelector("#hero-zoom-frame"),
+    };
+  }, []);
+
+  useEffect(() => {
+    refreshElementsCache();
+  }, [pathname, refreshElementsCache]);
+
   const updateHeaderColor = useCallback(() => {
     if (isMenuOpen) {
       if (logoRef.current) logoRef.current.style.filter = "invert(1)";
@@ -45,7 +76,8 @@ export default function Navbar() {
     }
 
     const headerY = 35;
-    const footerEl = document.querySelector("footer");
+    const cache = elementsCacheRef.current;
+    const footerEl = cache.footer || document.querySelector("footer");
 
     // Check if scrolled into footer on ANY page (footer is dark #222222 -> white logo, dark bg)
     if (footerEl) {
@@ -76,11 +108,11 @@ export default function Navbar() {
       return;
     }
 
-    const projectsEl = document.querySelector("#projects");
-    const galleryEl = document.querySelector("#gallery");
-    const aboutEl = document.querySelector("#about");
-    const homeEl = document.querySelector("#home");
-    const heroFrameEl = document.querySelector("#hero-zoom-frame");
+    const projectsEl = cache.projects || document.querySelector("#projects");
+    const galleryEl = cache.gallery || document.querySelector("#gallery");
+    const aboutEl = cache.about || document.querySelector("#about");
+    const homeEl = cache.home || document.querySelector("#home");
+    const heroFrameEl = cache.heroFrame || document.querySelector("#hero-zoom-frame");
 
     if (projectsEl) {
       const rect = projectsEl.getBoundingClientRect();
@@ -351,8 +383,8 @@ export default function Navbar() {
             ref={menuBtnRef}
             type="button"
             className={`menu-btn relative overflow-hidden outline-none flex items-center justify-center w-10 h-10 rounded-md p-1.5 cursor-pointer bg-transparent border-2 transition-all duration-300 group shadow-sm ${isWhiteBg && !isMenuOpen
-                ? "border-black text-black"
-                : "border-white text-white"
+              ? "border-black text-black"
+              : "border-white text-white"
               }`}
             aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMenuOpen}
@@ -365,8 +397,8 @@ export default function Navbar() {
             <div ref={menuIconRef} className="relative z-10 w-full h-full flex items-center justify-center pointer-events-none">
               <svg
                 className={`w-full h-full stroke-current transition-colors duration-300 ${isWhiteBg && !isMenuOpen
-                    ? "text-black"
-                    : "text-white group-hover:text-white"
+                  ? "text-black"
+                  : "text-white group-hover:text-white"
                   }`}
                 fill="none"
                 viewBox="0 0 24 24"
@@ -406,8 +438,8 @@ export default function Navbar() {
                 href={item.href}
                 prefetch={true}
                 className={`nav-menu-link transition-colors text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black uppercase tracking-wider ${isActive(item.href)
-                    ? "text-[#fd551d]"
-                    : "text-white hover:text-zinc-300"
+                  ? "text-[#fd551d]"
+                  : "text-white hover:text-zinc-300"
                   }`}
                 onClick={(e) => handleLinkClick(e, item.href)}
               >
