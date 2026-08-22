@@ -55,47 +55,59 @@ export default function PaperShader({
 }: PaperShaderProps = {}) {
   const isMounted = useMounted();
   const pathname = usePathname();
-  const [colorBack, setColorBack] = useState(propColorBack || "#ffffff");
-  const lastBackRef = useRef(propColorBack || "#ffffff");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const getThemeColor = () => {
+    if (propColorBack) return propColorBack;
+    return pathname === "/about" ? "#ffffff" : "#222222";
+  };
+
+  const [colorBack, setColorBack] = useState(getThemeColor);
+  const lastBackRef = useRef(getThemeColor());
+  const rafRef = useRef<number | null>(null);
 
   // Set theme colors based on route if propColorBack is not fixed
   useEffect(() => {
     if (propColorBack) return;
 
-    if (pathname === "/about") {
-      const rafId = requestAnimationFrame(() => {
-        setColorBack("#ffffff");
-        lastBackRef.current = "#ffffff";
-      });
-      return () => cancelAnimationFrame(rafId);
-    } else if (pathname !== "/") {
-      const rafId = requestAnimationFrame(() => {
-        setColorBack("#222222");
-        lastBackRef.current = "#222222";
-      });
-      return () => cancelAnimationFrame(rafId);
+    const targetColor = pathname === "/about" ? "#ffffff" : "#222222";
+    if (lastBackRef.current !== targetColor) {
+      lastBackRef.current = targetColor;
+      setColorBack(targetColor);
+      if (containerRef.current) {
+        containerRef.current.style.backgroundColor = targetColor;
+      }
+      if (typeof document !== "undefined") {
+        document.body.style.backgroundColor = targetColor;
+      }
     }
   }, [pathname, propColorBack]);
 
+  // Handle scroll progress transition from black (#222222) to white (#ffffff) on the home page
   useEffect(() => {
-    if (propColorBack) return;
+    if (propColorBack || pathname !== "/") return;
 
     const updateColorFromProgress = (progress: number) => {
-      let factor = 0;
-      if (progress <= 0.1) {
-        factor = 0;
-      } else if (progress >= 0.9) {
-        factor = 1;
-      } else {
-        factor = (progress - 0.1) / 0.8;
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
       }
 
-      const nextBack = interpolateColor("#222222", "#ffffff", factor);
+      rafRef.current = requestAnimationFrame(() => {
+        const factor = Math.max(0, Math.min(1, progress));
+        const nextBack = interpolateColor("#222222", "#ffffff", factor);
 
-      if (nextBack !== lastBackRef.current) {
-        lastBackRef.current = nextBack;
-        setColorBack(nextBack);
-      }
+        if (containerRef.current) {
+          containerRef.current.style.backgroundColor = nextBack;
+        }
+        if (typeof document !== "undefined") {
+          document.body.style.backgroundColor = nextBack;
+        }
+
+        if (nextBack !== lastBackRef.current) {
+          lastBackRef.current = nextBack;
+          setColorBack(nextBack);
+        }
+      });
     };
 
     const handleProgressEvent = (e: Event) => {
@@ -105,28 +117,35 @@ export default function PaperShader({
       }
     };
 
-    window.addEventListener("shader-scroll-progress", handleProgressEvent);
+    window.addEventListener("shader-scroll-progress", handleProgressEvent, { passive: true });
 
     return () => {
       window.removeEventListener("shader-scroll-progress", handleProgressEvent);
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
-  }, [propColorBack]);
+  }, [pathname, propColorBack]);
 
   if (!isMounted) return null;
 
+  const activeColorBack = propColorBack || colorBack;
+
   return (
     <div
+      ref={containerRef}
       className={className}
       style={{
         zIndex: 0,
         pointerEvents: "none",
-        background: "transparent",
+        backgroundColor: activeColorBack,
+        transition: "background-color 0.1s linear",
         ...style,
       }}
       aria-hidden="true"
     >
       <Dithering
-        colorBack={propColorBack || colorBack}
+        colorBack={activeColorBack}
         colorFront={colorFront}
         shape={shape}
         type={type}

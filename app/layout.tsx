@@ -50,7 +50,7 @@ export default function RootLayout({ children }: LayoutProps) {
           }}
         />
         <style>{`
-          body { background-color: #222222; }
+          body { background-color: #222222; transition: background-color 0.1s linear; }
           .page-transition-overlay {
             position: fixed;
             inset: 0;
