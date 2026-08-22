@@ -37,6 +37,28 @@
     --font-display: var(--font-departure-mono), "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
   }
 
+  /* Lenis CSS configuration */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  .lenis.lenis-smooth iframe {
+    pointer-events: none;
+  }
+
   html {
     min-height: 100%;
     background-color: #222222;

@@ -7,6 +7,7 @@ import { LoadingProvider } from "@/lib/LoadingContext";
 import GlobalLoader from "@/components/GlobalLoader";
 import PaperShaderWrapper from "@/components/PaperShaderWrapper";
 import PageTransition from "@/components/PageTransition";
+import SmoothScroll from "@/components/SmoothScroll";
 import { Suspense } from "react";
 import { siteMetadata, viewportConfig } from "@/app/metadata";
 
@@ -63,18 +64,20 @@ export default function RootLayout({ children }: LayoutProps) {
       </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col relative">
         <LoadingProvider>
-          <GlobalLoader />
-          <PaperShaderWrapper />
-          <PageTransition />
-          <div className="relative z-10 flex flex-col min-h-full">
-            <Navbar />
-            <main className="flex-1">
-              <Suspense fallback={null}>
-                {children}
-              </Suspense>
-            </main>
-            <Footer />
-          </div>
+          <SmoothScroll>
+            <GlobalLoader />
+            <PaperShaderWrapper />
+            <PageTransition />
+            <div className="relative z-10 flex flex-col min-h-full">
+              <Navbar />
+              <main className="flex-1">
+                <Suspense fallback={null}>
+                  {children}
+                </Suspense>
+              </main>
+              <Footer />
+            </div>
+          </SmoothScroll>
         </LoadingProvider>
       </body>
     </html>
