@@ -10,20 +10,17 @@ export interface Hero3DCanvasProps {
     /**
      * Parallax intensity multiplier.
      * Lower values (0.004 - 0.008) give minimal, subtle luxury movement.
-     * Medium values (0.010 - 0.016) give standard 3D depth.
-     * Higher values (> 0.020) produce pronounced displacement.
      * @default 0.007
      */
     intensity?: number;
     /**
      * Focal depth plane (0.0 to 1.0) that remains stationary.
-     * Defaults to 0.65 (anchors the face/eyes as pivot point).
      * @default 0.65
      */
     focusPlane?: number;
     /**
-     * Mouse easing / interpolation factor (0.01 = very slow/smooth, 0.1 = instant).
-     * @default 0.05
+     * Mouse easing factor (0.01 = slow/smooth, 0.1 = responsive).
+     * @default 0.045
      */
     smoothing?: number;
     /**
@@ -49,28 +46,12 @@ const fragmentShader = `
   uniform vec2 u_intensity;
   uniform float u_focusPlane;
   uniform float u_maxDisplacement;
-  uniform vec2 u_resolution;
-  uniform vec2 u_imageResolution;
 
   varying vec2 vUv;
 
   void main() {
-    // Calculate aspect ratio cover UV coordinates matching object-cover
-    vec2 s = u_resolution; // Canvas size
-    vec2 i = u_imageResolution; // Image natural size
-
-    float rs = s.x / s.y;
-    float ri = i.x / i.y;
-    vec2 newUv = vUv;
-
-    if (rs > ri) {
-      newUv.y = (vUv.y - 0.5) * (ri / rs) + 0.5;
-    } else {
-      newUv.x = (vUv.x - 0.5) * (rs / ri) + 0.5;
-    }
-
     // Sample depth from red channel (0.0 = background, 1.0 = closest foreground)
-    float depth = texture2D(u_depth, newUv).r;
+    float depth = texture2D(u_depth, vUv).r;
 
     // Displace relative to focus plane (face plane anchors, foreground pushes forward, background recedes)
     float depthDelta = (depth - u_focusPlane);
@@ -83,9 +64,9 @@ const fragmentShader = `
     }
 
     // Displaced UV coordinates clamped within texture boundaries
-    vec2 displacedUv = clamp(newUv + displacement, vec2(0.001), vec2(0.999));
+    vec2 displacedUv = clamp(vUv + displacement, vec2(0.001), vec2(0.999));
 
-    vec4 origColor = texture2D(u_texture, newUv);
+    vec4 origColor = texture2D(u_texture, vUv);
     vec4 dispColor = texture2D(u_texture, displacedUv);
 
     // Alpha protection: if displaced UV steps into transparent background, smoothly blend back to original
@@ -107,7 +88,7 @@ export default function Hero3DCanvas({
     className = 'w-full h-full',
     intensity = 0.007,
     focusPlane = 0.65,
-    smoothing = 0.05,
+    smoothing = 0.045,
     maxDisplacement = 0.012,
     onLoaded,
 }: Hero3DCanvasProps) {
@@ -115,9 +96,8 @@ export default function Hero3DCanvas({
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
-        const container = containerRef.current;
         const canvas = canvasRef.current;
-        if (!container || !canvas) return;
+        if (!canvas) return;
 
         let animationFrameId: number;
         let isDisposed = false;
@@ -132,8 +112,21 @@ export default function Hero3DCanvas({
             alpha: true,
             antialias: true,
             powerPreference: 'high-performance',
+            preserveDrawingBuffer: false,
         });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+        // Set fixed high-quality internal render buffer size (e.g. 1920x1080)
+        // CSS handles display scaling smoothly without WebGL buffer reallocation during scroll
+        const updateRendererResolution = () => {
+            if (isDisposed) return;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const targetW = Math.min(Math.round(window.innerWidth * dpr), 2560);
+            const targetH = Math.round(targetW * (9 / 16));
+            renderer.setPixelRatio(1);
+            renderer.setSize(targetW, targetH, false);
+        };
+
+        updateRendererResolution();
 
         // Uniforms
         const uniforms = {
@@ -143,8 +136,6 @@ export default function Hero3DCanvas({
             u_intensity: { value: new THREE.Vector2(intensity, intensity) },
             u_focusPlane: { value: focusPlane },
             u_maxDisplacement: { value: maxDisplacement },
-            u_resolution: { value: new THREE.Vector2(1, 1) },
-            u_imageResolution: { value: new THREE.Vector2(2880, 1620) },
         };
 
         // Fullscreen Quad Geometry
@@ -181,8 +172,8 @@ export default function Hero3DCanvas({
             const normX = (clientX - window.innerWidth / 2) / (window.innerWidth / 2);
             const normY = -(clientY - window.innerHeight / 2) / (window.innerHeight / 2);
 
-            targetMouse.x = normX;
-            targetMouse.y = normY;
+            targetMouse.x = Math.max(-1, Math.min(1, normX));
+            targetMouse.y = Math.max(-1, Math.min(1, normY));
         };
 
         const handlePointerLeave = () => {
@@ -194,21 +185,15 @@ export default function Hero3DCanvas({
         window.addEventListener('touchmove', handlePointerMove, { passive: true });
         window.addEventListener('mouseleave', handlePointerLeave);
 
-        // Resize Handler
-        const updateSize = () => {
-            if (!container || isDisposed) return;
-            const width = container.clientWidth || window.innerWidth;
-            const height = container.clientHeight || window.innerHeight;
-
-            renderer.setSize(width, height, false);
-            uniforms.u_resolution.value.set(width, height);
+        // Only update WebGL canvas buffer on window resize with debounce
+        let resizeTimer: NodeJS.Timeout | null = null;
+        const handleWindowResize = () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                updateRendererResolution();
+            }, 150);
         };
-
-        const resizeObserver = new ResizeObserver(() => {
-            updateSize();
-        });
-        resizeObserver.observe(container);
-        updateSize();
+        window.addEventListener('resize', handleWindowResize);
 
         // Texture Loader
         const textureLoader = new THREE.TextureLoader();
@@ -234,9 +219,6 @@ export default function Hero3DCanvas({
                 tex.wrapT = THREE.ClampToEdgeWrapping;
                 tex.generateMipmaps = false;
                 uniforms.u_texture.value = tex;
-                if (tex.image && tex.image.width && tex.image.height) {
-                    uniforms.u_imageResolution.value.set(tex.image.width, tex.image.height);
-                }
                 checkLoaded();
             },
             undefined,
@@ -284,10 +266,11 @@ export default function Hero3DCanvas({
             isDisposed = true;
             cancelAnimationFrame(animationFrameId);
 
+            if (resizeTimer) clearTimeout(resizeTimer);
             window.removeEventListener('mousemove', handlePointerMove);
             window.removeEventListener('touchmove', handlePointerMove);
             window.removeEventListener('mouseleave', handlePointerLeave);
-            resizeObserver.disconnect();
+            window.removeEventListener('resize', handleWindowResize);
 
             if (uniforms.u_texture.value) {
                 uniforms.u_texture.value.dispose();
@@ -303,8 +286,21 @@ export default function Hero3DCanvas({
     }, [diffuseMapUrl, depthMapUrl, intensity, focusPlane, smoothing, maxDisplacement, onLoaded]);
 
     return (
-        <div ref={containerRef} className={`relative overflow-hidden ${className}`}>
-            <canvas ref={canvasRef} className="block w-full h-full pointer-events-none select-none" />
+        <div ref={containerRef} className={`relative overflow-hidden w-full h-full ${className}`}>
+            <canvas
+                ref={canvasRef}
+                className="block w-full h-full object-cover object-center pointer-events-none select-none"
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    transform: 'translateZ(0)',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                }}
+            />
         </div>
     );
 }
+

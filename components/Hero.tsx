@@ -472,16 +472,21 @@ export default function Hero() {
           <div
             ref={portraitRef}
             className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter,opacity]"
-            style={{ opacity: 0 }}
+            style={{
+              opacity: 0,
+              transform: "translateZ(0)",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+            }}
           >
             <div className="relative w-full h-full overflow-hidden">
               <Hero3DCanvas
                 diffuseMapUrl="/img/hero.webp"
                 depthMapUrl="/img/hero-depth.webp"
-                intensity={0.007} // Minimal subtle movement (0.004 = ultra subtle, 0.007 = balanced luxury, 0.012 = pronounced)
+                intensity={0.005} // Minimal subtle movement (0.004 = ultra subtle, 0.007 = balanced luxury, 0.012 = pronounced)
                 focusPlane={0.65} // Anchors face & eyes as center pivot
                 smoothing={0.045} // Smooth mouse lerp dampening
-                maxDisplacement={0.012} // Prevents silhouette edge tearing
+                maxDisplacement={0.014} // Prevents silhouette edge tearing
                 onLoaded={() => setImageLoaded(true)}
                 className="w-full h-full"
               />
