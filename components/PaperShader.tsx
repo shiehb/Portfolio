@@ -1,9 +1,30 @@
 // components/PaperShader.tsx
 'use client';
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { Dithering } from "@paper-design/shaders-react";
+
+export interface PaperShaderProps {
+  className?: string;
+  style?: React.CSSProperties;
+  colorBack?: string;
+  colorFront?: string;
+  shape?: "warp" | "wave" | "dots" | "simplex" | "ripple" | "swirl" | "sphere";
+  speed?: number;
+  size?: number;
+  type?: "2x2" | "4x4" | "8x8" | "random";
+}
+
+const emptySubscribe = () => () => { };
+
+function useMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
 
 function interpolateColor(color1: string, color2: string, factor: number): string {
   const f = Math.min(Math.max(factor, 0), 1);
@@ -22,13 +43,25 @@ function interpolateColor(color1: string, color2: string, factor: number): strin
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
-export default function PaperShader() {
+export default function PaperShader({
+  className = "absolute inset-0 pointer-events-none w-full h-full",
+  style,
+  colorBack: propColorBack,
+  colorFront = "rgba(253, 85, 29, 0.10)",
+  shape = "warp",
+  type = "2x2",
+  speed = 0.3,
+  size = 1,
+}: PaperShaderProps = {}) {
+  const isMounted = useMounted();
   const pathname = usePathname();
-  const [colorBack, setColorBack] = useState("#222222");
-  const lastBackRef = useRef("#222222");
+  const [colorBack, setColorBack] = useState(propColorBack || "#ffffff");
+  const lastBackRef = useRef(propColorBack || "#ffffff");
 
-  // Set theme colors based on route
+  // Set theme colors based on route if propColorBack is not fixed
   useEffect(() => {
+    if (propColorBack) return;
+
     if (pathname === "/about") {
       const rafId = requestAnimationFrame(() => {
         setColorBack("#ffffff");
@@ -42,19 +75,18 @@ export default function PaperShader() {
       });
       return () => cancelAnimationFrame(rafId);
     }
-  }, [pathname]);
+  }, [pathname, propColorBack]);
 
   useEffect(() => {
+    if (propColorBack) return;
+
     const updateColorFromProgress = (progress: number) => {
       let factor = 0;
       if (progress <= 0.1) {
-        // Staying on #222222 from 0% to 10%
         factor = 0;
       } else if (progress >= 0.9) {
-        // Fully white #ffffff from 90% onwards
         factor = 1;
       } else {
-        // Smoothly interpolate between 10% and 90%
         factor = (progress - 0.1) / 0.8;
       }
 
@@ -78,28 +110,28 @@ export default function PaperShader() {
     return () => {
       window.removeEventListener("shader-scroll-progress", handleProgressEvent);
     };
-  }, []);
+  }, [propColorBack]);
+
+  if (!isMounted) return null;
 
   return (
     <div
+      className={className}
       style={{
-        position: "fixed",
-        inset: 0,
         zIndex: 0,
         pointerEvents: "none",
-        width: "100vw",
-        height: "100vh",
         background: "transparent",
+        ...style,
       }}
       aria-hidden="true"
     >
       <Dithering
-        colorBack={colorBack}
-        colorFront="rgba(253, 85, 29, 0.10)"
-        shape="warp"
-        type="2x2"
-        speed={0.3}
-        size={1}
+        colorBack={propColorBack || colorBack}
+        colorFront={colorFront}
+        shape={shape}
+        type={type}
+        speed={speed}
+        size={size}
         className="w-full h-full block"
         style={{
           width: "100%",

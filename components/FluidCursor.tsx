@@ -400,7 +400,7 @@ export default function FluidCursor({
       }
     `;
 
-        // High-contrast dark fluid output shader specifically tuned for white background
+        // High-contrast dark fluid output shader specifically tuned for light/paper background
         const displayFragmentShader = `
       precision highp float;
       precision highp sampler2D;
@@ -412,9 +412,9 @@ export default function FluidCursor({
       void main () {
           vec4 fluidColor = texture2D(uTexture, vUv);
           
-          // Compute alpha dynamic blend with power curve to keep subtle lingering trails visible smoothly
-          float len = length(fluidColor.rgb);
-          float alpha = clamp(pow(len, 0.75) * 1.85, 0.0, uMaxOpacity);
+          // Compute alpha dynamic blend with power curve to keep rich ink trails visible
+          float len = max(fluidColor.r, max(fluidColor.g, fluidColor.b));
+          float alpha = clamp(pow(len, 0.65) * 1.5, 0.0, uMaxOpacity);
 
           gl_FragColor = vec4(uColor, alpha);
       }
@@ -600,7 +600,7 @@ export default function FluidCursor({
             }
         }
 
-        function splat(x: number, y: number, dx: number, dy: number, color: [number, number, number]) {
+        function splat(x: number, y: number, dx: number, dy: number, dyeColor: [number, number, number] = [1.0, 1.0, 1.0]) {
             if (!splatProgram) return;
             const velocity = buffers.velocity;
             const dye = buffers.density;
@@ -617,9 +617,9 @@ export default function FluidCursor({
             blit(velocity.write);
             velocity.swap();
 
-            // Splat dye with dark ink / black tones
+            // Splat dye with normalized intensity
             gl!.uniform1i(splatProgram.uniforms.uTarget, dye.read.attach(0));
-            gl!.uniform3f(splatProgram.uniforms.color, color[0], color[1], color[2]);
+            gl!.uniform3f(splatProgram.uniforms.color, dyeColor[0], dyeColor[1], dyeColor[2]);
             blit(dye.write);
             dye.swap();
         }
@@ -629,12 +629,11 @@ export default function FluidCursor({
             const dye = buffers.density;
             if (!velocity?.read || !dye?.read) return;
             for (let i = 0; i < amount; i++) {
-                const color = config.DARK_INK_COLOR;
                 const x = Math.random();
                 const y = Math.random();
                 const dx = 1000 * (Math.random() - 0.5);
                 const dy = 1000 * (Math.random() - 0.5);
-                splat(x, y, dx, dy, color);
+                splat(x, y, dx, dy, [1.0, 1.0, 1.0]);
             }
         }
 

@@ -1,10 +1,13 @@
 // components/Hero.tsx
+'use client';
+
 import { useEffect, useRef, useState } from "react";
 import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import FluidCursor from "@/components/FluidCursor";
 import Hero3DCanvas from "@/components/Hero3DCanvas";
+import PaperShader from "@/components/PaperShader";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -453,23 +456,6 @@ export default function Hero() {
           }}
         >
           <div
-            ref={fluidCursorRef}
-            className="absolute inset-0 z-0 pointer-events-none will-change-[opacity]"
-            style={{ opacity: 0 }}
-          >
-            <FluidCursor
-              className="w-full h-full"
-              color={[0.04, 0.04, 0.045]}
-              maxOpacity={0.8}
-              densityDissipation={2}
-              velocityDissipation={2}
-              pressure={0.1}
-              curl={3}
-              splatRadius={0.2}
-              splatForce={3500}
-            />
-          </div>
-          <div
             ref={portraitRef}
             className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter,opacity]"
             style={{
@@ -480,15 +466,36 @@ export default function Hero() {
             }}
           >
             <div className="relative w-full h-full overflow-hidden">
+              <PaperShader
+                colorBack="#ffffff"
+                className="absolute inset-0 z-0 pointer-events-none w-full h-full"
+              />
+              <div
+                ref={fluidCursorRef}
+                className="absolute inset-0 z-[5] pointer-events-none will-change-[opacity]"
+                style={{ opacity: 0 }}
+              >
+                <FluidCursor
+                  className="w-full h-full"
+                  color={[0.08, 0.08, 0.09]}
+                  maxOpacity={0.85}
+                  densityDissipation={1.1}
+                  velocityDissipation={1.4}
+                  pressure={0.15}
+                  curl={25}
+                  splatRadius={0.28}
+                  splatForce={5000}
+                />
+              </div>
               <Hero3DCanvas
                 diffuseMapUrl="/img/hero.webp"
                 depthMapUrl="/img/hero-depth.webp"
-                intensity={0.005} // Minimal subtle movement (0.004 = ultra subtle, 0.007 = balanced luxury, 0.012 = pronounced)
+                intensity={0.007} // Minimal subtle movement (0.004 = ultra subtle, 0.007 = balanced luxury, 0.012 = pronounced)
                 focusPlane={0.65} // Anchors face & eyes as center pivot
                 smoothing={0.045} // Smooth mouse lerp dampening
-                maxDisplacement={0.014} // Prevents silhouette edge tearing
+                maxDisplacement={0.012} // Prevents silhouette edge tearing
                 onLoaded={() => setImageLoaded(true)}
-                className="w-full h-full"
+                className="w-full h-full relative z-10"
               />
             </div>
           </div>

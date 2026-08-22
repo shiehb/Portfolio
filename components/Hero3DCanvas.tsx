@@ -195,7 +195,7 @@ export default function Hero3DCanvas({
         };
         window.addEventListener('resize', handleWindowResize);
 
-        // Texture Loader
+        // Texture Loader with fallback support
         const textureLoader = new THREE.TextureLoader();
         let loadedCount = 0;
 
@@ -204,6 +204,21 @@ export default function Hero3DCanvas({
             if (loadedCount >= 2 && !isDisposed) {
                 onLoaded?.();
             }
+        };
+
+        // Create 1x1 fallback textures
+        const createFallbackDepthTexture = () => {
+            const data = new Uint8Array([165, 165, 165, 255]); // ~0.65 focus plane
+            const tex = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat);
+            tex.needsUpdate = true;
+            return tex;
+        };
+
+        const createFallbackDiffuseTexture = () => {
+            const data = new Uint8Array([0, 0, 0, 0]);
+            const tex = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat);
+            tex.needsUpdate = true;
+            return tex;
         };
 
         textureLoader.load(
@@ -222,7 +237,13 @@ export default function Hero3DCanvas({
                 checkLoaded();
             },
             undefined,
-            (err) => console.error('Error loading diffuse texture:', err)
+            (err) => {
+                console.warn('Diffuse texture fallback activated:', err);
+                if (!isDisposed) {
+                    uniforms.u_texture.value = createFallbackDiffuseTexture();
+                    checkLoaded();
+                }
+            }
         );
 
         textureLoader.load(
@@ -241,7 +262,13 @@ export default function Hero3DCanvas({
                 checkLoaded();
             },
             undefined,
-            (err) => console.error('Error loading depth texture:', err)
+            (err) => {
+                console.warn('Depth texture fallback activated:', err);
+                if (!isDisposed) {
+                    uniforms.u_depth.value = createFallbackDepthTexture();
+                    checkLoaded();
+                }
+            }
         );
 
         // Animation Loop
