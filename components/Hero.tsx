@@ -1,10 +1,10 @@
 // components/Hero.tsx
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import FluidCursor from "@/components/FluidCursor";
+import Hero3DCanvas from "@/components/Hero3DCanvas";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -475,17 +475,15 @@ export default function Hero() {
             style={{ opacity: 0 }}
           >
             <div className="relative w-full h-full overflow-hidden">
-              <Image
-                src="/img/hero.webp"
-                alt="Jericho Urbano - Visual Artist and Web Developer"
-                fill
-                priority
-                fetchPriority="high"
-                sizes="(max-width: 768px) 100vw, 1200px"
-                quality={85}
-                className="object-cover object-center select-none pointer-events-none"
-                draggable={false}
-                onLoad={() => setImageLoaded(true)}
+              <Hero3DCanvas
+                diffuseMapUrl="/img/hero.webp"
+                depthMapUrl="/img/hero-depth.webp"
+                intensity={0.007} // Minimal subtle movement (0.004 = ultra subtle, 0.007 = balanced luxury, 0.012 = pronounced)
+                focusPlane={0.65} // Anchors face & eyes as center pivot
+                smoothing={0.045} // Smooth mouse lerp dampening
+                maxDisplacement={0.012} // Prevents silhouette edge tearing
+                onLoaded={() => setImageLoaded(true)}
+                className="w-full h-full"
               />
             </div>
           </div>

@@ -35,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps) {
     >
       <head>
         <link rel="preload" as="image" href="/img/hero.webp" />
+        <link rel="preload" as="image" href="/img/hero-depth.webp" />
         <link rel="preload" as="image" href="/img/logo.webp" />
         <link rel="preload" as="font" href="/font/departure-mono.otf" type="font/otf" crossOrigin="anonymous" />
         <script
