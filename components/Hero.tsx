@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useLoading } from "@/lib/LoadingContext";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import FluidCursor from "@/components/FluidCursor";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -21,9 +22,8 @@ const PIXELS_PER_SECOND = 60;
 function MarqueeWords({ reverse }: { reverse: boolean }) {
   return (
     <div
-      className={`flex items-center py-2 shrink-0 ${
-        reverse ? "marquee-text-dark" : "marquee-text-light"
-      }`}
+      className={`flex items-center py-2 shrink-0 ${reverse ? "marquee-text-dark" : "marquee-text-light"
+        }`}
     >
       {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, index) => (
         <span key={index} className="marquee-text shrink-0 px-6 select-none">
@@ -116,16 +116,16 @@ export function get3x2TargetDimensions() {
     borderRadius = "16px";
   } else {
     if (vw < 1024) {
-      targetWidth = Math.min(vw * 0.75, (vh * 0.65) * 1.5, 620);
+      targetWidth = Math.min(vw * 0.75, vh * 0.65 * 1.5, 620);
       borderRadius = "20px";
     } else if (vw < 1280) {
-      targetWidth = Math.min(vw * 0.45, (vh * 0.60) * 1.5, 600);
+      targetWidth = Math.min(vw * 0.45, vh * 0.6 * 1.5, 600);
       borderRadius = "24px";
     } else if (vw < 2560) {
-      targetWidth = Math.min(vw * 0.38, (vh * 0.60) * 1.5, 700);
+      targetWidth = Math.min(vw * 0.38, vh * 0.6 * 1.5, 700);
       borderRadius = "24px";
     } else {
-      targetWidth = Math.min(vw * 0.35, (vh * 0.65) * 1.5, 900);
+      targetWidth = Math.min(vw * 0.35, vh * 0.65 * 1.5, 900);
       borderRadius = "28px";
     }
     targetHeight = targetWidth / 1.5;
@@ -141,6 +141,7 @@ export default function Hero() {
   const { incrementLoaded } = useLoading();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
+  const fluidCursorRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
   const marqueeRef = useRef<HTMLDivElement>(null);
   const signatureContainerRef = useRef<HTMLDivElement>(null);
@@ -161,6 +162,9 @@ export default function Hero() {
     if (frameRef.current) {
       gsap.set(frameRef.current, { opacity: 0 });
     }
+    if (fluidCursorRef.current) {
+      gsap.set(fluidCursorRef.current, { opacity: 0 });
+    }
     if (portraitRef.current) {
       gsap.set(portraitRef.current, { opacity: 0, scale: 1.1 });
     }
@@ -168,11 +172,11 @@ export default function Hero() {
       gsap.set(marqueeRef.current, { opacity: 0 });
     }
     if (signatureContainerRef.current) {
-      gsap.set(signatureContainerRef.current, { 
-        opacity: 0, 
+      gsap.set(signatureContainerRef.current, {
+        opacity: 0,
         scale: 0.85,
         y: 20,
-        visibility: 'hidden'
+        visibility: "hidden",
       });
     }
     if (aboutTitleRef.current) {
@@ -183,21 +187,41 @@ export default function Hero() {
       defaults: { ease: "power2.out" },
       onComplete: () => {
         isFirstRender.current = false;
-      }
+      },
     });
 
-    tl.to(frameRef.current, {
-      opacity: 1,
-      duration: 0.6,
-      ease: "power2.out",
-    }, 0.1);
+    tl.to(
+      frameRef.current,
+      {
+        opacity: 1,
+        duration: 0.6,
+        ease: "power2.out",
+      },
+      0.1
+    );
 
-    tl.to(portraitRef.current, {
-      opacity: 1,
-      scale: 1,
-      duration: 0.8,
-      ease: "power2.out",
-    }, 0.2);
+    tl.to(
+      portraitRef.current,
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 0.8,
+        ease: "power2.out",
+      },
+      0.2
+    );
+
+    if (fluidCursorRef.current) {
+      tl.to(
+        fluidCursorRef.current,
+        {
+          opacity: 1,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        0.2
+      );
+    }
 
     return () => {
       tl.kill();
@@ -236,6 +260,10 @@ export default function Hero() {
         gsap.set(marqueeRef.current, { opacity: 0 });
       }
 
+      if (fluidCursorRef.current) {
+        gsap.set(fluidCursorRef.current, { opacity: 1 });
+      }
+
       if (aboutTitleRef.current) {
         gsap.set(aboutTitleRef.current, {
           opacity: 0,
@@ -261,7 +289,7 @@ export default function Hero() {
           opacity: 0,
           scale: 0.85,
           y: 20,
-          visibility: 'hidden',
+          visibility: "hidden",
         });
       }
 
@@ -302,6 +330,18 @@ export default function Hero() {
         );
       }
 
+      if (fluidCursorRef.current) {
+        tl.to(
+          fluidCursorRef.current,
+          {
+            opacity: 0,          // Fully hides the fluid cursor
+            duration: 0.5,       // Fades out continuously until 50% into the zoom-out scroll
+            ease: "power1.out",
+          },
+          0
+        );
+      }
+
       if (marqueeRef.current) {
         tl.to(
           marqueeRef.current,
@@ -315,14 +355,18 @@ export default function Hero() {
       }
 
       if (signatureContainerRef.current) {
-        tl.to(signatureContainerRef.current, {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          visibility: 'visible',
-          ease: "power2.out",
-          duration: 0.3,
-        }, 0.35);
+        tl.to(
+          signatureContainerRef.current,
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            visibility: "visible",
+            ease: "power2.out",
+            duration: 0.3,
+          },
+          0.35
+        );
 
         const strokeSequence = [
           { duration: 0.32, ease: "power1.inOut" },
@@ -336,8 +380,10 @@ export default function Hero() {
         let strokeCursor = 0.38;
         signaturePathsRef.current.forEach((path, idx) => {
           if (!path) return;
-          const { duration, ease } =
-            strokeSequence[idx] ?? { duration: 0.15, ease: "power1.inOut" };
+          const { duration, ease } = strokeSequence[idx] ?? {
+            duration: 0.15,
+            ease: "power1.inOut",
+          };
 
           tl.set(path, { opacity: 1 }, strokeCursor);
 
@@ -396,15 +442,33 @@ export default function Hero() {
         <section
           ref={frameRef}
           id="hero-zoom-frame"
-          className="relative z-10 flex justify-center items-center overflow-hidden text-zinc-900 will-change-[width,height,border-radius,background-color,opacity]"
+          className="relative z-10 flex justify-center items-center overflow-hidden bg-white text-zinc-900 will-change-[width,height,border-radius,background-color,opacity]"
           style={{
             margin: "auto",
             position: "relative",
             width: "100%",
             height: "100%",
             opacity: 0,
+            backgroundColor: "#ffffff",
           }}
         >
+          <div
+            ref={fluidCursorRef}
+            className="absolute inset-0 z-0 pointer-events-none will-change-[opacity]"
+            style={{ opacity: 0 }}
+          >
+            <FluidCursor
+              className="w-full h-full"
+              color={[0.04, 0.04, 0.045]}
+              maxOpacity={0.8}
+              densityDissipation={2}
+              velocityDissipation={2}
+              pressure={0.1}
+              curl={3}
+              splatRadius={0.2}
+              splatForce={3500}
+            />
+          </div>
           <div
             ref={portraitRef}
             className="absolute inset-0 z-10 pointer-events-none will-change-[transform,filter,opacity]"
@@ -432,7 +496,7 @@ export default function Hero() {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none flex flex-col items-center justify-center px-2 w-[75%] md:w-[55%]"
           style={{
             opacity: 0,
-            visibility: 'hidden',
+            visibility: "hidden",
           }}
         >
           <svg
@@ -441,7 +505,6 @@ export default function Hero() {
             xmlns="http://www.w3.org/2000/svg"
             className="w-full h-auto drop-shadow-[0_10px_30px_rgba(253,85,29,0.45)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
           >
-            {/* 1. Main signature loop + descender tail */}
             <path
               ref={(el) => {
                 signaturePathsRef.current[0] = el;
@@ -452,8 +515,6 @@ export default function Hero() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-
-            {/* 2. Cursive baseline scribble flowing into the monogram flourish loop */}
             <path
               ref={(el) => {
                 signaturePathsRef.current[1] = el;
@@ -464,8 +525,6 @@ export default function Hero() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-
-            {/* 3. Inner flourish curl detail */}
             <path
               ref={(el) => {
                 signaturePathsRef.current[2] = el;
@@ -476,8 +535,6 @@ export default function Hero() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-
-            {/* 4. Small accent mark */}
             <path
               ref={(el) => {
                 signaturePathsRef.current[3] = el;
@@ -488,8 +545,6 @@ export default function Hero() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-
-            {/* 5. Diagonal piercing slash */}
             <path
               ref={(el) => {
                 signaturePathsRef.current[4] = el;
@@ -500,8 +555,6 @@ export default function Hero() {
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-
-            {/* 6. Far-right accent dot */}
             <path
               ref={(el) => {
                 signaturePathsRef.current[5] = el;
