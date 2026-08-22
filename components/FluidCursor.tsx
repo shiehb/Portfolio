@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 
-interface FluidCursorProps {
+export interface FluidCursorProps {
     className?: string;
     id?: string;
     color?: [number, number, number];
@@ -11,6 +11,8 @@ interface FluidCursorProps {
     velocityDissipation?: number;
     curl?: number;
     maxOpacity?: number;
+    pressure?: number;
+    splatForce?: number;
 }
 
 interface FBO {
@@ -46,6 +48,8 @@ export default function FluidCursor({
     velocityDissipation = 0.8,
     curl = 28,
     maxOpacity = 0.90,
+    pressure = 0.2,
+    splatForce = 6000,
 }: FluidCursorProps) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const configRef = useRef({
@@ -53,11 +57,11 @@ export default function FluidCursor({
         DYE_RESOLUTION: 512,
         DENSITY_DISSIPATION: densityDissipation,
         VELOCITY_DISSIPATION: velocityDissipation,
-        PRESSURE: 0.2,
+        PRESSURE: pressure,
         PRESSURE_ITERATIONS: 20,
         CURL: curl,
         SPLAT_RADIUS: splatRadius,
-        SPLAT_FORCE: 6000,
+        SPLAT_FORCE: splatForce,
         DARK_INK_COLOR: color,
         MAX_OPACITY: maxOpacity,
     });
@@ -68,15 +72,15 @@ export default function FluidCursor({
             DYE_RESOLUTION: 512,
             DENSITY_DISSIPATION: densityDissipation,
             VELOCITY_DISSIPATION: velocityDissipation,
-            PRESSURE: 0.2,
+            PRESSURE: pressure,
             PRESSURE_ITERATIONS: 20,
             CURL: curl,
             SPLAT_RADIUS: splatRadius,
-            SPLAT_FORCE: 6000,
+            SPLAT_FORCE: splatForce,
             DARK_INK_COLOR: color,
             MAX_OPACITY: maxOpacity,
         };
-    }, [color, curl, densityDissipation, maxOpacity, splatRadius, velocityDissipation]);
+    }, [color, curl, densityDissipation, maxOpacity, pressure, splatForce, splatRadius, velocityDissipation]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
